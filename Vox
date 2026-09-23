@@ -338,13 +338,11 @@ UICorner_17.Parent = CosnoleButton
 
 -- Scripts:
 
-local function ARHTMB_fake_script() -- userInterface.LocalScript 
-	local script = Instance.new('LocalScript', userInterface)
-
+local function PLAYER_LIST_fake_script()
+	local script = Instance.new("LocalScript", userInterface)
 	local Players = game:GetService("Players")
 	local panel = script.Parent
 	local main = panel:FindFirstAncestor("Main")
-	
 	local playerList = Instance.new("ScrollingFrame")
 	playerList.Name = "PlayerList"
 	playerList.Parent = panel
@@ -355,15 +353,16 @@ local function ARHTMB_fake_script() -- userInterface.LocalScript
 	playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	playerList.CanvasSize = UDim2.new()
 	playerList.ScrollBarThickness = 6
-	
-	local layout = Instance.new("UIListLayout")
-	layout.Parent = playerList
+
+	local layout = Instance.new("UIListLayout", playerList)
 	layout.Padding = UDim.new(0, 6)
 	layout.SortOrder = Enum.SortOrder.Name
-	
-	local selectedPlayer
-	
+
 	local function addPlayer(player)
+		if player == Players.LocalPlayer or playerList:FindFirstChild(tostring(player.UserId)) then
+			return
+		end
+
 		local button = Instance.new("TextButton")
 		button.Name = tostring(player.UserId)
 		button.Parent = playerList
@@ -374,53 +373,147 @@ local function ARHTMB_fake_script() -- userInterface.LocalScript
 		button.Text = player.Name
 		button.TextColor3 = Color3.new(1, 1, 1)
 		button.TextSize = 17
-	
 		Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-	
+
 		button.Activated:Connect(function()
-			selectedPlayer = player
 			main:SetAttribute("SelectedTradePlayerUserId", player.UserId)
-	
 			for _, item in playerList:GetChildren() do
 				if item:IsA("TextButton") then
 					item.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 				end
 			end
-	
 			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
-			print("Selected player:", selectedPlayer.Name)
 		end)
 	end
-	
+
 	for _, player in Players:GetPlayers() do
 		addPlayer(player)
 	end
-	
 	Players.PlayerAdded:Connect(addPlayer)
-	
 	Players.PlayerRemoving:Connect(function(player)
 		local button = playerList:FindFirstChild(tostring(player.UserId))
 		if button then
 			button:Destroy()
 		end
-	
-		if selectedPlayer == player then
-			selectedPlayer = nil
+		if main:GetAttribute("SelectedTradePlayerUserId") == player.UserId then
 			main:SetAttribute("SelectedTradePlayerUserId", nil)
 		end
 	end)
 end
-coroutine.wrap(ARHTMB_fake_script)()
-local function TRADELOOP_fake_script() -- Trade loop controller
-	local script = Instance.new('LocalScript', Main)
+coroutine.wrap(PLAYER_LIST_fake_script)()
 
+local function INVENTORY_LIST_fake_script(panel, inventoryName, attributeName, emptyText)
+	local script = Instance.new("LocalScript", panel)
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local LocalPlayer = game:GetService("Players").LocalPlayer
+	local main = panel:FindFirstAncestor("Main")
+	local list = Instance.new("ScrollingFrame")
+	list.Name = inventoryName .. "List"
+	list.Parent = panel
+	list.BackgroundTransparency = 1
+	list.BorderSizePixel = 0
+	list.Position = UDim2.fromOffset(8, 8)
+	list.Size = UDim2.new(1, -16, 1, -16)
+	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	list.CanvasSize = UDim2.new()
+	list.ScrollBarThickness = 6
+	local layout = Instance.new("UIListLayout", list)
+	layout.Padding = UDim.new(0, 6)
+	layout.SortOrder = Enum.SortOrder.Name
+
+	local ok, ClientData = pcall(function()
+		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
+	end)
+
+	local function refresh()
+		for _, child in list:GetChildren() do
+			if child:IsA("TextButton") or child:IsA("TextLabel") then
+				child:Destroy()
+			end
+		end
+		if not ok or not ClientData then
+			return
+		end
+		local dataOk, dataStore = pcall(function()
+			return ClientData.get_data()
+		end)
+		if not dataOk then
+			return
+		end
+		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
+		local inventory = playerData and playerData.inventory and playerData.inventory[inventoryName]
+		local entries = {}
+		if inventory then
+			for uniqueId, itemData in pairs(inventory) do
+				if itemData and itemData.kind then
+					table.insert(entries, {id = tostring(uniqueId), data = itemData})
+				end
+			end
+		end
+		table.sort(entries, function(a, b)
+			return tostring(a.data.kind) < tostring(b.data.kind)
+		end)
+		if #entries == 0 then
+			local label = Instance.new("TextLabel")
+			label.Name = "Empty"
+			label.Parent = list
+			label.Size = UDim2.new(1, -6, 0, 32)
+			label.BackgroundTransparency = 1
+			label.Text = emptyText
+			label.TextColor3 = Color3.new(1, 1, 1)
+			label.TextSize = 16
+			return
+		end
+		for _, entry in ipairs(entries) do
+			local button = Instance.new("TextButton")
+			button.Name = entry.id
+			button.Parent = list
+			button.Size = UDim2.new(1, -6, 0, 32)
+			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			button.BorderSizePixel = 0
+			button.Font = Enum.Font.SourceSansBold
+			button.Text = tostring(entry.data.kind)
+			button.TextColor3 = Color3.new(1, 1, 1)
+			button.TextSize = 17
+			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+			button.Activated:Connect(function()
+				main:SetAttribute(attributeName, entry.id)
+				if attributeName == "SelectedTradePetId" then
+					main:SetAttribute("SelectedTradeEggId", nil)
+				else
+					main:SetAttribute("SelectedTradePetId", nil)
+				end
+				for _, item in list:GetChildren() do
+					if item:IsA("TextButton") then
+						item.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+					end
+				end
+				button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
+			end)
+		end
+	end
+
+	refresh()
+	task.delay(1, refresh)
+	panel:GetPropertyChangedSignal("Visible"):Connect(function()
+		if panel.Visible then
+			refresh()
+		end
+	end)
+end
+INVENTORY_LIST_fake_script(PetInterface, "pets", "SelectedTradePetId", "No pets found")
+INVENTORY_LIST_fake_script(EggInterface, "eggs", "SelectedTradeEggId", "No eggs found")
+
+local function TRADE_LOOP_fake_script()
+	local script = Instance.new("LocalScript", Main)
 	local Players = game:GetService("Players")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local main = script.Parent
-	local startButton = main:WaitForChild("Trading"):WaitForChild("ScrollingFrame"):WaitForChild("SendTrade/Button")
-	local stopButton = main:WaitForChild("Trading"):WaitForChild("ScrollingFrame"):WaitForChild("StopTrade/Button")
+	local scrollingFrame = main:WaitForChild("Trading"):WaitForChild("ScrollingFrame")
+	local startButton = scrollingFrame:WaitForChild("SendTrade/Button")
+	local stopButton = scrollingFrame:WaitForChild("StopTrade/Button")
+	local addItemRemote = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AddItemToOffer")
 	local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
-
 	local loopToken = 0
 
 	local function stopTradeLoop()
@@ -430,12 +523,18 @@ local function TRADELOOP_fake_script() -- Trade loop controller
 	startButton.Activated:Connect(function()
 		local selectedUserId = main:GetAttribute("SelectedTradePlayerUserId")
 		local targetPlayer = selectedUserId and Players:GetPlayerByUserId(selectedUserId)
+		local selectedPetId = main:GetAttribute("SelectedTradePetId")
+		local selectedEggId = main:GetAttribute("SelectedTradeEggId")
+		local itemId = selectedPetId or selectedEggId
 
 		if not targetPlayer or targetPlayer == Players.LocalPlayer then
 			warn("Select another player before starting auto-trade.")
 			return
 		end
-
+		if not itemId then
+			warn("Select a pet or egg before starting auto-trade.")
+			return
+		end
 		if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
 			warn("TradeAPI/SendTradeRequest was not found.")
 			return
@@ -443,187 +542,37 @@ local function TRADELOOP_fake_script() -- Trade loop controller
 
 		stopTradeLoop()
 		local currentToken = loopToken
-
 		task.spawn(function()
 			while loopToken == currentToken do
-				targetPlayer = selectedUserId and Players:GetPlayerByUserId(selectedUserId)
+				targetPlayer = Players:GetPlayerByUserId(selectedUserId)
 				if not targetPlayer or targetPlayer == Players.LocalPlayer then
 					break
 				end
-
 				pcall(function()
+					addItemRemote:FireServer(itemId)
 					sendTradeRemote:FireServer(targetPlayer)
 				end)
 				task.wait(5)
 			end
 		end)
 	end)
-
 	stopButton.Activated:Connect(stopTradeLoop)
 end
-coroutine.wrap(TRADELOOP_fake_script)()
-local function KYZCE_fake_script() -- SwitchButton.LocalScript 
-	local script = Instance.new('LocalScript', SwitchButton)
+coroutine.wrap(TRADE_LOOP_fake_script)()
 
+local function AUTO_ACCEPT_fake_script()
+	local script = Instance.new("LocalScript", SwitchButton)
 	local button = script.Parent
 	local circle = button:WaitForChild("Circle")
-	
-	local green = false
-	
+	local enabled = false
 	circle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-	
 	button.Activated:Connect(function()
-		green = not green
-	
-		if green then
-			circle.Position = UDim2.new(0.425838023, 0, 0.0150290765, 0)
-			circle.BackgroundColor3 = Color3.fromRGB(57, 255, 20)
-		else
-			circle.BackgroundColor3 = Color3.fromRGB(255, 20, 20)
-		end
+		enabled = not enabled
+		circle.Position = enabled and UDim2.new(0.425838023, 0, 0.0150290765, 0) or UDim2.new(-0.0183440428, 0, 0.0923883468, 0)
+		circle.BackgroundColor3 = enabled and Color3.fromRGB(57, 255, 20) or Color3.fromRGB(255, 20, 20)
 	end)
 end
-coroutine.wrap(KYZCE_fake_script)()
-local function ZZPOG_fake_script() -- EggInterface.LocalScript 
-	local script = Instance.new('LocalScript', EggInterface)
-
-	local Players = game:GetService("Players")
-	local panel = script.Parent
-	
-	local playerList = Instance.new("ScrollingFrame")
-	playerList.Name = "PlayerList"
-	playerList.Parent = panel
-	playerList.BackgroundTransparency = 1
-	playerList.BorderSizePixel = 0
-	playerList.Position = UDim2.fromOffset(8, 8)
-	playerList.Size = UDim2.new(1, -16, 1, -16)
-	playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	playerList.CanvasSize = UDim2.new()
-	playerList.ScrollBarThickness = 6
-	
-	local layout = Instance.new("UIListLayout")
-	layout.Parent = playerList
-	layout.Padding = UDim.new(0, 6)
-	layout.SortOrder = Enum.SortOrder.Name
-	
-	local selectedPlayer
-	
-	local function addPlayer(player)
-		local button = Instance.new("TextButton")
-		button.Name = tostring(player.UserId)
-		button.Parent = playerList
-		button.Size = UDim2.new(1, -6, 0, 32)
-		button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-		button.BorderSizePixel = 0
-		button.Font = Enum.Font.SourceSansBold
-		button.Text = player.Name
-		button.TextColor3 = Color3.new(1, 1, 1)
-		button.TextSize = 17
-	
-		Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-	
-		button.Activated:Connect(function()
-			selectedPlayer = player
-	
-			for _, item in playerList:GetChildren() do
-				if item:IsA("TextButton") then
-					item.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-				end
-			end
-	
-			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
-			print("Selected player:", selectedPlayer.Name)
-		end)
-	end
-	
-	for _, player in Players:GetPlayers() do
-		addPlayer(player)
-	end
-	
-	Players.PlayerAdded:Connect(addPlayer)
-	
-	Players.PlayerRemoving:Connect(function(player)
-		local button = playerList:FindFirstChild(tostring(player.UserId))
-		if button then
-			button:Destroy()
-		end
-	
-		if selectedPlayer == player then
-			selectedPlayer = nil
-		end
-	end)
-end
-coroutine.wrap(ZZPOG_fake_script)()
-local function HXTBET_fake_script() -- PetInterface.LocalScript 
-	local script = Instance.new('LocalScript', PetInterface)
-
-	local Players = game:GetService("Players")
-	local panel = script.Parent
-	
-	local playerList = Instance.new("ScrollingFrame")
-	playerList.Name = "PlayerList"
-	playerList.Parent = panel
-	playerList.BackgroundTransparency = 1
-	playerList.BorderSizePixel = 0
-	playerList.Position = UDim2.fromOffset(8, 8)
-	playerList.Size = UDim2.new(1, -16, 1, -16)
-	playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	playerList.CanvasSize = UDim2.new()
-	playerList.ScrollBarThickness = 6
-	
-	local layout = Instance.new("UIListLayout")
-	layout.Parent = playerList
-	layout.Padding = UDim.new(0, 6)
-	layout.SortOrder = Enum.SortOrder.Name
-	
-	local selectedPlayer
-	
-	local function addPlayer(player)
-		local button = Instance.new("TextButton")
-		button.Name = tostring(player.UserId)
-		button.Parent = playerList
-		button.Size = UDim2.new(1, -6, 0, 32)
-		button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-		button.BorderSizePixel = 0
-		button.Font = Enum.Font.SourceSansBold
-		button.Text = player.Name
-		button.TextColor3 = Color3.new(1, 1, 1)
-		button.TextSize = 17
-	
-		Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-	
-		button.Activated:Connect(function()
-			selectedPlayer = player
-	
-			for _, item in playerList:GetChildren() do
-				if item:IsA("TextButton") then
-					item.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-				end
-			end
-	
-			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
-			print("Selected player:", selectedPlayer.Name)
-		end)
-	end
-	
-	for _, player in Players:GetPlayers() do
-		addPlayer(player)
-	end
-	
-	Players.PlayerAdded:Connect(addPlayer)
-	
-	Players.PlayerRemoving:Connect(function(player)
-		local button = playerList:FindFirstChild(tostring(player.UserId))
-		if button then
-			button:Destroy()
-		end
-	
-		if selectedPlayer == player then
-			selectedPlayer = nil
-		end
-	end)
-end
-coroutine.wrap(HXTBET_fake_script)()
+coroutine.wrap(AUTO_ACCEPT_fake_script)()
 local function CEUMCT_fake_script() -- SendTradeButton.LocalScript 
 	local script = Instance.new('LocalScript', SendTradeButton)
 
