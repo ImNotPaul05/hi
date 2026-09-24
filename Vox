@@ -796,18 +796,22 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 	local successClientData, ClientData = pcall(function()
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 	end)
-	local successItemData, ItemData = pcall(function()
-		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Game"):WaitForChild("ItemData"))
-	end)
 
-	local function getDisplayName(itemId)
-		if successItemData and type(ItemData) == "table" then
-			local item = ItemData[itemId] or (type(ItemData.items) == "table" and ItemData.items[itemId])
-			if type(item) == "table" then
-				return tostring(item.display_name or item.displayName or item.name or item.title or itemId)
-			end
+	local function formatDisplayName(value)
+		local name = tostring(value or "Unknown")
+		name = name:gsub("_(%d+)$", "")
+		name = name:gsub("_", " ")
+		name = name:gsub("-", " ")
+		name = name:gsub("%s+", " ")
+		name = name:gsub("^%s+", "")
+		name = name:gsub("%s+$", "")
+		if name == "" then
+			return "Unknown"
 		end
-		return tostring(itemId)
+		name = name:gsub("(%a)([%w%p]*)", function(first, rest)
+			return string.upper(first) .. string.lower(rest)
+		end)
+		return name
 	end
 
 	local function getPetGroups()
@@ -841,17 +845,18 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 
 		for uniqueId, itemData in pairs(pets) do
 			if type(itemData) == "table" then
-				local name = tostring(itemData.kind or itemData.name or itemData.id or "Unknown")
+				local rawName = itemData.kind or itemData.name or itemData.id or "Unknown"
+				local name = formatDisplayName(rawName)
 				local itemType = string.lower(tostring(itemData.category or itemData.itemType or ""))
 				local isEgg = eggIds[tostring(uniqueId)]
-					or eggKinds[name]
+					or eggKinds[tostring(rawName)]
 					or itemData.isEgg == true
 					or itemData.is_egg == true
 					or itemType == "egg"
 					or itemType == "eggs"
-					or string.find(string.lower(name), "egg", 1, true) ~= nil
+					or string.find(string.lower(tostring(rawName)), "egg", 1, true) ~= nil
 				if not isEgg then
-					groups[name] = groups[name] or {name = getDisplayName(name), ids = {}}
+					groups[name] = groups[name] or {name = name, ids = {}}
 					table.insert(groups[name].ids, tostring(uniqueId))
 				end
 			end
@@ -925,19 +930,6 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 	local successClientData, ClientData = pcall(function()
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 	end)
-	local successItemData, ItemData = pcall(function()
-		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Game"):WaitForChild("ItemData"))
-	end)
-
-	local function getDisplayName(itemId)
-		if successItemData and type(ItemData) == "table" then
-			local item = ItemData[itemId] or (type(ItemData.items) == "table" and ItemData.items[itemId])
-			if type(item) == "table" then
-				return tostring(item.display_name or item.displayName or item.name or item.title or itemId)
-			end
-		end
-		return tostring(itemId)
-	end
 
 	local function getEggGroups()
 		local groups = {}
@@ -954,7 +946,7 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 		local hasEggInventory = false
 
 		local function addEgg(name, amount)
-			name = tostring(name or "Unknown Egg")
+			name = formatDisplayName(name or "Unknown Egg")
 			groups[name] = (groups[name] or 0) + (tonumber(amount) or 1)
 		end
 
@@ -979,7 +971,8 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 		if not hasEggInventory and type(pets) == "table" then
 			for uniqueId, itemData in pairs(pets) do
 				if type(itemData) == "table" then
-					local name = tostring(itemData.kind or itemData.name or itemData.id or uniqueId)
+					local rawName = itemData.kind or itemData.name or itemData.id or uniqueId
+					local name = tostring(rawName)
 					local itemType = string.lower(tostring(itemData.category or itemData.itemType or ""))
 					local isEgg = eggIds[tostring(uniqueId)]
 						or eggKinds[name]
@@ -1034,7 +1027,7 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			button.BorderSizePixel = 0
 			button.Font = Enum.Font.SourceSansBold
-			button.Text = string.format("%s x%d", getDisplayName(name), groups[name])
+			button.Text = string.format("%s x%d", name, groups[name])
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 17
 			button:SetAttribute("Selected", false)
