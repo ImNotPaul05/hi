@@ -56,8 +56,8 @@ Trading.Parent = Main
 Trading.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Trading.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Trading.BorderSizePixel = 0
-Trading.Position = UDim2.new(0.270364106, 0, 0.0269669108, 0)
-Trading.Size = UDim2.new(0.458353221, 0, 0.945177197, 0)
+Trading.Position = UDim2.new(0.287127972, 0, -0.000489780679, 0)
+Trading.Size = UDim2.new(0.458353192, 0, 1.00048983, 0)
 
 ScrollingFrame.Parent = Trading
 ScrollingFrame.Active = true
@@ -357,13 +357,13 @@ UICorner_18.Parent = CosnoleButton
 
 -- Scripts:
 
-local function ZDTLK_fake_script() -- Main.MainLocalScript 
+local function YTODGY_fake_script() -- Main.MainLocalScript 
 	local script = Instance.new('LocalScript', Main)
 
 	
 end
-coroutine.wrap(ZDTLK_fake_script)()
-local function WCTCZE_fake_script() -- userInterface.Userscript 
+coroutine.wrap(YTODGY_fake_script)()
+local function LYTAYH_fake_script() -- userInterface.Userscript 
 	local script = Instance.new('LocalScript', userInterface)
 
 	local Players = game:GetService("Players")
@@ -432,8 +432,8 @@ local function WCTCZE_fake_script() -- userInterface.Userscript
 		end
 	end)
 end
-coroutine.wrap(WCTCZE_fake_script)()
-local function CEJFU_fake_script() -- SwitchButton.SwitchScript 
+coroutine.wrap(LYTAYH_fake_script)()
+local function DBQCXK_fake_script() -- SwitchButton.SwitchScript 
 	local script = Instance.new('LocalScript', SwitchButton)
 
 	local button = script.Parent
@@ -447,162 +447,34 @@ local function CEJFU_fake_script() -- SwitchButton.SwitchScript
 		green = not green
 	
 		if green then
-			circle.Position = UDim2.new(0.47, 0, 0,0.012, 0)
+			circle.Position = UDim2.new(0.47, 0, 0.012, 0)
 			circle.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
 		else
-			circle.Position = UDim2.new(0, 0, 0, 0.12, 0)
+			circle.Position = UDim2.new(0, 0, 0.12, 0)
 			circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
 		end
 	end)
 end
-coroutine.wrap(CEJFU_fake_script)()
-local function QSPFIDL_fake_script() -- EggInterface.EggScript 
+coroutine.wrap(DBQCXK_fake_script)()
+local function ITRGIUK_fake_script() -- EggInterface.EggScript 
 	local script = Instance.new('LocalScript', EggInterface)
 
-	local Players = game:GetService("Players")
-	local panel = script.Parent
 	
-	local playerList = Instance.new("ScrollingFrame")
-	playerList.Name = "PlayerList"
-	playerList.Parent = panel
-	playerList.BackgroundTransparency = 1
-	playerList.BorderSizePixel = 0
-	playerList.Position = UDim2.fromOffset(8, 8)
-	playerList.Size = UDim2.new(1, -16, 1, -16)
-	playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	playerList.CanvasSize = UDim2.new()
-	playerList.ScrollBarThickness = 6
-	
-	local layout = Instance.new("UIListLayout")
-	layout.Parent = playerList
-	layout.Padding = UDim.new(0, 6)
-	layout.SortOrder = Enum.SortOrder.Name
-	
-	local selectedPlayer
-	
-	local function addPlayer(player)
-		local button = Instance.new("TextButton")
-		button.Name = tostring(player.UserId)
-		button.Parent = playerList
-		button.Size = UDim2.new(1, -6, 0, 32)
-		button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-		button.BorderSizePixel = 0
-		button.Font = Enum.Font.SourceSansBold
-		button.Text = player.Name
-		button.TextColor3 = Color3.new(1, 1, 1)
-		button.TextSize = 17
-	
-		Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-	
-		button.Activated:Connect(function()
-			selectedPlayer = player
-	
-			for _, item in playerList:GetChildren() do
-				if item:IsA("TextButton") then
-					item.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-				end
-			end
-	
-			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
-			print("Selected player:", selectedPlayer.Name)
-		end)
-	end
-	
-	for _, player in Players:GetPlayers() do
-		addPlayer(player)
-	end
-	
-	Players.PlayerAdded:Connect(addPlayer)
-	
-	Players.PlayerRemoving:Connect(function(player)
-		local button = playerList:FindFirstChild(tostring(player.UserId))
-		if button then
-			button:Destroy()
-		end
-	
-		if selectedPlayer == player then
-			selectedPlayer = nil
-		end
-	end)
 end
-coroutine.wrap(QSPFIDL_fake_script)()
-local function PJFGR_fake_script() -- PetInterface.Petscript 
+coroutine.wrap(ITRGIUK_fake_script)()
+local function YWYP_fake_script() -- PetInterface.Petscript 
 	local script = Instance.new('LocalScript', PetInterface)
 
-	local Players = game:GetService("Players")
-	local panel = script.Parent
 	
-	local playerList = Instance.new("ScrollingFrame")
-	playerList.Name = "PlayerList"
-	playerList.Parent = panel
-	playerList.BackgroundTransparency = 1
-	playerList.BorderSizePixel = 0
-	playerList.Position = UDim2.fromOffset(8, 8)
-	playerList.Size = UDim2.new(1, -16, 1, -16)
-	playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	playerList.CanvasSize = UDim2.new()
-	playerList.ScrollBarThickness = 6
-	
-	local layout = Instance.new("UIListLayout")
-	layout.Parent = playerList
-	layout.Padding = UDim.new(0, 6)
-	layout.SortOrder = Enum.SortOrder.Name
-	
-	local selectedPlayer
-	
-	local function addPlayer(player)
-		local button = Instance.new("TextButton")
-		button.Name = tostring(player.UserId)
-		button.Parent = playerList
-		button.Size = UDim2.new(1, -6, 0, 32)
-		button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-		button.BorderSizePixel = 0
-		button.Font = Enum.Font.SourceSansBold
-		button.Text = player.Name
-		button.TextColor3 = Color3.new(1, 1, 1)
-		button.TextSize = 17
-	
-		Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-	
-		button.Activated:Connect(function()
-			selectedPlayer = player
-	
-			for _, item in playerList:GetChildren() do
-				if item:IsA("TextButton") then
-					item.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-				end
-			end
-	
-			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
-			print("Selected player:", selectedPlayer.Name)
-		end)
-	end
-	
-	for _, player in Players:GetPlayers() do
-		addPlayer(player)
-	end
-	
-	Players.PlayerAdded:Connect(addPlayer)
-	
-	Players.PlayerRemoving:Connect(function(player)
-		local button = playerList:FindFirstChild(tostring(player.UserId))
-		if button then
-			button:Destroy()
-		end
-	
-		if selectedPlayer == player then
-			selectedPlayer = nil
-		end
-	end)
 end
-coroutine.wrap(PJFGR_fake_script)()
-local function NFBWOYJ_fake_script() -- StopTradeButton.StopTradeScript 
+coroutine.wrap(YWYP_fake_script)()
+local function FKNY_fake_script() -- StopTradeButton.StopTradeScript 
 	local script = Instance.new('LocalScript', StopTradeButton)
 
 	
 end
-coroutine.wrap(NFBWOYJ_fake_script)()
-local function LWUDTV_fake_script() -- SendTradeButton.SendTradeScript 
+coroutine.wrap(FKNY_fake_script)()
+local function JJKLBS_fake_script() -- SendTradeButton.SendTradeScript 
 	local script = Instance.new('LocalScript', SendTradeButton)
 
 	local TweenService = game:GetService("TweenService")
@@ -666,260 +538,28 @@ local function LWUDTV_fake_script() -- SendTradeButton.SendTradeScript
 	button.Activated:Connect(playClickFill)
 	
 end
-coroutine.wrap(LWUDTV_fake_script)()
-local function GJKA_fake_script() -- RefreshPlrButton.RefreshplrScript 
+coroutine.wrap(JJKLBS_fake_script)()
+local function KQGQGYA_fake_script() -- RefreshPlrButton.RefreshplrScript 
 	local script = Instance.new('LocalScript', RefreshPlrButton)
 
 	
 end
-coroutine.wrap(GJKA_fake_script)()
-local function BSUHR_fake_script() -- RefreshPetButton.RefreshpetScript 
+coroutine.wrap(KQGQGYA_fake_script)()
+local function BDIVN_fake_script() -- RefreshPetButton.RefreshpetScript 
 	local script = Instance.new('LocalScript', RefreshPetButton)
 
 	print("Hello world!")
 	
 end
-coroutine.wrap(BSUHR_fake_script)()
-local function CJTRZOT_fake_script() -- RefreshEggButton.RefresheggScript 
+coroutine.wrap(BDIVN_fake_script)()
+local function ODIBEK_fake_script() -- RefreshEggButton.RefresheggScript 
 	local script = Instance.new('LocalScript', RefreshEggButton)
 
 	print("Hello world!")
 	
 end
-coroutine.wrap(CJTRZOT_fake_script)()
-
-local function TRADINGCONTROLLER_fake_script() -- Main.TradingController
-	local script = Instance.new("LocalScript", Main)
-
-	local Players = game:GetService("Players")
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local LocalPlayer = Players.LocalPlayer
-	local api = ReplicatedStorage:WaitForChild("API")
-	local panel = Trading:WaitForChild("ScrollingFrame")
-	local playerPanel = userInterface
-	local petPanel = PetInterface
-	local eggPanel = EggInterface
-
-	local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
-	local addItemRemote = api:WaitForChild("TradeAPI/AddItemToOffer")
-	local successClientData, ClientData = pcall(function()
-		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
-	end)
-
-	local selectedPlayer
-	local selectedOffer
-	local tradeLoopRunning = false
-
-	local function getPlayerData()
-		if not successClientData or not ClientData then
-			return nil
-		end
-
-		local dataStore = ClientData.get_data()
-		return dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
-	end
-
-	local function createList(parent, name)
-		local oldList = parent:FindFirstChild(name)
-		if oldList then
-			oldList:Destroy()
-		end
-
-		local list = Instance.new("ScrollingFrame")
-		list.Name = name
-		list.Parent = parent
-		list.BackgroundTransparency = 1
-		list.BorderSizePixel = 0
-		list.Position = UDim2.fromOffset(8, 8)
-		list.Size = UDim2.new(1, -16, 1, -16)
-		list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-		list.CanvasSize = UDim2.new()
-		list.ScrollBarThickness = 6
-
-		local layout = Instance.new("UIListLayout")
-		layout.Parent = list
-		layout.Padding = UDim.new(0, 6)
-		layout.SortOrder = Enum.SortOrder.Name
-		return list
-	end
-
-	local function makeButton(list, name, text)
-		local button = Instance.new("TextButton")
-		button.Name = name
-		button.Parent = list
-		button.Size = UDim2.new(1, -6, 0, 32)
-		button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-		button.BorderSizePixel = 0
-		button.Font = Enum.Font.SourceSansBold
-		button.Text = text
-		button.TextColor3 = Color3.new(1, 1, 1)
-		button.TextSize = 17
-		Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-		return button
-	end
-
-	local function selectButton(list, button, color)
-		for _, child in ipairs(list:GetChildren()) do
-			if child:IsA("TextButton") then
-				child.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-			end
-		end
-		button.BackgroundColor3 = color or Color3.fromRGB(158, 0, 158)
-	end
-
-	local function refreshPlayers()
-		local list = playerPanel:FindFirstChild("PlayerList")
-		if not list then
-			list = createList(playerPanel, "PlayerList")
-		else
-			for _, child in ipairs(list:GetChildren()) do
-				if child:IsA("TextButton") then
-					child:Destroy()
-				end
-			end
-		end
-
-		for _, player in ipairs(Players:GetPlayers()) do
-			if player ~= LocalPlayer then
-				local button = makeButton(list, tostring(player.UserId), player.Name)
-				button.Activated:Connect(function()
-					selectedPlayer = player
-					selectButton(list, button)
-					print("Selected player:", player.Name)
-				end)
-			end
-		end
-	end
-
-	local function getInventory(kind)
-		local playerData = getPlayerData()
-		local inventory = playerData and playerData.inventory and playerData.inventory[kind]
-		local grouped = {}
-		if type(inventory) ~= "table" then
-			return grouped
-		end
-
-		for uniqueId, itemData in pairs(inventory) do
-			if type(itemData) == "table" then
-				local itemName = itemData.kind or itemData.name or itemData.id or "Unknown"
-				local group = grouped[itemName]
-				if not group then
-					group = {name = tostring(itemName), ids = {}}
-					grouped[itemName] = group
-				end
-				table.insert(group.ids, uniqueId)
-			end
-		end
-		return grouped
-	end
-
-	local function refreshInventory(kind, parent, selectedName)
-		local expectedListName = kind == "pets" and "PetInventoryList" or "EggInventoryList"
-		local misplacedListName = kind == "pets" and "EggInventoryList" or "PetInventoryList"
-		local misplacedPanel = kind == "pets" and EggInterface or PetInterface
-		local misplacedList = misplacedPanel:FindFirstChild(misplacedListName)
-		if misplacedList then
-			misplacedList:Destroy()
-		end
-		local oldPlayerList = parent:FindFirstChild("PlayerList")
-		if oldPlayerList then
-			oldPlayerList:Destroy()
-		end
-		local list = createList(parent, expectedListName)
-		local groups = getInventory(kind)
-		local names = {}
-		for name in pairs(groups) do
-			table.insert(names, name)
-		end
-		table.sort(names)
-
-		for _, name in ipairs(names) do
-			local group = groups[name]
-			local button = makeButton(list, name, string.format("%s x%d", group.name, #group.ids))
-			button.Activated:Connect(function()
-				selectButton(list, button)
-				selectedOffer = group
-				print("Selected " .. selectedName .. ":", group.name, #group.ids)
-			end)
-		end
-	end
-
-	local function addSelectedItems()
-		local selected = selectedOffer
-		if not selected then
-			return
-		end
-
-		for index, uniqueId in ipairs(selected.ids) do
-			if index > 18 then
-				break
-			end
-			pcall(function()
-				addItemRemote:FireServer(uniqueId)
-			end)
-			task.wait(0.05)
-		end
-	end
-
-	local function sendTradeRequest()
-		if not selectedPlayer or not selectedPlayer.Parent or not sendTradeRemote then
-			return
-		end
-		if sendTradeRemote:IsA("RemoteEvent") then
-			pcall(function()
-				sendTradeRemote:FireServer(selectedPlayer)
-			end)
-		end
-	end
-
-	local function stopTradeLoop()
-		tradeLoopRunning = false
-		SendTradeButton.Text = "Start auto-trade"
-	end
-
-	local function startTradeLoop()
-		if tradeLoopRunning then
-			return
-		end
-		if not selectedPlayer then
-			warn("Select a player first")
-			return
-		end
-
-		tradeLoopRunning = true
-		SendTradeButton.Text = "Auto-trade running"
-		task.spawn(function()
-			while tradeLoopRunning do
-				addSelectedItems()
-				sendTradeRequest()
-				task.wait(5)
-			end
-		end)
-	end
-
-	refreshPlayers()
-	refreshInventory("pets", PetInterface, "pet")
-	refreshInventory("eggs", EggInterface, "egg")
-
-	RefreshPlrButton.Activated:Connect(refreshPlayers)
-	RefreshPetButton.Activated:Connect(function()
-		refreshInventory("pets", PetInterface, "pet")
-	end)
-	RefreshEggButton.Activated:Connect(function()
-		refreshInventory("eggs", EggInterface, "egg")
-	end)
-	SendTradeButton.Activated:Connect(startTradeLoop)
-	StopTradeButton.Activated:Connect(stopTradeLoop)
-	Players.PlayerRemoving:Connect(function(player)
-		if selectedPlayer == player then
-			selectedPlayer = nil
-			stopTradeLoop()
-		end
-		refreshPlayers()
-	end)
-end
-coroutine.wrap(TRADINGCONTROLLER_fake_script)()
-local function ZOLPNB_fake_script() -- TradingButton.LocalScript 
+coroutine.wrap(ODIBEK_fake_script)()
+local function ZZOXG_fake_script() -- TradingButton.LocalScript 
 	local script = Instance.new('LocalScript', TradingButton)
 
 	local button = script.Parent
@@ -936,8 +576,8 @@ local function ZOLPNB_fake_script() -- TradingButton.LocalScript
 		trading.Visible = true
 	end)
 end
-coroutine.wrap(ZOLPNB_fake_script)()
-local function OXGAUG_fake_script() -- ShopButton.LocalScript 
+coroutine.wrap(ZZOXG_fake_script)()
+local function IAMQYXD_fake_script() -- ShopButton.LocalScript 
 	local script = Instance.new('LocalScript', ShopButton)
 
 	local button = script.Parent
@@ -954,8 +594,8 @@ local function OXGAUG_fake_script() -- ShopButton.LocalScript
 		shop.Visible = false
 	end)
 end
-coroutine.wrap(OXGAUG_fake_script)()
-local function WKMD_fake_script() -- PotionButton.LocalScript 
+coroutine.wrap(IAMQYXD_fake_script)()
+local function YRII_fake_script() -- PotionButton.LocalScript 
 	local script = Instance.new('LocalScript', PotionButton)
 
 	local button = script.Parent
@@ -974,8 +614,8 @@ local function WKMD_fake_script() -- PotionButton.LocalScript
 		
 	end)
 end
-coroutine.wrap(WKMD_fake_script)()
-local function KGGHHW_fake_script() -- BucksButton.LocalScript 
+coroutine.wrap(YRII_fake_script)()
+local function ANTE_fake_script() -- BucksButton.LocalScript 
 	local script = Instance.new('LocalScript', BucksButton)
 
 	local button = script.Parent
@@ -992,8 +632,8 @@ local function KGGHHW_fake_script() -- BucksButton.LocalScript
 		bucks.Visible = true
 	end)
 end
-coroutine.wrap(KGGHHW_fake_script)()
-local function ECKFUKM_fake_script() -- ClosedButton.ClosedScript 
+coroutine.wrap(ANTE_fake_script)()
+local function RHZAMY_fake_script() -- ClosedButton.ClosedScript 
 	local script = Instance.new('LocalScript', ClosedButton)
 
 	local button = script.Parent
@@ -1006,8 +646,8 @@ local function ECKFUKM_fake_script() -- ClosedButton.ClosedScript
 		icon.Visible = true
 	end)
 end
-coroutine.wrap(ECKFUKM_fake_script)()
-local function YADLKWA_fake_script() -- CosnoleButton.ConsoleScript 
+coroutine.wrap(RHZAMY_fake_script)()
+local function BTCKXWL_fake_script() -- CosnoleButton.ConsoleScript 
 	local script = Instance.new('LocalScript', CosnoleButton)
 
 	local StarterGui = game:GetService("StarterGui")
@@ -1037,4 +677,264 @@ local function YADLKWA_fake_script() -- CosnoleButton.ConsoleScript
 	button.Activated:Connect(openDeveloperConsole)
 	
 end
-coroutine.wrap(YADLKWA_fake_script)()
+coroutine.wrap(BTCKXWL_fake_script)()
+
+-- Trading controller
+local ControllerPlayers = game:GetService("Players")
+local ControllerReplicatedStorage = game:GetService("ReplicatedStorage")
+local ControllerLocalPlayer = ControllerPlayers.LocalPlayer
+local ControllerAPI = ControllerReplicatedStorage:WaitForChild("API")
+local ControllerAddItem = ControllerAPI:WaitForChild("TradeAPI/AddItemToOffer")
+local ControllerSendRequest = ControllerReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
+local ControllerAcceptRequest = ControllerAPI:FindFirstChild("TradeAPI/AcceptOrDeclineTradeRequest")
+local ControllerAcceptNegotiation = ControllerAPI:FindFirstChild("TradeAPI/AcceptNegotiation")
+local ControllerConfirmTrade = ControllerAPI:FindFirstChild("TradeAPI/ConfirmTrade")
+
+local selectedPlayer
+local selectedItems = {}
+local tradeLoopRunning = false
+local autoAcceptRunning = false
+
+local function getInventory()
+	local ok, clientData = pcall(function()
+		return require(ControllerReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
+	end)
+	if not ok or not clientData or type(clientData.get_data) ~= "function" then
+		return {}
+	end
+
+	local data = clientData.get_data()
+	local playerData = data and (data[ControllerLocalPlayer] or data[ControllerLocalPlayer.Name])
+	return playerData and playerData.inventory or {}
+end
+
+local function getQuantity(itemData)
+	local quantity = type(itemData) == "table" and (itemData.amount or itemData.quantity or itemData.count) or 1
+	quantity = tonumber(quantity) or 1
+	return math.max(1, math.floor(quantity))
+end
+
+local function getKind(itemData, fallback)
+	local kind = type(itemData) == "table" and (itemData.kind or itemData.name or itemData.id) or itemData
+	return tostring(kind or fallback)
+end
+
+local function clearList(list)
+	for _, child in ipairs(list:GetChildren()) do
+		if child:IsA("GuiButton") or child:IsA("TextLabel") then
+			child:Destroy()
+		end
+	end
+end
+
+local function makeList(parent, name)
+	local list = parent:FindFirstChild(name)
+	if not list then
+		list = Instance.new("ScrollingFrame")
+		list.Name = name
+		list.Parent = parent
+		list.BackgroundTransparency = 1
+		list.BorderSizePixel = 0
+		list.Position = UDim2.fromOffset(8, 8)
+		list.Size = UDim2.new(1, -16, 1, -16)
+		list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		list.CanvasSize = UDim2.new()
+		list.ScrollBarThickness = 6
+		local layout = Instance.new("UIListLayout")
+		layout.Padding = UDim.new(0, 4)
+		layout.SortOrder = Enum.SortOrder.Name
+		layout.Parent = list
+	end
+	return list
+end
+
+local function addSelectableItem(list, itemId, label, amount, isSelected)
+	local button = Instance.new("TextButton")
+	button.Name = tostring(itemId) .. "_" .. tostring(amount)
+	button.Parent = list
+	button.Size = UDim2.new(1, -6, 0, 28)
+	button.BackgroundColor3 = isSelected and Color3.fromRGB(158, 0, 158) or Color3.fromRGB(45, 45, 45)
+	button.BorderSizePixel = 0
+	button.Font = Enum.Font.SourceSansBold
+	button.Text = label
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.TextSize = 15
+	button:SetAttribute("ItemId", tostring(itemId))
+	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+
+	button.Activated:Connect(function()
+		local id = button:GetAttribute("ItemId")
+		if selectedItems[id] then
+			selectedItems[id] = nil
+			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+		else
+			selectedItems[id] = true
+			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
+		end
+	end)
+end
+
+local function refreshItemList(parent, category)
+	local list = makeList(parent, "ItemList")
+	clearList(list)
+
+	local inventory = getInventory()
+	local items = inventory[category]
+	if type(items) ~= "table" and category == "eggs" then
+		items = inventory.food
+	end
+	if type(items) ~= "table" then
+		return
+	end
+
+	local itemNumber = 0
+	for itemId, itemData in pairs(items) do
+		local kind = getKind(itemData, itemId)
+		local quantity = getQuantity(itemData)
+		for copy = 1, quantity do
+			itemNumber += 1
+			local displayName = kind .. (quantity > 1 and " [" .. copy .. "/" .. quantity .. "]" or "")
+			addSelectableItem(list, itemId, displayName, itemNumber, selectedItems[tostring(itemId)])
+		end
+	end
+	if itemNumber == 0 then
+		local empty = Instance.new("TextLabel")
+		empty.Name = "Empty"
+		empty.Parent = list
+		empty.Size = UDim2.new(1, -6, 0, 28)
+		empty.BackgroundTransparency = 1
+		empty.Text = "No " .. category .. " found"
+		empty.TextColor3 = Color3.new(1, 1, 1)
+		empty.Font = Enum.Font.SourceSans
+		empty.TextSize = 15
+	end
+end
+
+local function refreshPlayers()
+	local list = userInterface:FindFirstChild("PlayerList")
+	if not list then
+		return
+	end
+	clearList(list)
+	for _, player in ipairs(ControllerPlayers:GetPlayers()) do
+		if player ~= ControllerLocalPlayer then
+			local button = Instance.new("TextButton")
+			button.Name = tostring(player.UserId)
+			button.Parent = list
+			button.Size = UDim2.new(1, -6, 0, 32)
+			button.BackgroundColor3 = player == selectedPlayer and Color3.fromRGB(158, 0, 158) or Color3.fromRGB(45, 45, 45)
+			button.BorderSizePixel = 0
+			button.Font = Enum.Font.SourceSansBold
+			button.Text = player.Name
+			button.TextColor3 = Color3.new(1, 1, 1)
+			button.TextSize = 17
+			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+			button.Activated:Connect(function()
+				selectedPlayer = player
+				refreshPlayers()
+				print("Selected player:", player.Name)
+			end)
+		end
+	end
+end
+
+local function sendTradeRequest()
+	if not selectedPlayer or not selectedPlayer.Parent or not ControllerSendRequest then
+		return false
+	end
+	local ok = pcall(function()
+		ControllerSendRequest:FireServer(selectedPlayer)
+	end)
+	if not ok then
+		return false
+	end
+
+	task.wait(0.5)
+	local sent = {}
+	for itemId in pairs(selectedItems) do
+		if not sent[itemId] then
+			sent[itemId] = true
+			pcall(function()
+				ControllerAddItem:FireServer(itemId)
+			end)
+		end
+	end
+	return true
+end
+
+local function startTradeLoop()
+	if tradeLoopRunning then
+		return
+	end
+	tradeLoopRunning = true
+	SendTradeButton.Text = "Trading..."
+	task.spawn(function()
+		while tradeLoopRunning do
+			sendTradeRequest()
+			task.wait(5)
+		end
+		SendTradeButton.Text = "Start auto-trade"
+	end)
+end
+
+local function stopTradeLoop()
+	tradeLoopRunning = false
+	SendTradeButton.Text = "Start auto-trade"
+end
+
+local function acceptPendingTrades()
+	if ControllerAcceptRequest then
+		for _, player in ipairs(ControllerPlayers:GetPlayers()) do
+			if player ~= ControllerLocalPlayer then
+				pcall(function()
+					ControllerAcceptRequest:InvokeServer(player, true)
+				end)
+			end
+		end
+	end
+	if ControllerAcceptNegotiation then
+		pcall(function()
+			ControllerAcceptNegotiation:FireServer()
+		end)
+	end
+	if ControllerConfirmTrade then
+		pcall(function()
+			ControllerConfirmTrade:FireServer()
+		end)
+	end
+end
+
+local PetList = makeList(PetInterface, "ItemList")
+local EggList = makeList(EggInterface, "ItemList")
+refreshPlayers()
+refreshItemList(PetInterface, "pets")
+refreshItemList(EggInterface, "eggs")
+
+SendTradeButton.Activated:Connect(startTradeLoop)
+StopTradeButton.Activated:Connect(stopTradeLoop)
+RefreshPlrButton.Activated:Connect(refreshPlayers)
+RefreshPetButton.Activated:Connect(function()
+	refreshItemList(PetInterface, "pets")
+end)
+RefreshEggButton.Activated:Connect(function()
+	refreshItemList(EggInterface, "eggs")
+end)
+ControllerPlayers.PlayerAdded:Connect(refreshPlayers)
+ControllerPlayers.PlayerRemoving:Connect(function(player)
+	if player == selectedPlayer then
+		selectedPlayer = nil
+	end
+	refreshPlayers()
+end)
+
+SwitchButton.Activated:Connect(function()
+	autoAcceptRunning = not autoAcceptRunning
+	if autoAcceptRunning then
+		task.spawn(function()
+			while autoAcceptRunning do
+				acceptPendingTrades()
+				task.wait(1)
+			end
+		end)
+	end
+end)
