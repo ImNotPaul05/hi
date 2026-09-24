@@ -814,12 +814,18 @@ local function TRADINGCONTROLLER_fake_script() -- Main.TradingController
 	end
 
 	local function refreshInventory(kind, parent, selectedName)
+		local expectedListName = kind == "pets" and "PetInventoryList" or "EggInventoryList"
+		local misplacedListName = kind == "pets" and "EggInventoryList" or "PetInventoryList"
+		local misplacedPanel = kind == "pets" and EggInterface or PetInterface
+		local misplacedList = misplacedPanel:FindFirstChild(misplacedListName)
+		if misplacedList then
+			misplacedList:Destroy()
+		end
 		local oldPlayerList = parent:FindFirstChild("PlayerList")
 		if oldPlayerList then
 			oldPlayerList:Destroy()
 		end
-		local listName = kind == "pets" and "PetInventoryList" or "EggInventoryList"
-		local list = createList(parent, listName)
+		local list = createList(parent, expectedListName)
 		local groups = getInventory(kind)
 		local names = {}
 		for name in pairs(groups) do
