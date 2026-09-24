@@ -715,27 +715,26 @@ local function TRADELOOP_fake_script() -- Main.TradeLoopScript
 		return nil
 	end
 
-	local function addSelectedItems()
+	local function addSelectedPets()
+		local petList = PetInterface:FindFirstChild("PetInventoryList")
+		if not petList then
+			return
+		end
+
 		local addedCount = 0
-		for _, list in ipairs({
-			PetInterface:FindFirstChild("PetInventoryList"),
-			EggInterface:FindFirstChild("EggInventoryList"),
-		}) do
-			if list then
-				for _, button in ipairs(list:GetChildren()) do
-					if button:IsA("TextButton") and button:GetAttribute("Selected") == true then
-						local itemIds = button:GetAttribute("ItemIds")
-						if type(itemIds) == "string" then
-							for itemId in string.gmatch(itemIds, "[^,]+") do
-								if addedCount >= 18 then
-									return
-								end
-								pcall(function()
-									addItemRemote:FireServer(itemId)
-								end)
-								addedCount += 1
-								task.wait(0.05)
-							end
+		for _, button in ipairs(petList:GetChildren()) do
+			if button:IsA("TextButton") and button:GetAttribute("Selected") == true then
+				local petIds = button:GetAttribute("PetIds")
+				if type(petIds) == "string" then
+					for petId in string.gmatch(petIds, "[^,]+") do
+						if addedCount >= 18 then
+							return
+						end
+						pcall(function()
+							addItemRemote:FireServer(petId)
+						end)
+						addedCount += 1
+						task.wait(0.05)
 					end
 				end
 			end
@@ -770,7 +769,7 @@ local function TRADELOOP_fake_script() -- Main.TradeLoopScript
 					break
 				end
 
-				addSelectedItems()
+				addSelectedPets()
 				pcall(function()
 					sendTradeRemote:FireServer(targetPlayer)
 				end)
