@@ -47,8 +47,14 @@ local UICorner_18 = Instance.new("UICorner")
 
 --Properties:
 
+local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local previousMain = playerGui:FindFirstChild("Main")
+if previousMain then
+	previousMain:Destroy()
+end
+
 Main.Name = "Main"
-Main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Main.Parent = playerGui
 Main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 Trading.Name = "Trading"
@@ -388,7 +394,7 @@ local function LYTAYH_fake_script() -- userInterface.Userscript
 	local selectedPlayer
 	
 	local function addPlayer(player)
-		if player == Players.LocalPlayer then
+		if player == Players.LocalPlayer or player.UserId == Players.LocalPlayer.UserId then
 			return
 		end
 
