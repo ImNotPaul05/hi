@@ -448,22 +448,47 @@ coroutine.wrap(LYTAYH_fake_script)()
 local function DBQCXK_fake_script() -- SwitchButton.SwitchScript 
 	local script = Instance.new('LocalScript', SwitchButton)
 
+	local Players = game:GetService("Players")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local button = script.Parent
 	local circle = button:WaitForChild("Circle")
-	
-	local green = false
-	
-	circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
-	
+	local acceptRequest = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AcceptOrDeclineTradeRequest")
+	local acceptNegotiation = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AcceptNegotiation")
+	local confirmTrade = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/ConfirmTrade")
+	local enabled = false
+
+	local function acceptTrades()
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player ~= Players.LocalPlayer then
+				pcall(function()
+					acceptRequest:InvokeServer(player, true)
+				end)
+			end
+		end
+
+		pcall(function()
+			acceptNegotiation:FireServer()
+			confirmTrade:FireServer()
+		end)
+	end
+
+	local function setEnabled(value)
+		enabled = value
+		button:SetAttribute("AutoAcceptEnabled", enabled)
+		circle.Position = enabled and UDim2.new(0.47, 0, 0.012, 0) or UDim2.new(0, 0, 0.012, 0)
+		circle.BackgroundColor3 = enabled and Color3.fromRGB(255, 0, 255) or Color3.fromRGB(132, 0, 132)
+	end
+
+	setEnabled(false)
 	button.Activated:Connect(function()
-		green = not green
-	
-		if green then
-			circle.Position = UDim2.new(0.47, 0, 0,0.012, 0)
-			circle.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
-		else
-			circle.Position = UDim2.new(0, 0, 0, 0.12, 0)
-			circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
+		setEnabled(not enabled)
+		if enabled then
+			task.spawn(function()
+				while enabled and button.Parent do
+					acceptTrades()
+					task.wait(1)
+				end
+			end)
 		end
 	end)
 end
@@ -925,6 +950,7 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 		local eggs = inventory and inventory.eggs
 		local eggIds = {}
 		local eggKinds = {}
+		local hasEggInventory = false
 
 		local function addEgg(name, amount)
 			name = tostring(name or "Unknown Egg")
@@ -933,6 +959,7 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 
 		if type(eggs) == "table" then
 			for eggId, eggData in pairs(eggs) do
+				hasEggInventory = true
 				eggIds[tostring(eggId)] = true
 				if type(eggData) == "table" then
 					local name = eggData.kind or eggData.name or eggData.id or eggId
@@ -948,7 +975,7 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 		end
 
 		local pets = inventory and inventory.pets
-		if type(pets) == "table" then
+		if not hasEggInventory and type(pets) == "table" then
 			for uniqueId, itemData in pairs(pets) do
 				if type(itemData) == "table" then
 					local name = tostring(itemData.kind or itemData.name or itemData.id or uniqueId)
