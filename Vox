@@ -388,6 +388,10 @@ local function LYTAYH_fake_script() -- userInterface.Userscript
 	local selectedPlayer
 	
 	local function addPlayer(player)
+		if player == Players.LocalPlayer then
+			return
+		end
+
 		local button = Instance.new("TextButton")
 		button.Name = tostring(player.UserId)
 		button.Parent = playerList
