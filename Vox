@@ -796,6 +796,19 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 	local successClientData, ClientData = pcall(function()
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 	end)
+	local successItemData, ItemData = pcall(function()
+		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Game"):WaitForChild("ItemData"))
+	end)
+
+	local function getDisplayName(itemId)
+		if successItemData and type(ItemData) == "table" then
+			local item = ItemData[itemId] or (type(ItemData.items) == "table" and ItemData.items[itemId])
+			if type(item) == "table" then
+				return tostring(item.display_name or item.displayName or item.name or item.title or itemId)
+			end
+		end
+		return tostring(itemId)
+	end
 
 	local function getPetGroups()
 		local groups = {}
@@ -838,7 +851,7 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 					or itemType == "eggs"
 					or string.find(string.lower(name), "egg", 1, true) ~= nil
 				if not isEgg then
-					groups[name] = groups[name] or {name = name, ids = {}}
+					groups[name] = groups[name] or {name = getDisplayName(name), ids = {}}
 					table.insert(groups[name].ids, tostring(uniqueId))
 				end
 			end
@@ -912,6 +925,19 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 	local successClientData, ClientData = pcall(function()
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 	end)
+	local successItemData, ItemData = pcall(function()
+		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Game"):WaitForChild("ItemData"))
+	end)
+
+	local function getDisplayName(itemId)
+		if successItemData and type(ItemData) == "table" then
+			local item = ItemData[itemId] or (type(ItemData.items) == "table" and ItemData.items[itemId])
+			if type(item) == "table" then
+				return tostring(item.display_name or item.displayName or item.name or item.title or itemId)
+			end
+		end
+		return tostring(itemId)
+	end
 
 	local function getEggGroups()
 		local groups = {}
@@ -1008,7 +1034,7 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			button.BorderSizePixel = 0
 			button.Font = Enum.Font.SourceSansBold
-			button.Text = string.format("%s x%d", name, groups[name])
+			button.Text = string.format("%s x%d", getDisplayName(name), groups[name])
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 17
 			button:SetAttribute("Selected", false)
