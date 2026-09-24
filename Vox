@@ -403,6 +403,7 @@ local function LYTAYH_fake_script() -- userInterface.Userscript
 	
 		button.Activated:Connect(function()
 			selectedPlayer = player
+			panel:SetAttribute("SelectedPlayerUserId", player.UserId)
 	
 			for _, item in playerList:GetChildren() do
 				if item:IsA("TextButton") then
@@ -429,6 +430,7 @@ local function LYTAYH_fake_script() -- userInterface.Userscript
 	
 		if selectedPlayer == player then
 			selectedPlayer = nil
+			panel:SetAttribute("SelectedPlayerUserId", nil)
 		end
 	end)
 end
@@ -447,10 +449,10 @@ local function DBQCXK_fake_script() -- SwitchButton.SwitchScript
 		green = not green
 	
 		if green then
-			circle.Position = UDim2.new(0.47, 0, 0.012, 0)
+			circle.Position = UDim2.new(0.47, 0, 0,0.012, 0)
 			circle.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
 		else
-			circle.Position = UDim2.new(0, 0, 0.12, 0)
+			circle.Position = UDim2.new(0, 0, 0, 0.12, 0)
 			circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
 		end
 	end)
@@ -679,261 +681,71 @@ local function BTCKXWL_fake_script() -- CosnoleButton.ConsoleScript
 end
 coroutine.wrap(BTCKXWL_fake_script)()
 
--- Trading controller
-local ControllerPlayers = game:GetService("Players")
-local ControllerReplicatedStorage = game:GetService("ReplicatedStorage")
-local ControllerLocalPlayer = ControllerPlayers.LocalPlayer
-local ControllerAPI = ControllerReplicatedStorage:WaitForChild("API")
-local ControllerAddItem = ControllerAPI:WaitForChild("TradeAPI/AddItemToOffer")
-local ControllerSendRequest = ControllerReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
-local ControllerAcceptRequest = ControllerAPI:FindFirstChild("TradeAPI/AcceptOrDeclineTradeRequest")
-local ControllerAcceptNegotiation = ControllerAPI:FindFirstChild("TradeAPI/AcceptNegotiation")
-local ControllerConfirmTrade = ControllerAPI:FindFirstChild("TradeAPI/ConfirmTrade")
+local function TRADELOOP_fake_script() -- Main.TradeLoopScript
+	local script = Instance.new("LocalScript", Main)
 
-local selectedPlayer
-local selectedItems = {}
-local tradeLoopRunning = false
-local autoAcceptRunning = false
+	local Players = game:GetService("Players")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local playerPanel = userInterface
+	local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
+	local loopRunning = false
 
-local function getInventory()
-	local ok, clientData = pcall(function()
-		return require(ControllerReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
-	end)
-	if not ok or not clientData or type(clientData.get_data) ~= "function" then
-		return {}
-	end
-
-	local data = clientData.get_data()
-	local playerData = data and (data[ControllerLocalPlayer] or data[ControllerLocalPlayer.Name])
-	return playerData and playerData.inventory or {}
-end
-
-local function getQuantity(itemData)
-	local quantity = type(itemData) == "table" and (itemData.amount or itemData.quantity or itemData.count) or 1
-	quantity = tonumber(quantity) or 1
-	return math.max(1, math.floor(quantity))
-end
-
-local function getKind(itemData, fallback)
-	local kind = type(itemData) == "table" and (itemData.kind or itemData.name or itemData.id) or itemData
-	return tostring(kind or fallback)
-end
-
-local function clearList(list)
-	for _, child in ipairs(list:GetChildren()) do
-		if child:IsA("GuiButton") or child:IsA("TextLabel") then
-			child:Destroy()
+	local function getSelectedPlayer()
+		local userId = playerPanel:GetAttribute("SelectedPlayerUserId")
+		if type(userId) ~= "number" then
+			return nil
 		end
-	end
-end
 
-local function makeList(parent, name)
-	local list = parent:FindFirstChild(name)
-	if not list then
-		list = Instance.new("ScrollingFrame")
-		list.Name = name
-		list.Parent = parent
-		list.BackgroundTransparency = 1
-		list.BorderSizePixel = 0
-		list.Position = UDim2.fromOffset(8, 8)
-		list.Size = UDim2.new(1, -16, 1, -16)
-		list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-		list.CanvasSize = UDim2.new()
-		list.ScrollBarThickness = 6
-		local layout = Instance.new("UIListLayout")
-		layout.Padding = UDim.new(0, 4)
-		layout.SortOrder = Enum.SortOrder.Name
-		layout.Parent = list
-	end
-	return list
-end
-
-local function addSelectableItem(list, itemId, label, amount, isSelected)
-	local button = Instance.new("TextButton")
-	button.Name = tostring(itemId) .. "_" .. tostring(amount)
-	button.Parent = list
-	button.Size = UDim2.new(1, -6, 0, 28)
-	button.BackgroundColor3 = isSelected and Color3.fromRGB(158, 0, 158) or Color3.fromRGB(45, 45, 45)
-	button.BorderSizePixel = 0
-	button.Font = Enum.Font.SourceSansBold
-	button.Text = label
-	button.TextColor3 = Color3.new(1, 1, 1)
-	button.TextSize = 15
-	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-	button.Activated:Connect(function()
-		local idKey = tostring(itemId)
-		if selectedItems[idKey] then
-			selectedItems[idKey] = nil
-			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-		else
-			selectedItems[idKey] = itemId
-			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player.UserId == userId then
+				return player
+			end
 		end
-	end)
-end
-
-local function refreshItemList(parent, category)
-	local list = makeList(parent, "ItemList")
-	clearList(list)
-
-	local inventory = getInventory()
-	local items = inventory[category]
-	if type(items) ~= "table" and category == "eggs" then
-		items = inventory.food
-	end
-	if type(items) ~= "table" then
-		return
+		return nil
 	end
 
-	local itemNumber = 0
-	for itemId, itemData in pairs(items) do
-		local kind = getKind(itemData, itemId)
-		local quantity = getQuantity(itemData)
-		for copy = 1, quantity do
-			itemNumber += 1
-			local displayName = kind .. (quantity > 1 and " [" .. copy .. "/" .. quantity .. "]" or "")
-			addSelectableItem(list, itemId, displayName, itemNumber, selectedItems[tostring(itemId)] ~= nil)
-		end
-	end
-	if itemNumber == 0 then
-		local empty = Instance.new("TextLabel")
-		empty.Name = "Empty"
-		empty.Parent = list
-		empty.Size = UDim2.new(1, -6, 0, 28)
-		empty.BackgroundTransparency = 1
-		empty.Text = "No " .. category .. " found"
-		empty.TextColor3 = Color3.new(1, 1, 1)
-		empty.Font = Enum.Font.SourceSans
-		empty.TextSize = 15
-	end
-end
-
-local function refreshPlayers()
-	local list = userInterface:FindFirstChild("PlayerList")
-	if not list then
-		return
-	end
-	clearList(list)
-	for _, player in ipairs(ControllerPlayers:GetPlayers()) do
-		if player ~= ControllerLocalPlayer then
-			local button = Instance.new("TextButton")
-			button.Name = tostring(player.UserId)
-			button.Parent = list
-			button.Size = UDim2.new(1, -6, 0, 32)
-			button.BackgroundColor3 = player == selectedPlayer and Color3.fromRGB(158, 0, 158) or Color3.fromRGB(45, 45, 45)
-			button.BorderSizePixel = 0
-			button.Font = Enum.Font.SourceSansBold
-			button.Text = player.Name
-			button.TextColor3 = Color3.new(1, 1, 1)
-			button.TextSize = 17
-			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-			button.Activated:Connect(function()
-				selectedPlayer = player
-				refreshPlayers()
-				print("Selected player:", player.Name)
-			end)
-		end
-	end
-end
-
-local function sendTradeRequest()
-	if not selectedPlayer or not selectedPlayer.Parent or not ControllerSendRequest then
-		return false
-	end
-	local ok = pcall(function()
-		ControllerSendRequest:FireServer(selectedPlayer)
-	end)
-	if not ok then
-		return false
-	end
-
-	task.wait(0.5)
-	local sent = {}
-	for itemKey, itemId in pairs(selectedItems) do
-		if not sent[itemKey] then
-			sent[itemKey] = true
-			pcall(function()
-				ControllerAddItem:FireServer(itemId)
-			end)
-		end
-	end
-	return true
-end
-
-local function startTradeLoop()
-	if tradeLoopRunning then
-		return
-	end
-	tradeLoopRunning = true
-	SendTradeButton.Text = "Trading..."
-	task.spawn(function()
-		while tradeLoopRunning do
-			sendTradeRequest()
-			task.wait(5)
-		end
+	local function stopLoop()
+		loopRunning = false
 		SendTradeButton.Text = "Start auto-trade"
+	end
+
+	local function startLoop()
+		if loopRunning then
+			return
+		end
+		if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
+			warn("TradeAPI/SendTradeRequest was not found")
+			return
+		end
+		if not getSelectedPlayer() then
+			warn("Select a player first")
+			return
+		end
+
+		loopRunning = true
+		SendTradeButton.Text = "Auto-trade running"
+		task.spawn(function()
+			while loopRunning do
+				local targetPlayer = getSelectedPlayer()
+				if not targetPlayer then
+					stopLoop()
+					break
+				end
+
+				pcall(function()
+					sendTradeRemote:FireServer(targetPlayer)
+				end)
+				task.wait(5)
+			end
+		end)
+	end
+
+	SendTradeButton.Activated:Connect(startLoop)
+	StopTradeButton.Activated:Connect(stopLoop)
+	Players.PlayerRemoving:Connect(function(player)
+		if getSelectedPlayer() == player then
+			stopLoop()
+		end
 	end)
 end
-
-local function stopTradeLoop()
-	tradeLoopRunning = false
-	SendTradeButton.Text = "Start auto-trade"
-end
-
-local function acceptPendingTrades()
-	if ControllerAcceptRequest then
-		for _, player in ipairs(ControllerPlayers:GetPlayers()) do
-			if player ~= ControllerLocalPlayer then
-				pcall(function()
-					ControllerAcceptRequest:InvokeServer(player, true)
-				end)
-			end
-		end
-	end
-	if ControllerAcceptNegotiation then
-		pcall(function()
-			ControllerAcceptNegotiation:FireServer()
-		end)
-	end
-	if ControllerConfirmTrade then
-		pcall(function()
-			ControllerConfirmTrade:FireServer()
-		end)
-	end
-end
-
-local PetList = makeList(PetInterface, "ItemList")
-local EggList = makeList(EggInterface, "ItemList")
-refreshPlayers()
-refreshItemList(PetInterface, "pets")
-refreshItemList(EggInterface, "eggs")
-
-SendTradeButton.Activated:Connect(startTradeLoop)
-StopTradeButton.Activated:Connect(stopTradeLoop)
-RefreshPlrButton.Activated:Connect(refreshPlayers)
-RefreshPetButton.Activated:Connect(function()
-	refreshItemList(PetInterface, "pets")
-end)
-RefreshEggButton.Activated:Connect(function()
-	refreshItemList(EggInterface, "eggs")
-end)
-ControllerPlayers.PlayerAdded:Connect(refreshPlayers)
-ControllerPlayers.PlayerRemoving:Connect(function(player)
-	if player == selectedPlayer then
-		selectedPlayer = nil
-	end
-	refreshPlayers()
-end)
-
-SwitchButton.Activated:Connect(function()
-	autoAcceptRunning = not autoAcceptRunning
-	if autoAcceptRunning then
-		task.spawn(function()
-			while autoAcceptRunning do
-				acceptPendingTrades()
-				task.wait(1)
-			end
-		end)
-	end
-end)
+coroutine.wrap(TRADELOOP_fake_script)()
