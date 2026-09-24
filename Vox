@@ -698,6 +698,7 @@ local function TRADELOOP_fake_script() -- Main.TradeLoopScript
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local playerPanel = userInterface
 	local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
+	local addItemRemote = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AddItemToOffer")
 	local loopRunning = false
 
 	local function getSelectedPlayer()
@@ -712,6 +713,32 @@ local function TRADELOOP_fake_script() -- Main.TradeLoopScript
 			end
 		end
 		return nil
+	end
+
+	local function addSelectedPets()
+		local petList = PetInterface:FindFirstChild("PetInventoryList")
+		if not petList then
+			return
+		end
+
+		local addedCount = 0
+		for _, button in ipairs(petList:GetChildren()) do
+			if button:IsA("TextButton") and button:GetAttribute("Selected") == true then
+				local petIds = button:GetAttribute("PetIds")
+				if type(petIds) == "string" then
+					for petId in string.gmatch(petIds, "[^,]+") do
+						if addedCount >= 18 then
+							return
+						end
+						pcall(function()
+							addItemRemote:FireServer(petId)
+						end)
+						addedCount += 1
+						task.wait(0.05)
+					end
+				end
+			end
+		end
 	end
 
 	local function stopLoop()
@@ -742,6 +769,7 @@ local function TRADELOOP_fake_script() -- Main.TradeLoopScript
 					break
 				end
 
+				addSelectedPets()
 				pcall(function()
 					sendTradeRemote:FireServer(targetPlayer)
 				end)
@@ -759,3 +787,93 @@ local function TRADELOOP_fake_script() -- Main.TradeLoopScript
 	end)
 end
 coroutine.wrap(TRADELOOP_fake_script)()
+
+local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
+	local script = Instance.new("LocalScript", PetInterface)
+
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local LocalPlayer = game:GetService("Players").LocalPlayer
+	local successClientData, ClientData = pcall(function()
+		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
+	end)
+
+	local function getPetGroups()
+		local groups = {}
+		if not successClientData or not ClientData then
+			return groups
+		end
+
+		local dataStore = ClientData.get_data()
+		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
+		local pets = playerData and playerData.inventory and playerData.inventory.pets
+		if type(pets) ~= "table" then
+			return groups
+		end
+
+		for uniqueId, itemData in pairs(pets) do
+			if type(itemData) == "table" then
+				local name = tostring(itemData.kind or itemData.name or itemData.id or "Unknown")
+				groups[name] = groups[name] or {name = name, ids = {}}
+				table.insert(groups[name].ids, tostring(uniqueId))
+			end
+		end
+		return groups
+	end
+
+	local function refreshPets()
+		local oldList = PetInterface:FindFirstChild("PetInventoryList")
+		if oldList then
+			oldList:Destroy()
+		end
+
+		local list = Instance.new("ScrollingFrame")
+		list.Name = "PetInventoryList"
+		list.Parent = PetInterface
+		list.BackgroundTransparency = 1
+		list.BorderSizePixel = 0
+		list.Position = UDim2.fromOffset(8, 8)
+		list.Size = UDim2.new(1, -16, 1, -16)
+		list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		list.CanvasSize = UDim2.new()
+		list.ScrollBarThickness = 6
+
+		local layout = Instance.new("UIListLayout")
+		layout.Parent = list
+		layout.Padding = UDim.new(0, 6)
+		layout.SortOrder = Enum.SortOrder.Name
+
+		local groups = getPetGroups()
+		local names = {}
+		for name in pairs(groups) do
+			table.insert(names, name)
+		end
+		table.sort(names)
+
+		for _, name in ipairs(names) do
+			local group = groups[name]
+			local button = Instance.new("TextButton")
+			button.Name = name
+			button.Parent = list
+			button.Size = UDim2.new(1, -6, 0, 32)
+			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			button.BorderSizePixel = 0
+			button.Font = Enum.Font.SourceSansBold
+			button.Text = string.format("%s x%d", group.name, #group.ids)
+			button.TextColor3 = Color3.new(1, 1, 1)
+			button.TextSize = 17
+			button:SetAttribute("Selected", false)
+			button:SetAttribute("PetIds", table.concat(group.ids, ","))
+			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+
+			button.Activated:Connect(function()
+				local selected = not button:GetAttribute("Selected")
+				button:SetAttribute("Selected", selected)
+				button.BackgroundColor3 = selected and Color3.fromRGB(158, 0, 158) or Color3.fromRGB(45, 45, 45)
+			end)
+		end
+	end
+
+	refreshPets()
+	RefreshPetButton.Activated:Connect(refreshPets)
+end
+coroutine.wrap(PETINVENTORY_fake_script)()
