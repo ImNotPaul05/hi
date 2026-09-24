@@ -818,7 +818,8 @@ local function TRADINGCONTROLLER_fake_script() -- Main.TradingController
 		if oldPlayerList then
 			oldPlayerList:Destroy()
 		end
-		local list = createList(parent, "InventoryList")
+		local listName = kind == "pets" and "PetInventoryList" or "EggInventoryList"
+		local list = createList(parent, listName)
 		local groups = getInventory(kind)
 		local names = {}
 		for name in pairs(groups) do
@@ -891,15 +892,15 @@ local function TRADINGCONTROLLER_fake_script() -- Main.TradingController
 	end
 
 	refreshPlayers()
-	refreshInventory("pets", petPanel, "pet")
-	refreshInventory("eggs", eggPanel, "egg")
+	refreshInventory("pets", PetInterface, "pet")
+	refreshInventory("eggs", EggInterface, "egg")
 
 	RefreshPlrButton.Activated:Connect(refreshPlayers)
 	RefreshPetButton.Activated:Connect(function()
-		refreshInventory("pets", petPanel, "pet")
+		refreshInventory("pets", PetInterface, "pet")
 	end)
 	RefreshEggButton.Activated:Connect(function()
-		refreshInventory("eggs", eggPanel, "egg")
+		refreshInventory("eggs", EggInterface, "egg")
 	end)
 	SendTradeButton.Activated:Connect(startTradeLoop)
 	StopTradeButton.Activated:Connect(stopTradeLoop)
