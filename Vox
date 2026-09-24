@@ -530,9 +530,7 @@ local function JJKLBS_fake_script() -- SendTradeButton.SendTradeScript
 			{Size = UDim2.fromScale(1, 1)}
 		)
 		activeTween = tween
-		local completionConnection
-		completionConnection = tween.Completed:Connect(function()
-			completionConnection:Disconnect()
+		tween.Completed:Once(function()
 			if activeTween == tween then
 				fill.Visible = false
 			end
@@ -717,27 +715,26 @@ local function TRADELOOP_fake_script() -- Main.TradeLoopScript
 		return nil
 	end
 
-	local function addSelectedItems()
+	local function addSelectedPets()
+		local petList = PetInterface:FindFirstChild("PetInventoryList")
+		if not petList then
+			return
+		end
+
 		local addedCount = 0
-		for _, list in ipairs({
-			PetInterface:FindFirstChild("PetInventoryList"),
-			EggInterface:FindFirstChild("EggInventoryList"),
-		}) do
-			if list then
-				for _, button in ipairs(list:GetChildren()) do
-					if button:IsA("TextButton") and button:GetAttribute("Selected") == true then
-						local itemIds = button:GetAttribute("ItemIds")
-						if type(itemIds) == "string" then
-							for itemId in string.gmatch(itemIds, "[^,]+") do
-								if addedCount >= 18 then
-									return
-								end
-								pcall(function()
-									addItemRemote:FireServer(itemId)
-								end)
-								addedCount += 1
-								task.wait(0.05)
-							end
+		for _, button in ipairs(petList:GetChildren()) do
+			if button:IsA("TextButton") and button:GetAttribute("Selected") == true then
+				local petIds = button:GetAttribute("PetIds")
+				if type(petIds) == "string" then
+					for petId in string.gmatch(petIds, "[^,]+") do
+						if addedCount >= 18 then
+							return
+						end
+						pcall(function()
+							addItemRemote:FireServer(petId)
+						end)
+						addedCount += 1
+						task.wait(0.05)
 					end
 				end
 			end
@@ -772,7 +769,7 @@ local function TRADELOOP_fake_script() -- Main.TradeLoopScript
 					break
 				end
 
-				addSelectedItems()
+				addSelectedPets()
 				pcall(function()
 					sendTradeRemote:FireServer(targetPlayer)
 				end)
@@ -806,17 +803,7 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 			return groups
 		end
 
-		if type(ClientData.get_data) ~= "function" then
-			warn("ClientData.get_data is unavailable")
-			return groups
-		end
-		local dataSuccess, dataStore = pcall(function()
-			return ClientData.get_data()
-		end)
-		if not dataSuccess then
-			warn("Could not read client inventory data")
-			return groups
-		end
+		local dataStore = ClientData.get_data()
 		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
 		local inventory = playerData and playerData.inventory
 		local pets = inventory and inventory.pets
@@ -901,7 +888,7 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 17
 			button:SetAttribute("Selected", false)
-			button:SetAttribute("ItemIds", table.concat(group.ids, ","))
+			button:SetAttribute("PetIds", table.concat(group.ids, ","))
 			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
 			button.Activated:Connect(function()
@@ -932,29 +919,25 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 			return groups
 		end
 
-		if type(ClientData.get_data) ~= "function" then
-			warn("ClientData.get_data is unavailable")
-			return groups
-		end
-		local dataSuccess, dataStore = pcall(function()
-			return ClientData.get_data()
-		end)
-		if not dataSuccess then
-			warn("Could not read client inventory data")
-			return groups
-		end
+		local dataStore = ClientData.get_data()
 		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
-		local eggs = playerData and playerData.inventory and playerData.inventory.eggs
+		local inventory = playerData and playerData.inventory
+		local eggs = inventory and inventory.eggs
 		if type(eggs) ~= "table" then
 			return groups
 		end
 
-		for uniqueId, itemData in pairs(eggs) do
-			if type(itemData) == "table" then
-				local name = tostring(itemData.kind or itemData.name or itemData.id or "Unknown")
-				groups[name] = groups[name] or {name = name, ids = {}}
-				table.insert(groups[name].ids, tostring(uniqueId))
+		for eggId, eggData in pairs(eggs) do
+			local name = tostring(eggId)
+			local amount = 1
+			if type(eggData) == "table" then
+				name = tostring(eggData.kind or eggData.name or eggData.id or eggId)
+				amount = tonumber(eggData.amount or eggData.quantity or eggData.count) or 1
+			elseif type(eggData) == "number" then
+				amount = eggData
 			end
+
+			groups[name] = (groups[name] or 0) + amount
 		end
 		return groups
 	end
@@ -989,26 +972,17 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 		table.sort(names)
 
 		for _, name in ipairs(names) do
-			local group = groups[name]
-			local button = Instance.new("TextButton")
+			local button = Instance.new("TextLabel")
 			button.Name = name
 			button.Parent = list
 			button.Size = UDim2.new(1, -6, 0, 32)
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			button.BorderSizePixel = 0
 			button.Font = Enum.Font.SourceSansBold
-			button.Text = string.format("%s x%d", group.name, #group.ids)
+			button.Text = string.format("%s x%d", name, groups[name])
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 17
-			button:SetAttribute("Selected", false)
-			button:SetAttribute("ItemIds", table.concat(group.ids, ","))
 			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-			button.Activated:Connect(function()
-				local selected = not button:GetAttribute("Selected")
-				button:SetAttribute("Selected", selected)
-				button.BackgroundColor3 = selected and Color3.fromRGB(158, 0, 158) or Color3.fromRGB(45, 45, 45)
-			end)
 		end
 	end
 
