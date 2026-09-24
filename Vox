@@ -806,7 +806,17 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 			return groups
 		end
 
-		local dataStore = ClientData.get_data()
+		if type(ClientData.get_data) ~= "function" then
+			warn("ClientData.get_data is unavailable")
+			return groups
+		end
+		local dataSuccess, dataStore = pcall(function()
+			return ClientData.get_data()
+		end)
+		if not dataSuccess then
+			warn("Could not read client inventory data")
+			return groups
+		end
 		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
 		local inventory = playerData and playerData.inventory
 		local pets = inventory and inventory.pets
@@ -922,7 +932,17 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 			return groups
 		end
 
-		local dataStore = ClientData.get_data()
+		if type(ClientData.get_data) ~= "function" then
+			warn("ClientData.get_data is unavailable")
+			return groups
+		end
+		local dataSuccess, dataStore = pcall(function()
+			return ClientData.get_data()
+		end)
+		if not dataSuccess then
+			warn("Could not read client inventory data")
+			return groups
+		end
 		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
 		local eggs = playerData and playerData.inventory and playerData.inventory.eggs
 		if type(eggs) ~= "table" then
