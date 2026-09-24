@@ -394,26 +394,24 @@ local function LYTAYH_fake_script() -- userInterface.Userscript
 	local selectedPlayer
 	
 	local function addPlayer(player)
+		if player == Players.LocalPlayer or player.UserId == Players.LocalPlayer.UserId then
+			return
+		end
+
 		local button = Instance.new("TextButton")
 		button.Name = tostring(player.UserId)
 		button.Parent = playerList
 		button.Size = UDim2.new(1, -6, 0, 32)
-		local isLocalPlayer = player == Players.LocalPlayer or player.UserId == Players.LocalPlayer.UserId
-		button.BackgroundColor3 = isLocalPlayer and Color3.fromRGB(30, 30, 30) or Color3.fromRGB(45, 45, 45)
+		button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 		button.BorderSizePixel = 0
-		button.AutoButtonColor = not isLocalPlayer
 		button.Font = Enum.Font.SourceSansBold
-		button.Text = isLocalPlayer and string.format("%s (You)", player.Name) or player.Name
+		button.Text = player.Name
 		button.TextColor3 = Color3.new(1, 1, 1)
 		button.TextSize = 17
 	
 		Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 	
 		button.Activated:Connect(function()
-			if isLocalPlayer then
-				return
-			end
-
 			selectedPlayer = player
 			panel:SetAttribute("SelectedPlayerUserId", player.UserId)
 	
