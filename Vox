@@ -798,6 +798,32 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 	end)
 	local definitionCache = {}
 
+	local function findDefinition(definitions, itemId)
+		local visited = {}
+		local function search(value, depth)
+			if type(value) ~= "table" or visited[value] or depth > 8 then
+				return nil
+			end
+			visited[value] = true
+			if type(value[itemId]) == "table" then
+				return value[itemId]
+			end
+			for key, entry in pairs(value) do
+				if type(entry) == "table" then
+					if tostring(key) == itemId or entry.id == itemId or entry.kind == itemId then
+						return entry
+					end
+					local found = search(entry, depth + 1)
+					if found then
+						return found
+					end
+				end
+			end
+			return nil
+		end
+		return search(definitions, 0)
+	end
+
 	local function displayName(itemId, itemData, definitionTypes)
 		if type(itemData) == "table" then
 			for _, field in ipairs({"display_name", "displayName", "actual_name", "actualName", "title"}) do
@@ -814,7 +840,7 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 				definitionCache[definitionType] = ok and definitions or false
 			end
 			local definitions = definitionCache[definitionType]
-			local entry = type(definitions) == "table" and definitions[itemId]
+			local entry = findDefinition(definitions, itemId)
 			if type(entry) == "table" then
 				for _, field in ipairs({"display_name", "displayName", "name", "title"}) do
 					if type(entry[field]) == "string" and entry[field] ~= "" and entry[field] ~= itemId then
@@ -870,7 +896,7 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 					or string.find(string.lower(name), "egg", 1, true) ~= nil
 				if not isEgg then
 					groups[name] = groups[name] or {
-						name = displayName(name, itemData, {"PetDefinitions", "PetData", "PetDatabase"}),
+						name = displayName(name, itemData, {"PetDefinitions", "PetData", "PetDatabase", "PetEggDefinitions", "PetEggData", "ItemDefinitions"}),
 						ids = {},
 					}
 					table.insert(groups[name].ids, tostring(uniqueId))
@@ -948,6 +974,32 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 	end)
 	local definitionCache = {}
 
+	local function findDefinition(definitions, itemId)
+		local visited = {}
+		local function search(value, depth)
+			if type(value) ~= "table" or visited[value] or depth > 8 then
+				return nil
+			end
+			visited[value] = true
+			if type(value[itemId]) == "table" then
+				return value[itemId]
+			end
+			for key, entry in pairs(value) do
+				if type(entry) == "table" then
+					if tostring(key) == itemId or entry.id == itemId or entry.kind == itemId then
+						return entry
+					end
+					local found = search(entry, depth + 1)
+					if found then
+						return found
+					end
+				end
+			end
+			return nil
+		end
+		return search(definitions, 0)
+	end
+
 	local function displayName(itemId, itemData)
 		if type(itemData) == "table" then
 			for _, field in ipairs({"display_name", "displayName", "actual_name", "actualName", "title"}) do
@@ -957,14 +1009,14 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 			end
 		end
 
-		for _, definitionType in ipairs({"EggDefinitions", "EggData", "EggDatabase", "PetDefinitions", "PetData", "PetDatabase"}) do
+		for _, definitionType in ipairs({"EggDefinitions", "EggData", "EggDatabase", "PetDefinitions", "PetData", "PetDatabase", "PetEggDefinitions", "PetEggData", "ItemDefinitions"}) do
 			if definitionCache[definitionType] == nil then
 				local module = ReplicatedStorage:FindFirstChild(definitionType, true)
 				local ok, definitions = module and pcall(require, module)
 				definitionCache[definitionType] = ok and definitions or false
 			end
 			local definitions = definitionCache[definitionType]
-			local entry = type(definitions) == "table" and definitions[itemId]
+			local entry = findDefinition(definitions, itemId)
 			if type(entry) == "table" then
 				for _, field in ipairs({"display_name", "displayName", "name", "title"}) do
 					if type(entry[field]) == "string" and entry[field] ~= "" and entry[field] ~= itemId then
