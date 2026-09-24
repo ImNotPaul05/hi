@@ -530,7 +530,9 @@ local function JJKLBS_fake_script() -- SendTradeButton.SendTradeScript
 			{Size = UDim2.fromScale(1, 1)}
 		)
 		activeTween = tween
-		tween.Completed:Once(function()
+		local completionConnection
+		completionConnection = tween.Completed:Connect(function()
+			completionConnection:Disconnect()
 			if activeTween == tween then
 				fill.Visible = false
 			end
