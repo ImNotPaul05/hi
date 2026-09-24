@@ -16,13 +16,30 @@ local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequ
 local tradeFunction = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AcceptOrDeclineTradeRequest")
 local API = ReplicatedStorage:WaitForChild("API")
 
-if _G.TradeLoopRunning == nil then
-	_G.TradeLoopRunning = false
-end
-
 local successClientData, ClientData = pcall(function()
 	return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 end)
+
+local function getSelectedUniqueIds()
+	local selectedIds = {}
+	if type(_G.SelectedPetIds) ~= "table" or not successClientData or not ClientData then
+		return selectedIds
+	end
+
+	local dataStore = ClientData.get_data()
+	local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
+	local pets = playerData and playerData.inventory and playerData.inventory.pets
+	if not pets then
+		return selectedIds
+	end
+
+	for uniqueId, isSelected in pairs(_G.SelectedPetIds) do
+		if isSelected and pets[uniqueId] then
+			table.insert(selectedIds, uniqueId)
+		end
+	end
+	return selectedIds
+end
 
 local function getMultipleUniqueIdsByName(itemName, itemForm, limit)
 	if not successClientData or not ClientData then
@@ -57,31 +74,6 @@ local function getMultipleUniqueIdsByName(itemName, itemForm, limit)
 	return uniqueIds
 end
 
-local function getSelectedUniqueIds()
-	local selectedIds = {}
-	if type(_G.SelectedPetIds) ~= "table" then
-		return selectedIds
-	end
-
-	if not successClientData or not ClientData then
-		return selectedIds
-	end
-
-	local dataStore = ClientData.get_data()
-	local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
-	local pets = playerData and playerData.inventory and playerData.inventory.pets
-	if not pets then
-		return selectedIds
-	end
-
-	for uniqueId, isSelected in pairs(_G.SelectedPetIds) do
-		if isSelected and pets[uniqueId] then
-			table.insert(selectedIds, uniqueId)
-		end
-	end
-	return selectedIds
-end
-
 local function sendTradeRequest(playerName)
 	local targetPlayer = Players:FindFirstChild(playerName)
 	if not targetPlayer then
@@ -93,12 +85,7 @@ local function sendTradeRequest(playerName)
 			sendTradeRemote:FireServer(targetPlayer)
 		end)
 		if success then
-			for _ = 1, 5 do
-				if not _G.TradeLoopRunning or _G.TradeLoopPlayerName ~= playerName then
-					return false
-				end
-				task.wait(1)
-			end
+			task.wait(5)
 			return true
 		end
 	end
@@ -123,21 +110,16 @@ end
 
 task.spawn(function()
 	while true do
-		if MainAccUsername and #MainAccUsername > 0 and MainAccUsername[1] ~= "" then
-			for _, playerName in ipairs(MainAccUsername) do
-				if Players:FindFirstChild(playerName) then
-					local uniqueIds = getSelectedUniqueIds()
-					if #uniqueIds == 0 then
-						uniqueIds = getMultipleUniqueIdsByName(TARGET_ITEM_NAME, TARGET_ITEM_FORM, 18)
-					end
+		if _G.TradeLoopRunning and _G.TradeLoopPlayerName and Players:FindFirstChild(_G.TradeLoopPlayerName) then
+			local uniqueIds = getSelectedUniqueIds()
+			if #uniqueIds == 0 then
+				uniqueIds = getMultipleUniqueIdsByName(TARGET_ITEM_NAME, TARGET_ITEM_FORM, 18)
+			end
 
-					for _, uniqueId in ipairs(uniqueIds) do
-						pcall(function()
-							addItemRemote:FireServer(uniqueId)
-						end)
-					end
-					break
-				end
+			for _, uniqueId in ipairs(uniqueIds) do
+				pcall(function()
+					addItemRemote:FireServer(uniqueId)
+				end)
 			end
 		end
 
@@ -148,9 +130,7 @@ end)
 task.spawn(function()
 	while true do
 		if _G.TradeLoopRunning and _G.TradeLoopPlayerName then
-			if not sendTradeRequest(_G.TradeLoopPlayerName) then
-				task.wait(1)
-			end
+			sendTradeRequest(_G.TradeLoopPlayerName)
 		end
 
 		if ForceReceiver then
