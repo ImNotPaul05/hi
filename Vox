@@ -526,41 +526,65 @@ local function YIEDIF_fake_script() -- PetInterface.Petscript
 			end
 		end
 
-		local petEntries = {}
+		local petsByName = {}
 		for uniqueId, itemData in pairs(getPets()) do
 			local kind = itemData and tostring(itemData.kind or ""):lower()
 			local isPet = itemData and kind ~= "" and not kind:find("egg", 1, true)
 			if isPet then
-				table.insert(petEntries, {
-					id = uniqueId,
-					name = getPetDisplayName(itemData)
-				})
+				local displayName = getPetDisplayName(itemData)
+				petsByName[displayName] = petsByName[displayName] or {}
+				table.insert(petsByName[displayName], uniqueId)
 			end
 		end
 
+		local petEntries = {}
+		for displayName, ids in pairs(petsByName) do
+			table.insert(petEntries, {
+				ids = ids,
+				name = displayName
+			})
+		end
+
 		table.sort(petEntries, function(left, right)
-			return left.name .. tostring(left.id) < right.name .. tostring(right.id)
+			return left.name < right.name
 		end)
 
 		for _, pet in ipairs(petEntries) do
 			local button = Instance.new("TextButton")
-			button.Name = tostring(pet.id)
+			button.Name = pet.name
 			button.Parent = petList
 			button.Size = UDim2.new(1, -6, 0, 32)
-			button.BackgroundColor3 = selectedPets[pet.id]
+			local allSelected = true
+			for _, uniqueId in ipairs(pet.ids) do
+				if not selectedPets[uniqueId] then
+					allSelected = false
+					break
+				end
+			end
+			button.BackgroundColor3 = allSelected
 				and Color3.fromRGB(158, 0, 158)
 				or Color3.fromRGB(45, 45, 45)
 			button.BorderSizePixel = 0
 			button.Font = Enum.Font.SourceSansBold
-			button.Text = pet.name
+			button.Text = pet.name .. " " .. tostring(#pet.ids) .. "x"
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 17
 
 			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
 			button.Activated:Connect(function()
-				selectedPets[pet.id] = not selectedPets[pet.id] and true or nil
-				button.BackgroundColor3 = selectedPets[pet.id]
+				local shouldSelect = false
+				for _, uniqueId in ipairs(pet.ids) do
+					if not selectedPets[uniqueId] then
+						shouldSelect = true
+						break
+					end
+				end
+
+				for _, uniqueId in ipairs(pet.ids) do
+					selectedPets[uniqueId] = shouldSelect and true or nil
+				end
+				button.BackgroundColor3 = shouldSelect
 					and Color3.fromRGB(158, 0, 158)
 					or Color3.fromRGB(45, 45, 45)
 			end)
