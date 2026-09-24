@@ -805,16 +805,38 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 
 		local dataStore = ClientData.get_data()
 		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
-		local pets = playerData and playerData.inventory and playerData.inventory.pets
+		local inventory = playerData and playerData.inventory
+		local pets = inventory and inventory.pets
 		if type(pets) ~= "table" then
 			return groups
+		end
+
+		local eggIds = {}
+		local eggKinds = {}
+		local eggs = inventory and inventory.eggs
+		if type(eggs) == "table" then
+			for eggId, eggData in pairs(eggs) do
+				eggIds[tostring(eggId)] = true
+				if type(eggData) == "table" then
+					local eggKind = eggData.kind or eggData.name or eggData.id
+					if eggKind then
+						eggKinds[tostring(eggKind)] = true
+					end
+				end
+			end
 		end
 
 		for uniqueId, itemData in pairs(pets) do
 			if type(itemData) == "table" then
 				local name = tostring(itemData.kind or itemData.name or itemData.id or "Unknown")
 				local itemType = string.lower(tostring(itemData.category or itemData.itemType or ""))
-				local isEgg = itemType == "egg" or itemType == "eggs" or string.find(string.lower(name), "egg", 1, true) ~= nil
+				local isEgg = eggIds[tostring(uniqueId)]
+					or eggKinds[name]
+					or itemData.isEgg == true
+					or itemData.is_egg == true
+					or itemType == "egg"
+					or itemType == "eggs"
+					or string.find(string.lower(name), "egg", 1, true) ~= nil
 				if not isEgg then
 					groups[name] = groups[name] or {name = name, ids = {}}
 					table.insert(groups[name].ids, tostring(uniqueId))
