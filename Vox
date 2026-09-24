@@ -759,16 +759,15 @@ local function addSelectableItem(list, itemId, label, amount, isSelected)
 	button.Text = label
 	button.TextColor3 = Color3.new(1, 1, 1)
 	button.TextSize = 15
-	button:SetAttribute("ItemId", tostring(itemId))
 	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
 	button.Activated:Connect(function()
-		local id = button:GetAttribute("ItemId")
-		if selectedItems[id] then
-			selectedItems[id] = nil
+		local idKey = tostring(itemId)
+		if selectedItems[idKey] then
+			selectedItems[idKey] = nil
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 		else
-			selectedItems[id] = true
+			selectedItems[idKey] = itemId
 			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
 		end
 	end)
@@ -794,7 +793,7 @@ local function refreshItemList(parent, category)
 		for copy = 1, quantity do
 			itemNumber += 1
 			local displayName = kind .. (quantity > 1 and " [" .. copy .. "/" .. quantity .. "]" or "")
-			addSelectableItem(list, itemId, displayName, itemNumber, selectedItems[tostring(itemId)])
+			addSelectableItem(list, itemId, displayName, itemNumber, selectedItems[tostring(itemId)] ~= nil)
 		end
 	end
 	if itemNumber == 0 then
@@ -851,9 +850,9 @@ local function sendTradeRequest()
 
 	task.wait(0.5)
 	local sent = {}
-	for itemId in pairs(selectedItems) do
-		if not sent[itemId] then
-			sent[itemId] = true
+	for itemKey, itemId in pairs(selectedItems) do
+		if not sent[itemKey] then
+			sent[itemKey] = true
 			pcall(function()
 				ControllerAddItem:FireServer(itemId)
 			end)
