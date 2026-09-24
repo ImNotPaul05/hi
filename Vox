@@ -388,10 +388,6 @@ local function TDGYDTV_fake_script() -- userInterface.Userscript
 	local selectedPlayer
 	
 	local function addPlayer(player)
-		if player == Players.LocalPlayer then
-			return
-		end
-
 		local button = Instance.new("TextButton")
 		button.Name = tostring(player.UserId)
 		button.Parent = playerList
@@ -434,8 +430,8 @@ local function TDGYDTV_fake_script() -- userInterface.Userscript
 	
 		if selectedPlayer == player then
 			selectedPlayer = nil
-			_G.TradeLoopRunning = false
 			_G.TradeLoopPlayerName = nil
+			_G.TradeLoopRunning = false
 		end
 	end)
 end
@@ -472,129 +468,7 @@ coroutine.wrap(XNHMNRB_fake_script)()
 local function YIEDIF_fake_script() -- PetInterface.Petscript 
 	local script = Instance.new('LocalScript', PetInterface)
 
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local LocalPlayer = game.Players.LocalPlayer
-	local panel = script.Parent
-	local main = panel:FindFirstAncestor("Main")
-	local refreshButton = main:FindFirstChild("RefreshPet/Button", true)
-	local selectedPets = {}
-
-	_G.SelectedPetIds = selectedPets
-
-	local successClientData, ClientData = pcall(function()
-		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
-	end)
-
-	local petList = Instance.new("ScrollingFrame")
-	petList.Name = "PetList"
-	petList.Parent = panel
-	petList.BackgroundTransparency = 1
-	petList.BorderSizePixel = 0
-	petList.Position = UDim2.fromOffset(8, 8)
-	petList.Size = UDim2.new(1, -16, 1, -16)
-	petList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	petList.CanvasSize = UDim2.new()
-	petList.ScrollBarThickness = 6
-
-	local layout = Instance.new("UIListLayout")
-	layout.Parent = petList
-	layout.Padding = UDim.new(0, 6)
-	layout.SortOrder = Enum.SortOrder.Name
-
-	local function getPetDisplayName(itemData)
-		local displayName = itemData.display_name or itemData.displayName or itemData.kind or "Unknown pet"
-		displayName = tostring(displayName):gsub("_", " ")
-		return displayName:gsub("%S+", function(word)
-			return word:gsub("^%l", string.upper)
-		end)
-	end
-
-	local function getPets()
-		if not successClientData or not ClientData then
-			return {}
-		end
-
-		local dataStore = ClientData.get_data()
-		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
-		return playerData and playerData.inventory and playerData.inventory.pets or {}
-	end
-
-	local function refreshPets()
-		for _, child in ipairs(petList:GetChildren()) do
-			if child:IsA("TextButton") then
-				child:Destroy()
-			end
-		end
-
-		local petsByName = {}
-		for uniqueId, itemData in pairs(getPets()) do
-			local kind = itemData and tostring(itemData.kind or ""):lower()
-			local isPet = itemData and kind ~= "" and not kind:find("egg", 1, true)
-			if isPet then
-				local displayName = getPetDisplayName(itemData)
-				petsByName[displayName] = petsByName[displayName] or {}
-				table.insert(petsByName[displayName], uniqueId)
-			end
-		end
-
-		local petEntries = {}
-		for displayName, ids in pairs(petsByName) do
-			table.insert(petEntries, {
-				ids = ids,
-				name = displayName
-			})
-		end
-
-		table.sort(petEntries, function(left, right)
-			return left.name < right.name
-		end)
-
-		for _, pet in ipairs(petEntries) do
-			local button = Instance.new("TextButton")
-			button.Name = pet.name
-			button.Parent = petList
-			button.Size = UDim2.new(1, -6, 0, 32)
-			local allSelected = true
-			for _, uniqueId in ipairs(pet.ids) do
-				if not selectedPets[uniqueId] then
-					allSelected = false
-					break
-				end
-			end
-			button.BackgroundColor3 = allSelected
-				and Color3.fromRGB(158, 0, 158)
-				or Color3.fromRGB(45, 45, 45)
-			button.BorderSizePixel = 0
-			button.Font = Enum.Font.SourceSansBold
-			button.Text = pet.name .. " " .. tostring(#pet.ids) .. "x"
-			button.TextColor3 = Color3.new(1, 1, 1)
-			button.TextSize = 17
-
-			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-			button.Activated:Connect(function()
-				local shouldSelect = false
-				for _, uniqueId in ipairs(pet.ids) do
-					if not selectedPets[uniqueId] then
-						shouldSelect = true
-						break
-					end
-				end
-
-				for _, uniqueId in ipairs(pet.ids) do
-					selectedPets[uniqueId] = shouldSelect and true or nil
-				end
-				button.BackgroundColor3 = shouldSelect
-					and Color3.fromRGB(158, 0, 158)
-					or Color3.fromRGB(45, 45, 45)
-			end)
-		end
-	end
-
-	refreshPets()
-	if refreshButton then
-		refreshButton.Activated:Connect(refreshPets)
-	end
+	
 end
 coroutine.wrap(YIEDIF_fake_script)()
 local function BSSVB_fake_script() -- StopTradeButton.StopTradeScript 
@@ -604,8 +478,6 @@ local function BSSVB_fake_script() -- StopTradeButton.StopTradeScript
 
 	button.Activated:Connect(function()
 		_G.TradeLoopRunning = false
-		_G.TradeLoopPlayerName = nil
-		button.Text = "Stopped"
 	end)
 end
 coroutine.wrap(BSSVB_fake_script)()
@@ -670,16 +542,12 @@ local function EYOQY_fake_script() -- SendTradeButton.SendTradeScript
 		end
 	end
 	
-	button.Activated:Connect(playClickFill)
-
 	button.Activated:Connect(function()
-		if not _G.TradeLoopPlayerName then
-			button.Text = "Select a player first"
-			return
-		end
+		playClickFill()
 
-		_G.TradeLoopRunning = true
-		button.Text = "Sending trades"
+		if _G.TradeLoopPlayerName then
+			_G.TradeLoopRunning = true
+		end
 	end)
 	
 end
