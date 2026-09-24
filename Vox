@@ -972,7 +972,7 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 		table.sort(names)
 
 		for _, name in ipairs(names) do
-			local button = Instance.new("TextLabel")
+			local button = Instance.new("TextButton")
 			button.Name = name
 			button.Parent = list
 			button.Size = UDim2.new(1, -6, 0, 32)
@@ -982,7 +982,14 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 			button.Text = string.format("%s x%d", name, groups[name])
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 17
+			button:SetAttribute("Selected", false)
 			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+
+			button.Activated:Connect(function()
+				local selected = not button:GetAttribute("Selected")
+				button:SetAttribute("Selected", selected)
+				button.BackgroundColor3 = selected and Color3.fromRGB(158, 0, 158) or Color3.fromRGB(45, 45, 45)
+			end)
 		end
 	end
 
