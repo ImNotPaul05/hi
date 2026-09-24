@@ -373,8 +373,7 @@ local function getItemDisplayName(itemData, fallback)
 			or itemData.name
 	end
 	rawName = tostring(rawName or fallback or "Unknown")
-	rawName = string.gsub(rawName, "_%d%d%d%d", "")
-	rawName = string.gsub(rawName, "%s%d%d%d%d", "")
+	rawName = string.gsub(rawName, "_%d%d%d%d$", "")
 	rawName = string.gsub(rawName, "[_%-]+", " ")
 	rawName = string.gsub(rawName, "(%a)([%w]*)", function(first, rest)
 		return string.upper(first) .. string.lower(rest)
