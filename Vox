@@ -528,7 +528,9 @@ local function YIEDIF_fake_script() -- PetInterface.Petscript
 
 		local petEntries = {}
 		for uniqueId, itemData in pairs(getPets()) do
-			if itemData then
+			local kind = itemData and tostring(itemData.kind or ""):lower()
+			local isPet = itemData and kind ~= "" and not kind:find("egg", 1, true)
+			if isPet then
 				table.insert(petEntries, {
 					id = uniqueId,
 					name = getPetDisplayName(itemData)
