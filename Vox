@@ -363,24 +363,6 @@ UICorner_18.Parent = CosnoleButton
 
 -- Scripts:
 
-local function getItemDisplayName(itemData, fallback)
-	local rawName
-	if type(itemData) == "table" then
-		rawName = itemData.displayName
-			or itemData.display_name
-			or itemData.display_name_text
-			or itemData.localizedName
-			or itemData.name
-	end
-	rawName = tostring(rawName or fallback or "Unknown")
-	rawName = string.gsub(rawName, "_%d%d%d%d$", "")
-	rawName = string.gsub(rawName, "[_%-]+", " ")
-	rawName = string.gsub(rawName, "(%a)([%w]*)", function(first, rest)
-		return string.upper(first) .. string.lower(rest)
-	end)
-	return rawName
-end
-
 local function YTODGY_fake_script() -- Main.MainLocalScript 
 	local script = Instance.new('LocalScript', Main)
 
@@ -836,7 +818,7 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 			for eggId, eggData in pairs(eggs) do
 				eggIds[tostring(eggId)] = true
 				if type(eggData) == "table" then
-					local eggKind = getItemDisplayName(eggData, eggData.kind or eggData.name or eggData.id)
+					local eggKind = eggData.kind or eggData.name or eggData.id
 					if eggKind then
 						eggKinds[tostring(eggKind)] = true
 					end
@@ -846,8 +828,7 @@ local function PETINVENTORY_fake_script() -- PetInterface.PetInventoryScript
 
 		for uniqueId, itemData in pairs(pets) do
 			if type(itemData) == "table" then
-				local itemId = tostring(uniqueId)
-				local name = getItemDisplayName(itemData, itemData.kind or itemData.name or itemData.id or itemId)
+				local name = tostring(itemData.kind or itemData.name or itemData.id or "Unknown")
 				local itemType = string.lower(tostring(itemData.category or itemData.itemType or ""))
 				local isEgg = eggIds[tostring(uniqueId)]
 					or eggKinds[name]
@@ -956,15 +937,14 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 				hasEggInventory = true
 				eggIds[tostring(eggId)] = true
 				if type(eggData) == "table" then
-							local name = getItemDisplayName(eggData, eggData.kind or eggData.name or eggData.id or eggId)
+					local name = eggData.kind or eggData.name or eggData.id or eggId
 					eggKinds[tostring(name)] = true
 					addEgg(name, eggData.amount or eggData.quantity or eggData.count)
 				elseif type(eggData) == "string" then
-							local name = getItemDisplayName(nil, eggData)
-							eggKinds[name] = true
-							addEgg(name)
+					eggKinds[eggData] = true
+					addEgg(eggData)
 				else
-							addEgg(getItemDisplayName(nil, eggId), eggData)
+					addEgg(eggId, eggData)
 				end
 			end
 		end
@@ -973,7 +953,7 @@ local function EGG_INVENTORY_fake_script() -- EggInterface.EggInventoryScript
 		if not hasEggInventory and type(pets) == "table" then
 			for uniqueId, itemData in pairs(pets) do
 				if type(itemData) == "table" then
-					local name = getItemDisplayName(itemData, itemData.kind or itemData.name or itemData.id or uniqueId)
+					local name = tostring(itemData.kind or itemData.name or itemData.id or uniqueId)
 					local itemType = string.lower(tostring(itemData.category or itemData.itemType or ""))
 					local isEgg = eggIds[tostring(uniqueId)]
 						or eggKinds[name]
