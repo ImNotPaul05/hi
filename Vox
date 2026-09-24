@@ -368,9 +368,6 @@ local function TDGYDTV_fake_script() -- userInterface.Userscript
 
 	local Players = game:GetService("Players")
 	local panel = script.Parent
-	local main = panel:FindFirstAncestor("Main")
-	local sendTradeButton = main:WaitForChild("Trading"):WaitForChild("ScrollingFrame"):WaitForChild("SendTrade/Button")
-	local stopTradeButton = main.Trading.ScrollingFrame:WaitForChild("StopTrade/Button")
 	
 	local playerList = Instance.new("ScrollingFrame")
 	playerList.Name = "PlayerList"
@@ -389,28 +386,8 @@ local function TDGYDTV_fake_script() -- userInterface.Userscript
 	layout.SortOrder = Enum.SortOrder.Name
 	
 	local selectedPlayer
-
-	local function stopTradeLoop()
-		_G.TradeLoopRunning = false
-		_G.TradeLoopPlayerName = nil
-	end
-
-	sendTradeButton.Activated:Connect(function()
-		if not selectedPlayer or not selectedPlayer.Parent then
-			return
-		end
-
-		_G.TradeLoopPlayerName = selectedPlayer.Name
-		_G.TradeLoopRunning = true
-	end)
-
-	stopTradeButton.Activated:Connect(stopTradeLoop)
 	
 	local function addPlayer(player)
-		if player == Players.LocalPlayer then
-			return
-		end
-
 		local button = Instance.new("TextButton")
 		button.Name = tostring(player.UserId)
 		button.Parent = playerList
@@ -426,6 +403,7 @@ local function TDGYDTV_fake_script() -- userInterface.Userscript
 	
 		button.Activated:Connect(function()
 			selectedPlayer = player
+			_G.TradeLoopPlayerName = player.Name
 	
 			for _, item in playerList:GetChildren() do
 				if item:IsA("TextButton") then
@@ -434,9 +412,6 @@ local function TDGYDTV_fake_script() -- userInterface.Userscript
 			end
 	
 			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
-			if _G.TradeLoopRunning then
-				_G.TradeLoopPlayerName = selectedPlayer.Name
-			end
 			print("Selected player:", selectedPlayer.Name)
 		end)
 	end
@@ -455,7 +430,8 @@ local function TDGYDTV_fake_script() -- userInterface.Userscript
 	
 		if selectedPlayer == player then
 			selectedPlayer = nil
-			stopTradeLoop()
+			_G.TradeLoopRunning = false
+			_G.TradeLoopPlayerName = nil
 		end
 	end)
 end
@@ -498,7 +474,13 @@ coroutine.wrap(YIEDIF_fake_script)()
 local function BSSVB_fake_script() -- StopTradeButton.StopTradeScript 
 	local script = Instance.new('LocalScript', StopTradeButton)
 
-	
+	local button = script.Parent
+
+	button.Activated:Connect(function()
+		_G.TradeLoopRunning = false
+		_G.TradeLoopPlayerName = nil
+		button.Text = "Stopped"
+	end)
 end
 coroutine.wrap(BSSVB_fake_script)()
 local function EYOQY_fake_script() -- SendTradeButton.SendTradeScript 
@@ -563,6 +545,16 @@ local function EYOQY_fake_script() -- SendTradeButton.SendTradeScript
 	end
 	
 	button.Activated:Connect(playClickFill)
+
+	button.Activated:Connect(function()
+		if not _G.TradeLoopPlayerName then
+			button.Text = "Select a player first"
+			return
+		end
+
+		_G.TradeLoopRunning = true
+		button.Text = "Sending trades"
+	end)
 	
 end
 coroutine.wrap(EYOQY_fake_script)()
