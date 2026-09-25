@@ -564,13 +564,67 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local successClientData, ClientData = pcall(function()
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 	end)
+	local petCatalog
+	local petCatalogModule = ReplicatedStorage:FindFirstChild("PetList", true)
+	if petCatalogModule and petCatalogModule:IsA("ModuleScript") then
+		pcall(function()
+			petCatalog = require(petCatalogModule)
+		end)
+	end
+	local displayNameCache = {}
+
+	local function findCatalogDisplayName(value, petKind, visited, depth)
+		if type(value) ~= "table" or visited[value] or depth > 6 then
+			return nil
+		end
+
+		visited[value] = true
+		local directEntry = value[petKind]
+		if type(directEntry) == "string" then
+			return directEntry
+		elseif type(directEntry) == "table" then
+			return directEntry.display_name or directEntry.displayName or directEntry.name or directEntry.display or directEntry.label
+		end
+
+		for _, entry in pairs(value) do
+			if type(entry) == "table" then
+				if entry.kind == petKind or entry.id == petKind or entry.pet_kind == petKind then
+					local displayName = entry.display_name or entry.displayName or entry.name or entry.display or entry.label
+					if displayName then
+						return displayName
+					end
+				end
+
+				local displayName = findCatalogDisplayName(entry, petKind, visited, depth + 1)
+				if displayName then
+					return displayName
+				end
+			end
+		end
+	end
 
 	local function getPetDisplayName(itemData)
 		if type(itemData) ~= "table" then
 			return nil
 		end
 
-		return itemData.display_name or itemData.displayName or itemData.name or itemData.kind
+		local petKind = itemData.kind
+		if not petKind then
+			return itemData.display_name or itemData.displayName or itemData.name
+		end
+
+		if displayNameCache[petKind] then
+			return displayNameCache[petKind]
+		end
+
+		local displayName = itemData.display_name or itemData.displayName or itemData.name
+		if not displayName and petCatalog then
+			displayName = findCatalogDisplayName(petCatalog, petKind, {}, 0)
+		end
+
+		displayName = displayName or petKind
+		displayNameCache[petKind] = displayName
+		return displayName
 	end
 
 	local function refreshPets()
