@@ -695,12 +695,8 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 				if selectedGroups[group] then
 					return
 				end
-				if offeredPetCount >= 18 then
-					warn("Trade offer is full")
-					return
-				end
 
-			selectedGroups[group] = true
+				selectedGroups[group] = true
 				button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
 
 				local availableSlots = 18 - offeredPetCount
@@ -711,6 +707,9 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 					end)
 				end
 				offeredPetCount += petsToAdd
+				if petsToAdd == 0 then
+					warn("Selected pet, but the trade offer is full")
+				end
 				print("Selected pet:", button.Text)
 			end)
 		end
