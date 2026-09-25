@@ -602,9 +602,9 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 
 	local function getForm(itemData)
 		local properties = itemData.properties or {}
-		if properties.mega_neon == true then
+		if properties.mega_neon then
 			return "Mega"
-		elseif properties.neon == true then
+		elseif properties.neon then
 			return "Neon"
 		end
 		return "Normal"
@@ -674,8 +674,8 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			button.BorderSizePixel = 0
 			button.Font = Enum.Font.SourceSansBold
-			local formLabel = group.form == "MEGA_NEON" and "Mega Neon"
-				or group.form == "NEON" and "Neon"
+			local formLabel = group.form == "Mega" and "Mega Neon"
+				or group.form == "Neon" and "Neon"
 				or "Normal"
 			button.Text = string.format("%s %s ×%d", formLabel, group.displayName, #group.uniqueIds)
 			button.TextColor3 = Color3.new(1, 1, 1)
