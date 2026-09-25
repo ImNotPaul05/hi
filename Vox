@@ -575,6 +575,12 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		return cleanedName:gsub("^%s+", ""):gsub("%s+$", "")
 	end
 
+	local function capitalizeWords(displayName)
+		return displayName:gsub("(%S+)", function(word)
+			return word:sub(1, 1):upper() .. word:sub(2):lower()
+		end)
+	end
+
 	local function getDisplayName(itemData)
 		local properties = itemData.properties or {}
 		local displayName = properties.name
@@ -586,12 +592,12 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		if displayName and displayName ~= "" then
 			local cleanedName = removeEventPrefix(displayName)
 			if cleanedName ~= "" then
-				return cleanedName
+				return capitalizeWords(cleanedName)
 			end
 		end
 
 		local kind = tostring(itemData.kind or "Unknown pet")
-		return removeEventPrefix(kind:gsub("^%l", string.upper):gsub("[_%-]", " "))
+		return capitalizeWords(removeEventPrefix(kind:gsub("[_%-]", " ")))
 	end
 
 	local function getForm(itemData)
@@ -673,8 +679,8 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 				or "Normal"
 			button.Text = string.format("%s %s ×%d", formLabel, group.displayName, #group.uniqueIds)
 			button.TextColor3 = Color3.new(1, 1, 1)
-			button.TextSize = 16
-			button.TextXAlignment = Enum.TextXAlignment.Left
+			button.TextSize = 17
+			button.TextXAlignment = Enum.TextXAlignment.Center
 			button.AutoButtonColor = true
 			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
