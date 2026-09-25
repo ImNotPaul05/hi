@@ -546,8 +546,10 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local Players = game:GetService("Players")
 	local localPlayer = Players.LocalPlayer
 	local panel = script.Parent
+	local api = ReplicatedStorage:WaitForChild("API")
 	local refreshButton = panel.Parent:WaitForChild("RefreshPet/Button")
-	local addItemRemote = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AddItemToOffer")
+	local addItemRemote = api:WaitForChild("TradeAPI/AddItemToOffer")
+	local removeItemRemote = api:FindFirstChild("TradeAPI/RemoveItemFromOffer")
 
 	local list = Instance.new("ScrollingFrame")
 	list.Name = "PetList"
@@ -569,7 +571,6 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 	end)
 	local selectedGroups = {}
-	local offeredPetCount = 0
 
 	local function removeEventPrefix(displayName)
 		local cleanedName = tostring(displayName):gsub("^[%a%s_%-]+%d%d%d%d[%s_%-]+", "")
@@ -629,7 +630,6 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			end
 		end
 		selectedGroups = {}
-		offeredPetCount = 0
 	end
 
 	local function refreshPets()
@@ -693,22 +693,27 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 
 			button.Activated:Connect(function()
 				if selectedGroups[group] then
+					selectedGroups[group] = nil
+					button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+
+					if removeItemRemote and removeItemRemote:IsA("RemoteEvent") then
+						for index = 1, #group.uniqueIds do
+							pcall(function()
+								removeItemRemote:FireServer(group.uniqueIds[index])
+							end)
+					end
+					end
+					print("Unselected pet:", button.Text)
 					return
 				end
 
 				selectedGroups[group] = true
 				button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
 
-				local availableSlots = 18 - offeredPetCount
-				local petsToAdd = math.min(#group.uniqueIds, availableSlots)
-				for index = 1, petsToAdd do
+				for index = 1, #group.uniqueIds do
 					pcall(function()
 						addItemRemote:FireServer(group.uniqueIds[index])
 					end)
-				end
-				offeredPetCount += petsToAdd
-				if petsToAdd == 0 then
-					warn("Selected pet, but the trade offer is full")
 				end
 				print("Selected pet:", button.Text)
 			end)
