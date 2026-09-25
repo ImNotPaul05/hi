@@ -409,7 +409,11 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 	local scrollingFrame = panel.Parent
 	local sendTradeButton = scrollingFrame:WaitForChild("SendTrade/Button")
 	local stopTradeButton = scrollingFrame:WaitForChild("StopTrade/Button")
-	local sendTradeRemote = game:GetService("ReplicatedStorage"):FindFirstChild("TradeAPI/SendTradeRequest", true)
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local API = ReplicatedStorage:WaitForChild("API")
+	local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
+	local AcceptNeg = API:WaitForChild("TradeAPI/AcceptNegotiation")
+	local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
 
 	local function stopTradeLoop()
 		tradeLoopRunning = false
@@ -443,7 +447,12 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 					sendTradeRemote:FireServer(targetPlayer)
 				end)
 
-				task.wait(5)
+				pcall(function()
+					AcceptNeg:FireServer()
+					ConfirmTrade:FireServer()
+				end)
+
+				task.wait(1)
 			end
 		end)
 	end
