@@ -568,7 +568,8 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local successClientData, ClientData = pcall(function()
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 	end)
-	local selectedButton
+	local selectedGroups = {}
+	local offeredPetCount = 0
 
 	local function removeEventPrefix(displayName)
 		local cleanedName = tostring(displayName):gsub("^[%a%s_%-]+%d%d%d%d[%s_%-]+", "")
@@ -627,7 +628,8 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 				child:Destroy()
 			end
 		end
-		selectedButton = nil
+		selectedGroups = {}
+		offeredPetCount = 0
 	end
 
 	local function refreshPets()
@@ -686,20 +688,29 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			button.TextSize = 16
 			button.TextXAlignment = Enum.TextXAlignment.Center
 			button.AutoButtonColor = true
+			button.Active = true
 			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
 			button.Activated:Connect(function()
-				if selectedButton then
-					selectedButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+				if selectedGroups[group] then
+					return
 				end
-				selectedButton = button
+				if offeredPetCount >= 18 then
+					warn("Trade offer is full")
+					return
+				end
+
+			selectedGroups[group] = true
 				button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
 
-				for index = 1, math.min(#group.uniqueIds, 18) do
+				local availableSlots = 18 - offeredPetCount
+				local petsToAdd = math.min(#group.uniqueIds, availableSlots)
+				for index = 1, petsToAdd do
 					pcall(function()
 						addItemRemote:FireServer(group.uniqueIds[index])
 					end)
 				end
+				offeredPetCount += petsToAdd
 				print("Selected pet:", button.Text)
 			end)
 		end
