@@ -660,21 +660,10 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 	end
 
 	local function isEgg(itemData)
-		local properties = itemData.properties or {}
 		local kind = string.lower(tostring(itemData.kind or ""))
-		local displayName = string.lower(tostring(
-			properties.name
-				or properties.custom_name
-				or properties.display_name
-				or itemData.display_name
-				or itemData.displayName
-				or itemData.name
-				or ""
-		))
 		local category = string.lower(tostring(itemData.category or ""))
 		return itemData.is_egg == true
 			or string.find(kind, "egg", 1, true) ~= nil
-			or string.find(displayName, "egg", 1, true) ~= nil
 			or category == "egg"
 			or category == "eggs"
 	end
