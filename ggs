@@ -78,15 +78,14 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 			return
 		end
 
-		local foundPets = {}
+		local petCounts = {}
 
-		-- Loop through inventory pets using your data layout
+		-- Aggregate counts by pet kind and properties
 		for uniqueId, itemData in pairs(playerData.inventory.pets) do
 			if itemData and itemData.kind then
 				local petName = itemData.kind
 				local properties = itemData.properties or {}
 				
-				-- Format display label style (e.g., handling neon/mega markers if desired)
 				local suffix = ""
 				if properties.mega_neon then
 					suffix = " (Mega Neon)"
@@ -96,14 +95,13 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 
 				local displayName = petName .. suffix
 				
-				if not foundPets[uniqueId] then
-					foundPets[uniqueId] = displayName
-				end
+				-- Count occurrences
+				petCounts[displayName] = (petCounts[displayName] or 0) + 1
 			end
 		end
 
-		-- Create visual text labels inside the scrolling frame
-		for uniqueId, displayName in pairs(foundPets) do
+		-- Create visual text labels showing the total count per pet type
+		for displayName, count in pairs(petCounts) do
 			local textLabel = Instance.new("TextLabel")
 			textLabel.Size = UDim2.new(1, 0, 0, 30)
 			textLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -111,7 +109,7 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 			textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 			textLabel.TextSize = 14
 			textLabel.Font = Enum.Font.SourceSansBold
-			textLabel.Text = displayName
+			textLabel.Text = "  " .. displayName .. "  (x" .. count .. ")"
 			textLabel.Parent = container
 		end
 		
