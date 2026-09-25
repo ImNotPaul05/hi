@@ -684,7 +684,7 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			button.Text = string.format("%s %s ×%d", formLabel, group.displayName, #group.uniqueIds)
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 16
-			button.TextXAlignment = Enum.TextXAlignment.Middle
+			button.TextXAlignment = Enum.TextXAlignment.Center
 			button.AutoButtonColor = true
 			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
