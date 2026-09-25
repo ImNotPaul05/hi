@@ -672,8 +672,8 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 				or ""
 		))
 		
-	end
 	
+
 	local function clearList()
 		for _, child in ipairs(list:GetChildren()) do
 			if child:IsA("TextButton") then
