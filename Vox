@@ -530,19 +530,50 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 
 	local button = script.Parent
 	local circle = button:WaitForChild("Circle")
-	
-	local green = false
-	
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local Players = game:GetService("Players")
+	local API = ReplicatedStorage:WaitForChild("API")
+	local tradeFunction = API:WaitForChild("TradeAPI/AcceptOrDeclineTradeRequest")
+	local acceptNegotiation = API:WaitForChild("TradeAPI/AcceptNegotiation")
+	local confirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
+	local autoAcceptEnabled = false
+	local runId = 0
+
+	circle.Position = UDim2.new(0, 0, 0.012, 0)
 	circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
-	
+
 	button.Activated:Connect(function()
-		green = not green
-	
-		if green then
-			circle.Position = UDim2.new(0.47, 0, 0,0.012, 0)
+		autoAcceptEnabled = not autoAcceptEnabled
+		runId += 1
+		local currentRunId = runId
+
+		if autoAcceptEnabled then
+			circle.Position = UDim2.new(0.47, 0, 0.012, 0)
 			circle.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
+
+			task.spawn(function()
+				while autoAcceptEnabled and currentRunId == runId do
+					for _, targetPlayer in ipairs(Players:GetPlayers()) do
+						if not autoAcceptEnabled or currentRunId ~= runId then
+							break
+						end
+
+						if targetPlayer ~= Players.LocalPlayer then
+							pcall(function()
+								tradeFunction:InvokeServer(targetPlayer, true)
+							end)
+						end
+					end
+
+					pcall(function()
+						acceptNegotiation:FireServer()
+						confirmTrade:FireServer()
+					end)
+					task.wait(1)
+				end
+			end)
 		else
-			circle.Position = UDim2.new(0, 0, 0, 0.12, 0)
+			circle.Position = UDim2.new(0, 0, 0.012, 0)
 			circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
 		end
 	end)
