@@ -546,10 +546,8 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local Players = game:GetService("Players")
 	local localPlayer = Players.LocalPlayer
 	local panel = script.Parent
-	local api = ReplicatedStorage:WaitForChild("API")
 	local refreshButton = panel.Parent:WaitForChild("RefreshPet/Button")
-	local addItemRemote = api:WaitForChild("TradeAPI/AddItemToOffer")
-	local removeItemRemote = api:FindFirstChild("TradeAPI/RemoveItemFromOffer")
+	local addItemRemote = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AddItemToOffer")
 
 	local list = Instance.new("ScrollingFrame")
 	list.Name = "PetList"
@@ -570,7 +568,7 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local successClientData, ClientData = pcall(function()
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 	end)
-	local selectedGroups = {}
+	local selectedButton
 
 	local function removeEventPrefix(displayName)
 		local cleanedName = tostring(displayName):gsub("^[%a%s_%-]+%d%d%d%d[%s_%-]+", "")
@@ -629,7 +627,7 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 				child:Destroy()
 			end
 		end
-		selectedGroups = {}
+		selectedButton = nil
 	end
 
 	local function refreshPets()
@@ -685,32 +683,19 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			local formLabel = group.form
 			button.Text = string.format("%s %s ×%d", formLabel, group.displayName, #group.uniqueIds)
 			button.TextColor3 = Color3.new(1, 1, 1)
-			button.TextSize = 16
-			button.TextXAlignment = Enum.TextXAlignment.Center
+			button.TextSize = 17
+			button.TextXAlignment = Enum.TextXAlignment.Left
 			button.AutoButtonColor = true
-			button.Active = true
 			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
 
 			button.Activated:Connect(function()
-				if selectedGroups[group] then
-					selectedGroups[group] = nil
-					button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-
-					if removeItemRemote and removeItemRemote:IsA("RemoteEvent") then
-						for index = 1, #group.uniqueIds do
-							pcall(function()
-								removeItemRemote:FireServer(group.uniqueIds[index])
-							end)
-					end
-					end
-					print("Unselected pet:", button.Text)
-					return
+				if selectedButton then
+					selectedButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 				end
-
-				selectedGroups[group] = true
+				selectedButton = button
 				button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
 
-				for index = 1, #group.uniqueIds do
+				for index = 1, math.min(#group.uniqueIds, 18) do
 					pcall(function()
 						addItemRemote:FireServer(group.uniqueIds[index])
 					end)
