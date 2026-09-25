@@ -50,7 +50,12 @@ local UICorner_19 = Instance.new("UICorner")
 --Properties:
 
 Main.Name = "Main"
-Main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local previousMain = playerGui:FindFirstChild("Main")
+if previousMain then
+	previousMain:Destroy()
+end
+Main.Parent = playerGui
 Main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 Trading.Name = "Trading"
