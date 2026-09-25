@@ -433,6 +433,10 @@ local function NDVICD_fake_script() -- userInterface.Userscript
 	stopTradeButton.Activated:Connect(stopTradeLoop)
 	
 	local function addPlayer(player)
+		if player == Players.LocalPlayer then
+			return
+		end
+
 		local button = Instance.new("TextButton")
 		button.Name = tostring(player.UserId)
 		button.Parent = playerList
