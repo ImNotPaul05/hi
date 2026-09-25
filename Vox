@@ -668,7 +668,10 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			button.BorderSizePixel = 0
 			button.Font = Enum.Font.SourceSansBold
-			button.Text = string.format("%dx %s (%s)", #group.uniqueIds, group.displayName, group.form)
+			local formLabel = group.form == "MEGA_NEON" and "Mega Neon"
+				or group.form == "NEON" and "Neon"
+				or "Normal"
+			button.Text = string.format("%s %s ×%d", formLabel, group.displayName, #group.uniqueIds)
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 16
 			button.TextXAlignment = Enum.TextXAlignment.Left
