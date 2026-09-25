@@ -590,6 +590,17 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		return "NORMAL"
 	end
 
+	local function isEgg(itemData)
+		local kind = string.lower(tostring(itemData.kind or ""))
+		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
+		local category = string.lower(tostring(itemData.category or ""))
+		return itemData.is_egg == true
+			or string.find(kind, "egg", 1, true) ~= nil
+			or string.find(displayName, "egg", 1, true) ~= nil
+			or category == "egg"
+			or category == "eggs"
+	end
+
 	local function clearList()
 		for _, child in ipairs(list:GetChildren()) do
 			if child:IsA("TextButton") then
@@ -614,7 +625,7 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 
 		local groupedPets = {}
 		for uniqueId, itemData in pairs(pets) do
-			if itemData then
+			if itemData and not isEgg(itemData) then
 				local displayName = getDisplayName(itemData)
 				local form = getForm(itemData)
 				local key = displayName .. "|" .. form
