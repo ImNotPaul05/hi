@@ -619,9 +619,12 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local function isPracticeDog(itemData)
 		local kind = string.lower(tostring(itemData.kind or ""))
 		local name = string.lower(tostring(itemData.name or ""))
+		local displayName = string.lower(getDisplayName(itemData))
 		return kind == "practice_dog"
 			or kind == "practice dog"
 			or name == "practice dog"
+			or string.find(kind, "practice", 1, true) ~= nil
+			or displayName == "practice dog"
 	end
 
 	local function isEgg(itemData)
