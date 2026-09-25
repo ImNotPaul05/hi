@@ -1,0 +1,119 @@
+-- Gui to Lua
+-- Version: 3.2
+
+-- Instances:
+
+local Fire = Instance.new("ScreenGui")
+local PetInterface = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local ScrollingFrame = Instance.new("ScrollingFrame")
+local UIListLayout = Instance.new("UIListLayout")
+
+--Properties:
+
+Fire.Name = "Fire"
+Fire.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Fire.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+PetInterface.Name = "PetInterface"
+PetInterface.Parent = Fire
+PetInterface.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+PetInterface.BackgroundTransparency = 0.300
+PetInterface.BorderColor3 = Color3.fromRGB(0, 0, 0)
+PetInterface.BorderSizePixel = 0
+PetInterface.Position = UDim2.new(0.377159834, 0, 0.253035486, 0)
+PetInterface.Size = UDim2.new(0.277651787, 0, 0.398642451, 0)
+
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = PetInterface
+
+ScrollingFrame.Name = "PetScrollingFrame"
+ScrollingFrame.Parent = PetInterface
+ScrollingFrame.Active = true
+ScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ScrollingFrame.BackgroundTransparency = 1.000
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.Position = UDim2.new(0.04, 0, 0.04, 0)
+ScrollingFrame.Size = UDim2.new(0.92, 0, 0.92, 0)
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollingFrame.ScrollBarThickness = 6
+
+UIListLayout.Parent = ScrollingFrame
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 5)
+
+-- Scripts:
+
+local function SDDB_fake_script() -- PetInterface.Petscript 
+	local script = Instance.new('LocalScript', PetInterface)
+
+	local Players = game:GetService("Players")
+	local LocalPlayer = Players.LocalPlayer
+	local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+	local Backpack = LocalPlayer:WaitForChild("Backpack")
+
+	local container = script.Parent:WaitForChild("PetScrollingFrame")
+	local listLayout = container:WaitForChild("UIListLayout")
+
+	local function updatePetList()
+		-- Clear old labels first to avoid duplicates
+		for _, child in ipairs(container:GetChildren()) do
+			if child:IsA("TextLabel") then
+				child:Destroy()
+			end
+		end
+
+		local foundPets = {}
+
+		-- 1. Scan PlayerGui for text elements matching inventory/pet categories
+		for _, gui in ipairs(PlayerGui:GetDescendants()) do
+			if gui:IsA("TextLabel") and gui.Text ~= "" and #gui.Text > 1 then
+				local parentName = gui.Parent.Name:lower()
+				if parentName:find("item") or parentName:find("pet") or parentName:find("name") or parentName:find("slot") then
+					if not foundPets[gui.Text] then
+						foundPets[gui.Text] = true
+					end
+				end
+			end
+		end
+
+		-- 2. Scan Backpack for tools/pets
+		for _, item in ipairs(Backpack:GetChildren()) do
+			if item:IsA("Tool") and not foundPets[item.Name] then
+				foundPets[item.Name] = true
+			end
+		end
+
+		-- 3. Scan Character for equipped items
+		if LocalPlayer.Character then
+			for _, item in ipairs(LocalPlayer.Character:GetChildren()) do
+				if item:IsA("Tool") and not foundPets[item.Name] then
+					foundPets[item.Name] = true
+				end
+			end
+		end
+
+		-- Create visual text labels inside the scrolling frame
+		for petName, _ in pairs(foundPets) do
+			local textLabel = Instance.new("TextLabel")
+			textLabel.Size = UDim2.new(1, 0, 0, 30)
+			textLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			textLabel.BackgroundTransparency = 0.2
+			textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			textLabel.TextSize = 14
+			textLabel.Font = Enum.Font.SourceSansBold
+			textLabel.Text = petName
+			textLabel.Parent = container
+		end
+		
+		-- Adjust canvas size automatically based on content
+		container.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
+	end
+
+	-- Run initially and update when backpack updates
+	task.spawn(updatePetList)
+	Backpack.ChildAdded:Connect(updatePetList)
+	Backpack.ChildRemoved:Connect(updatePetList)
+end
+
+coroutine.wrap(SDDB_fake_script)()
