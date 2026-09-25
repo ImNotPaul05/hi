@@ -640,6 +640,23 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			or category == "eggs"
 	end
 
+	local function isPracticeDog(itemData)
+		local properties = itemData.properties or {}
+		local kind = string.lower(tostring(itemData.kind or ""))
+		local displayName = string.lower(tostring(
+			properties.name
+				or properties.custom_name
+				or properties.display_name
+				or itemData.display_name
+				or itemData.displayName
+				or itemData.name
+				or ""
+		))
+		return kind == "practice_dog"
+			or string.find(kind, "practice_dog", 1, true) ~= nil
+			or string.find(displayName, "practice dog", 1, true) ~= nil
+	end
+
 	local function clearList()
 		for _, child in ipairs(list:GetChildren()) do
 			if child:IsA("TextButton") then
@@ -679,7 +696,7 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 
 		local groupedPets = {}
 		for uniqueId, itemData in pairs(pets) do
-			if itemData and not isEgg(itemData) then
+			if itemData and not isEgg(itemData) and not isPracticeDog(itemData) then
 				local displayName = getDisplayName(itemData)
 				local form = getForm(itemData)
 				local key = displayName .. "|" .. form
