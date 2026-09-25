@@ -596,13 +596,19 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 
 	local function getForm(itemData)
 		local properties = itemData.properties or {}
-		if properties.mega_neon == true then
-			return "Mega NEON"
-		elseif properties.neon == true then
-			return "NEON"
+		if properties.mega_neon then
+			return "Mega"
+		elseif properties.neon then
+			return "Neon"
 		end
-		return "NORMAL"
+		return "Normal"
 	end
+
+	local formOrder = {
+		Mega = 1,
+		Neon = 2,
+		Normal = 3,
+	}
 
 	local function isEgg(itemData)
 		local kind = string.lower(tostring(itemData.kind or ""))
@@ -657,7 +663,12 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			table.insert(groups, group)
 		end
 		table.sort(groups, function(left, right)
-			return left.displayName .. left.form < right.displayName .. right.form
+			local leftOrder = formOrder[left.form] or 4
+			local rightOrder = formOrder[right.form] or 4
+			if leftOrder == rightOrder then
+				return left.displayName < right.displayName
+			end
+			return leftOrder < rightOrder
 		end)
 
 		for _, group in ipairs(groups) do
@@ -668,9 +679,7 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			button.BorderSizePixel = 0
 			button.Font = Enum.Font.SourceSansBold
-			local formLabel = group.form == "MEGA_NEON" and "Mega Neon"
-				or group.form == "NEON" and "Neon"
-				or "Normal"
+			local formLabel = group.form
 			button.Text = string.format("%s %s ×%d", formLabel, group.displayName, #group.uniqueIds)
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 16
