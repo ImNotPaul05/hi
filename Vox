@@ -663,7 +663,7 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		local kind = string.lower(tostring(itemData.kind or ""))
 		local finalKindToken = kind:match("[%w]+$")
 		local category = string.lower(tostring(itemData.category or ""))
-		return itemData.is_egg == true
+		return itemData.is_egg_ == true
 	end
 
 	local function clearList()
