@@ -644,6 +644,17 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			or category == "eggs"
 	end
 
+	local function removeEventPrefix(displayName)
+		local cleanedName = tostring(displayName):gsub("^[%a%s_%-]+%d%d%d%d[%s_%-]+", "")
+		return cleanedName:gsub("^%s+", ""):gsub("%s+$", "")
+	end
+
+	local function capitalizeWords(displayName)
+		return displayName:gsub("(%S+)", function(word)
+			return word:sub(1, 1):upper() .. word:sub(2):lower()
+		end)
+	end
+
 	local function getDisplayName(itemData)
 		local properties = itemData.properties or {}
 		local displayName = properties.name
@@ -652,12 +663,15 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			or itemData.display_name
 			or itemData.displayName
 			or itemData.name
-			or itemData.kind
-		return tostring(displayName or "Unknown egg")
-			:gsub("[_%-]", " ")
-			:gsub("(%S+)", function(word)
-				return word:sub(1, 1):upper() .. word:sub(2):lower()
-			end)
+		if displayName and displayName ~= "" then
+			local cleanedName = removeEventPrefix(displayName)
+			if cleanedName ~= "" then
+				return capitalizeWords(cleanedName)
+			end
+		end
+
+		local kind = tostring(itemData.kind or "Unknown egg")
+		return capitalizeWords(removeEventPrefix(kind:gsub("[_%-]", " ")))
 	end
 
 	local function clearList()
