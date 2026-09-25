@@ -634,13 +634,8 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 	local selectedGroups = {}
 
 	local function isEgg(itemData)
-		local kind = string.lower(tostring(itemData.kind or ""))
-		local category = string.lower(tostring(itemData.category or ""))
-		return itemData.is_egg == true
-			or kind == "egg"
-			or string.match(kind, "_egg$") ~= nil
-			or category == "egg"
-			or category == "eggs"
+		local kind = string.lower(tostring(itemData.kind or "")):gsub("[^%w]+", "_")
+		return kind == "egg" or string.find("_" .. kind .. "_", "_egg_", 1, true) ~= nil
 	end
 
 	local function cleanEggName(displayName)
