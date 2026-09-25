@@ -671,14 +671,9 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 				or itemData.name
 				or ""
 		))
-		local category = string.lower(tostring(itemData.category or ""))
-		return itemData.is_egg == true
-			or string.find(kind, "_egg", 1, true) ~= nil
-			or string.find(kind, "egg_", 1, true) ~= nil
-			or string.find(kind, "_egg_", 1, true) ~= nil
-			or string.find(displayName, "eggs", 1, true) ~= nil
+		
 	end
-
+	
 	local function clearList()
 		for _, child in ipairs(list:GetChildren()) do
 			if child:IsA("TextButton") then
