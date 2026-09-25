@@ -543,130 +543,127 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local script = Instance.new('LocalScript', PetInterface)
 
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local petPanel = script.Parent
-	local refreshButton = petPanel.Parent:WaitForChild("RefreshPet/Button")
-	local petList = Instance.new("ScrollingFrame")
-	petList.Name = "PetList"
-	petList.Parent = petPanel
-	petList.BackgroundTransparency = 1
-	petList.BorderSizePixel = 0
-	petList.Position = UDim2.fromOffset(8, 8)
-	petList.Size = UDim2.new(1, -16, 1, -16)
-	petList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	petList.CanvasSize = UDim2.new()
-	petList.ScrollBarThickness = 6
+	local Players = game:GetService("Players")
+	local localPlayer = Players.LocalPlayer
+	local panel = script.Parent
+	local refreshButton = panel.Parent:WaitForChild("RefreshPet/Button")
+	local addItemRemote = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AddItemToOffer")
+
+	local list = Instance.new("ScrollingFrame")
+	list.Name = "PetList"
+	list.Parent = panel
+	list.BackgroundTransparency = 1
+	list.BorderSizePixel = 0
+	list.Position = UDim2.fromOffset(8, 8)
+	list.Size = UDim2.new(1, -16, 1, -16)
+	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	list.CanvasSize = UDim2.new()
+	list.ScrollBarThickness = 6
 
 	local layout = Instance.new("UIListLayout")
-	layout.Parent = petList
-	layout.Padding = UDim.new(0, 4)
+	layout.Parent = list
+	layout.Padding = UDim.new(0, 5)
 	layout.SortOrder = Enum.SortOrder.Name
 
 	local successClientData, ClientData = pcall(function()
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 	end)
-	local petCatalog
-	local petCatalogModule = ReplicatedStorage:FindFirstChild("PetList", true)
-	if petCatalogModule and petCatalogModule:IsA("ModuleScript") then
-		pcall(function()
-			petCatalog = require(petCatalogModule)
-		end)
-	end
-	local displayNameCache = {}
+	local selectedButton
 
-	local function findCatalogDisplayName(value, petKind, visited, depth)
-		if type(value) ~= "table" or visited[value] or depth > 6 then
-			return nil
-		end
-
-		visited[value] = true
-		local directEntry = value[petKind]
-		if type(directEntry) == "string" then
-			return directEntry
-		elseif type(directEntry) == "table" then
-			return directEntry.display_name or directEntry.displayName or directEntry.name or directEntry.display or directEntry.label
-		end
-
-		for _, entry in pairs(value) do
-			if type(entry) == "table" then
-				if entry.kind == petKind or entry.id == petKind or entry.pet_kind == petKind then
-					local displayName = entry.display_name or entry.displayName or entry.name or entry.display or entry.label
-					if displayName then
-						return displayName
-					end
-				end
-
-				local displayName = findCatalogDisplayName(entry, petKind, visited, depth + 1)
-				if displayName then
-					return displayName
-				end
-			end
-		end
-	end
-
-	local function getPetDisplayName(itemData)
-		if type(itemData) ~= "table" then
-			return nil
-		end
-
-		local petKind = itemData.kind
-		if not petKind then
-			return itemData.display_name or itemData.displayName or itemData.name
-		end
-
-		if displayNameCache[petKind] then
-			return displayNameCache[petKind]
-		end
-
+	local function getDisplayName(itemData)
 		local displayName = itemData.display_name or itemData.displayName or itemData.name
-		if not displayName and petCatalog then
-			displayName = findCatalogDisplayName(petCatalog, petKind, {}, 0)
+		if displayName and displayName ~= "" then
+			return tostring(displayName)
 		end
 
-		displayName = displayName or petKind
-		displayNameCache[petKind] = displayName
-		return displayName
+		local kind = tostring(itemData.kind or "Unknown pet")
+		return kind:gsub("^%l", string.upper):gsub("[_%-]", " ")
 	end
 
-	local function refreshPets()
-		for _, child in petList:GetChildren() do
-			if child:IsA("TextLabel") then
+	local function getForm(itemData)
+		local properties = itemData.properties or {}
+		if properties.mega_neon == true then
+			return "MEGA NEON"
+		elseif properties.neon == true then
+			return "NEON"
+		end
+		return "NORMAL"
+	end
+
+	local function clearList()
+		for _, child in ipairs(list:GetChildren()) do
+			if child:IsA("TextButton") then
 				child:Destroy()
 			end
 		end
+		selectedButton = nil
+	end
 
+	local function refreshPets()
+		clearList()
 		if not successClientData or not ClientData then
 			return
 		end
 
 		local dataStore = ClientData.get_data()
-		local localPlayer = game:GetService("Players").LocalPlayer
 		local playerData = dataStore and (dataStore[localPlayer] or dataStore[localPlayer.Name])
 		local pets = playerData and playerData.inventory and playerData.inventory.pets
 		if not pets then
 			return
 		end
 
-		local petCounts = {}
-		for _, itemData in pairs(pets) do
-			local displayName = getPetDisplayName(itemData)
-			if displayName then
-				petCounts[displayName] = (petCounts[displayName] or 0) + 1
+		local groupedPets = {}
+		for uniqueId, itemData in pairs(pets) do
+			if itemData then
+				local displayName = getDisplayName(itemData)
+				local form = getForm(itemData)
+				local key = displayName .. "|" .. form
+				local group = groupedPets[key]
+				if not group then
+					group = {displayName = displayName, form = form, uniqueIds = {}}
+					groupedPets[key] = group
+				end
+				table.insert(group.uniqueIds, uniqueId)
 			end
 		end
 
-		for displayName, count in pairs(petCounts) do
-			local petLabel = Instance.new("TextLabel")
-			petLabel.Name = displayName
-			petLabel.Parent = petList
-			petLabel.Size = UDim2.new(1, -6, 0, 28)
-			petLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-			petLabel.BorderSizePixel = 0
-			petLabel.Font = Enum.Font.SourceSansBold
-			petLabel.Text = count > 1 and string.format("%s x%d", displayName, count) or displayName
-			petLabel.TextColor3 = Color3.new(1, 1, 1)
-			petLabel.TextSize = 17
+		local groups = {}
+		for _, group in pairs(groupedPets) do
+			table.insert(groups, group)
+		end
+		table.sort(groups, function(left, right)
+			return left.displayName .. left.form < right.displayName .. right.form
+		end)
 
-			Instance.new("UICorner", petLabel).CornerRadius = UDim.new(0, 6)
+		for _, group in ipairs(groups) do
+			local button = Instance.new("TextButton")
+			button.Name = group.displayName .. "_" .. group.form
+			button.Parent = list
+			button.Size = UDim2.new(1, -6, 0, 32)
+			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			button.BorderSizePixel = 0
+			button.Font = Enum.Font.SourceSansBold
+			button.Text = string.format("%dx %s (%s)", #group.uniqueIds, group.displayName, group.form)
+			button.TextColor3 = Color3.new(1, 1, 1)
+			button.TextSize = 16
+			button.TextXAlignment = Enum.TextXAlignment.Left
+			button.AutoButtonColor = true
+			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+
+			button.Activated:Connect(function()
+				if selectedButton then
+					selectedButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+				end
+				selectedButton = button
+				button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
+
+				for index = 1, math.min(#group.uniqueIds, 18) do
+					pcall(function()
+						addItemRemote:FireServer(group.uniqueIds[index])
+					end)
+				end
+				print("Selected pet:", button.Text)
+			end)
 		end
 	end
 
@@ -754,7 +751,6 @@ coroutine.wrap(EZWTW_fake_script)()
 local function VKIOV_fake_script() -- RefreshPetButton.RefreshpetScript 
 	local script = Instance.new('LocalScript', RefreshPetButton)
 
-	print("Hello world!")
 	
 end
 coroutine.wrap(VKIOV_fake_script)()
