@@ -530,17 +530,18 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 
 	local button = script.Parent
 	local circle = button:WaitForChild("Circle")
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local Players = game:GetService("Players")
 	local LocalPlayer = Players.LocalPlayer
 	local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local API = ReplicatedStorage:WaitForChild("API")
 	local tradeFunction = API:WaitForChild("TradeAPI/AcceptOrDeclineTradeRequest")
 	local acceptNegotiation = API:WaitForChild("TradeAPI/AcceptNegotiation")
 	local confirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
-	local framesToHide = {Dialog = true}
 	local autoAcceptEnabled = false
 	local runId = 0
+
+	framesToHide = {Dialog = true}
 
 	circle.Position = UDim2.new(0, 0, 0.012, 0)
 	circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
@@ -576,18 +577,18 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 				end
 			end)
 
-			task.spawn(function()
-				while autoAcceptEnabled and currentRunId == runId do
-					for _, gui in ipairs(PlayerGui:GetDescendants()) do
-						if gui:IsA("Frame") and framesToHide[gui.Name] and gui.Visible then
-							gui.Visible = false
-							print("Successfully hid frame: " .. gui:GetFullName())
-						end
+		task.spawn(function()
+			while autoAcceptEnabled and currentRunId == runId do
+				for _, gui in ipairs(PlayerGui:GetDescendants()) do
+					if gui:IsA("Frame") and framesToHide[gui.Name] and gui.Visible then
+						gui.Visible = false
+						print("Successfully hid frame: " .. gui:GetFullName())
 					end
-
-					task.wait(2)
 				end
-			end)
+
+				task.wait(2)
+			end
+		end)
 		else
 			circle.Position = UDim2.new(0, 0, 0.012, 0)
 			circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
