@@ -616,6 +616,14 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		Normal = 3,
 	}
 
+	local function isPracticeDog(itemData)
+		local kind = string.lower(tostring(itemData.kind or ""))
+		local name = string.lower(tostring(itemData.name or ""))
+		return kind == "practice_dog"
+			or kind == "practice dog"
+			or name == "practice dog"
+	end
+
 	local function isEgg(itemData)
 		local kind = string.lower(tostring(itemData.kind or ""))
 		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
@@ -651,7 +659,7 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 
 		local groupedPets = {}
 		for uniqueId, itemData in pairs(pets) do
-			if itemData and not isEgg(itemData) then
+			if itemData and not isPracticeDog(itemData) and not isEgg(itemData) then
 				local displayName = getDisplayName(itemData)
 				local form = getForm(itemData)
 				local key = displayName .. "|" .. form
