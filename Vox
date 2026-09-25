@@ -633,7 +633,7 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		local cleanedName = tostring(displayName):gsub("^[%a%s_%-]+%d%d%d%d[%s_%-]+", "")
 		return cleanedName:gsub("^%s+", ""):gsub("%s+$", "")
 	end
-	
+
 	local function capitalizeWords(displayName)
 		return displayName:gsub("(%S+)", function(word)
 			return word:sub(1, 1):upper() .. word:sub(2):lower()
@@ -661,13 +661,11 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 
 	local function isEgg(itemData)
 		local kind = string.lower(tostring(itemData.kind or ""))
-		local finalKindToken = kind:match("[%w]+$")
 		local category = string.lower(tostring(itemData.category or ""))
 		return itemData.is_egg == true
-			or finalKindToken == "egg"
+			or string.find(kind, "egg", 1, true) ~= nil
+			or category == "egg"
 			or category == "eggs"
-			or category == "egg_"
-			or category == "Egg_"
 	end
 
 	local function clearList()
