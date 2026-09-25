@@ -50,7 +50,6 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 	local Players = game:GetService("Players")
 	local LocalPlayer = Players.LocalPlayer
 	local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-	local Backpack = LocalPlayer:WaitForChild("Backpack")
 
 	local container = script.Parent:WaitForChild("PetScrollingFrame")
 	local listLayout = container:WaitForChild("UIListLayout")
@@ -65,35 +64,33 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 
 		local foundPets = {}
 
-		-- 1. Scan PlayerGui for text elements matching inventory/pet categories
+		-- Scan PlayerGui exclusively for pet inventory elements
 		for _, gui in ipairs(PlayerGui:GetDescendants()) do
 			if gui:IsA("TextLabel") and gui.Text ~= "" and #gui.Text > 1 then
-				local parentName = gui.Parent.Name:lower()
-				if parentName:find("item") or parentName:find("pet") or parentName:find("name") or parentName:find("slot") then
-					if not foundPets[gui.Text] then
-						foundPets[gui.Text] = true
+				local fullName = gui:GetFullName():lower()
+				
+				-- Ensure it belongs to a pet section and excludes tools/food/toys
+				if fullName:find("pet") and not fullName:find("tool") and not fullName:find("food") and not fullName:find("toy") then
+					local text = gui.Text
+					
+					-- Filter out common static UI text elements/headers
+					local ignoreList = {"pets", "inventory", "equipped", "favorite", "search", "name"}
+					local isIgnored = false
+					for _, word in ipairs(ignoreList) do
+						if text:lower() == word then
+							isIgnored = true
+							break
+						end
+					end
+					
+					if not isIgnored and not foundPets[text] then
+						foundPets[text] = true
 					end
 				end
 			end
 		end
 
-		-- 2. Scan Backpack for tools/pets
-		for _, item in ipairs(Backpack:GetChildren()) do
-			if item:IsA("Tool") and not foundPets[item.Name] then
-				foundPets[item.Name] = true
-			end
-		end
-
-		-- 3. Scan Character for equipped items
-		if LocalPlayer.Character then
-			for _, item in ipairs(LocalPlayer.Character:GetChildren()) do
-				if item:IsA("Tool") and not foundPets[item.Name] then
-					foundPets[item.Name] = true
-				end
-			end
-		end
-
-		-- Create visual text labels inside the scrolling frame
+		-- Create visual text labels for each found pet
 		for petName, _ in pairs(foundPets) do
 			local textLabel = Instance.new("TextLabel")
 			textLabel.Size = UDim2.new(1, 0, 0, 30)
@@ -110,10 +107,16 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 		container.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
 	end
 
-	-- Run initially and update when backpack updates
+	-- Run initially
 	task.spawn(updatePetList)
-	Backpack.ChildAdded:Connect(updatePetList)
-	Backpack.ChildRemoved:Connect(updatePetList)
+	
+	-- Optional periodic refresh to catch newly opened menus or loaded pets
+	task.spawn(function()
+		while true do
+			task.wait(3)
+			pcall(updatePetList)
+		end
+	end)
 end
 
 coroutine.wrap(SDDB_fake_script)()
