@@ -571,7 +571,13 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local selectedButton
 
 	local function getDisplayName(itemData)
-		local displayName = itemData.display_name or itemData.displayName or itemData.name
+		local properties = itemData.properties or {}
+		local displayName = properties.name
+			or properties.custom_name
+			or properties.display_name
+			or itemData.display_name
+			or itemData.displayName
+			or itemData.name
 		if displayName and displayName ~= "" then
 			return tostring(displayName)
 		end
