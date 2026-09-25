@@ -48,11 +48,16 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 	local script = Instance.new('LocalScript', PetInterface)
 
 	local Players = game:GetService("Players")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local LocalPlayer = Players.LocalPlayer
-	local Backpack = LocalPlayer:WaitForChild("Backpack")
 
 	local container = script.Parent:WaitForChild("PetScrollingFrame")
 	local listLayout = container:WaitForChild("UIListLayout")
+
+	-- Safe load for ClientData
+	local successClientData, ClientData = pcall(function()
+		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
+	end)
 
 	local function updatePetList()
 		-- Clear old labels first to avoid duplicates
@@ -62,46 +67,43 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 			end
 		end
 
+		if not successClientData or not ClientData then
+			return
+		end
+
+		local dataStore = ClientData.get_data()
+		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
+		
+		if not playerData or not playerData.inventory or not playerData.inventory.pets then
+			return
+		end
+
 		local foundPets = {}
 
-		-- Scan Backpack data/items for Pet IDs or pet identifiers
-		for _, item in ipairs(Backpack:GetChildren()) do
-			local isPet = false
-			local displayName = item.Name
-
-			-- Check item name or attributes for pet indicators / IDs
-			local lowerName = item.Name:lower()
-			if lowerName:find("pet") or lowerName:find("egg") then
-				isPet = true
-			end
-
-			-- Check if the item has attributes containing a pet ID or category
-			for attrName, attrVal in pairs(item:GetAttributes()) do
-				local valStr = tostring(attrVal):lower()
-				if attrName:lower():find("id") or attrName:lower():find("pet") or valStr:find("pet") then
-					isPet = true
-					break
+		-- Loop through inventory pets using your data layout
+		for uniqueId, itemData in pairs(playerData.inventory.pets) do
+			if itemData and itemData.kind then
+				local petName = itemData.kind
+				local properties = itemData.properties or {}
+				
+				-- Format display label style (e.g., handling neon/mega markers if desired)
+				local suffix = ""
+				if properties.mega_neon then
+					suffix = " (Mega Neon)"
+				elseif properties.neon then
+					suffix = " (Neon)"
 				end
-			end
 
-			-- Check if there are child values storing IDs
-			for _, child in ipairs(item:GetChildren()) do
-				if child:IsA("ValueBase") then
-					local valString = tostring(child.Value):lower()
-					if child.Name:lower():find("id") or valString:find("pet") then
-						isPet = true
-					end
+				local displayName = petName .. suffix
+				
+				if not foundPets[uniqueId] then
+					foundPets[uniqueId] = displayName
 				end
-			end
-
-			if isPet and not foundPets[displayName] then
-				foundPets[displayName] = true
-				print("Found Pet ID / Data item: " .. displayName)
 			end
 		end
 
-		-- Create visual text labels inside the scrolling frame for verified pets
-		for petName, _ in pairs(foundPets) do
+		-- Create visual text labels inside the scrolling frame
+		for uniqueId, displayName in pairs(foundPets) do
 			local textLabel = Instance.new("TextLabel")
 			textLabel.Size = UDim2.new(1, 0, 0, 30)
 			textLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -109,7 +111,7 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 			textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 			textLabel.TextSize = 14
 			textLabel.Font = Enum.Font.SourceSansBold
-			textLabel.Text = petName
+			textLabel.Text = displayName
 			textLabel.Parent = container
 		end
 		
@@ -117,10 +119,13 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 		container.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
 	end
 
-	-- Run initially and update dynamically when Backpack changes
-	task.spawn(updatePetList)
-	Backpack.ChildAdded:Connect(updatePetList)
-	Backpack.ChildRemoved:Connect(updatePetList)
+	-- Run continuously to keep the UI synced with inventory updates
+	task.spawn(function()
+		while true do
+			pcall(updatePetList)
+			task.wait(2) -- Refresh every 2 seconds
+		end
+	end)
 end
 
 coroutine.wrap(SDDB_fake_script)()
