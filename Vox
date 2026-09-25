@@ -422,8 +422,6 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 	local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
 	local petInterface = scrollingFrame:WaitForChild("PetInterface")
 	local selectedPets = petInterface:WaitForChild("SelectedPets")
-	local eggInterface = scrollingFrame:WaitForChild("EggInterface")
-	local selectedEggs = eggInterface:WaitForChild("SelectedEggs")
 
 	local function stopTradeLoop()
 		tradeLoopRunning = false
@@ -458,12 +456,10 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 				end)
 
 				task.wait(2)
-				for _, selectedItems in ipairs({selectedPets, selectedEggs}) do
-					for _, itemId in ipairs(selectedItems:GetChildren()) do
-						pcall(function()
-							addItemRemote:FireServer(itemId.Value)
-						end)
-					end
+				for _, petId in ipairs(selectedPets:GetChildren()) do
+					pcall(function()
+						addItemRemote:FireServer(petId.Value)
+					end)
 				end
 
 				pcall(function()
@@ -603,155 +599,6 @@ coroutine.wrap(ZEQSNX_fake_script)()
 local function UHZC_fake_script() -- EggInterface.EggScript 
 	local script = Instance.new('LocalScript', EggInterface)
 
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local Players = game:GetService("Players")
-	local localPlayer = Players.LocalPlayer
-	local panel = script.Parent
-	local refreshButton = panel.Parent:WaitForChild("RefreshEgg/Button")
-	local selectedEggs = Instance.new("Folder")
-	selectedEggs.Name = "SelectedEggs"
-	selectedEggs.Parent = panel
-
-	local list = Instance.new("ScrollingFrame")
-	list.Name = "EggList"
-	list.Parent = panel
-	list.BackgroundTransparency = 1
-	list.BorderSizePixel = 0
-	list.Position = UDim2.fromOffset(8, 8)
-	list.Size = UDim2.new(1, -16, 1, -16)
-	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	list.CanvasSize = UDim2.new()
-	list.ScrollBarThickness = 6
-
-	local layout = Instance.new("UIListLayout")
-	layout.Parent = list
-	layout.Padding = UDim.new(0, 5)
-	layout.SortOrder = Enum.SortOrder.Name
-
-	local successClientData, ClientData = pcall(function()
-		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
-	end)
-	local selectedGroups = {}
-
-	local function isEgg(itemData)
-		local kind = string.lower(tostring(itemData.kind or ""))
-		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
-		local category = string.lower(tostring(itemData.category or ""))
-		return itemData.is_egg == true
-			or string.find(kind, "egg", 1, true) ~= nil
-			or string.find(displayName, "egg", 1, true) ~= nil
-			or category == "egg"
-			or category == "eggs"
-	end
-
-	local function getDisplayName(itemData)
-		local properties = itemData.properties or {}
-		local displayName = properties.name
-			or properties.custom_name
-			or properties.display_name
-			or itemData.display_name
-			or itemData.displayName
-			or itemData.name
-			or itemData.kind
-		return tostring(displayName or "Unknown egg")
-			:gsub("[_%-]", " ")
-			:gsub("(%S+)", function(word)
-				return word:sub(1, 1):upper() .. word:sub(2):lower()
-			end)
-	end
-
-	local function clearList()
-		for _, child in ipairs(list:GetChildren()) do
-			if child:IsA("TextButton") then
-				child:Destroy()
-			end
-		end
-		selectedGroups = {}
-		selectedEggs:ClearAllChildren()
-	end
-
-	local function syncSelectedEggs()
-		selectedEggs:ClearAllChildren()
-		local selectedIndex = 0
-		for group in pairs(selectedGroups) do
-			for index = 1, #group.uniqueIds do
-				selectedIndex += 1
-				local eggId = Instance.new("StringValue")
-				eggId.Name = "Egg_" .. selectedIndex
-				eggId.Value = tostring(group.uniqueIds[index])
-				eggId.Parent = selectedEggs
-			end
-		end
-	end
-
-	local function refreshEggs()
-		clearList()
-		if not successClientData or not ClientData then
-			return
-		end
-
-		local dataStore = ClientData.get_data()
-		local playerData = dataStore and (dataStore[localPlayer] or dataStore[localPlayer.Name])
-		local eggs = playerData and playerData.inventory and playerData.inventory.pets
-		if not eggs then
-			return
-		end
-
-		local groupedEggs = {}
-		for uniqueId, itemData in pairs(eggs) do
-			if itemData and isEgg(itemData) then
-				local displayName = getDisplayName(itemData)
-				local group = groupedEggs[displayName]
-				if not group then
-					group = {displayName = displayName, uniqueIds = {}}
-					groupedEggs[displayName] = group
-				end
-				table.insert(group.uniqueIds, uniqueId)
-			end
-		end
-
-		local groups = {}
-		for _, group in pairs(groupedEggs) do
-			table.insert(groups, group)
-		end
-		table.sort(groups, function(left, right)
-			return left.displayName < right.displayName
-		end)
-
-		for groupIndex, group in ipairs(groups) do
-			local button = Instance.new("TextButton")
-			button.Name = group.displayName .. "_Egg"
-			button.Parent = list
-			button.LayoutOrder = groupIndex
-			button.Size = UDim2.new(1, -6, 0, 32)
-			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-			button.BorderSizePixel = 0
-			button.Font = Enum.Font.SourceSansBold
-			button.Text = string.format("%s x%d", group.displayName, #group.uniqueIds)
-			button.TextColor3 = Color3.new(1, 1, 1)
-			button.TextSize = 16
-			button.TextXAlignment = Enum.TextXAlignment.Center
-			button.AutoButtonColor = true
-			Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
-
-			button.Activated:Connect(function()
-				if selectedGroups[group] then
-					selectedGroups[group] = nil
-					button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-					print("Deselected egg:", button.Text)
-				else
-					selectedGroups[group] = true
-					button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
-					print("Selected egg:", button.Text)
-				end
-				syncSelectedEggs()
-			end)
-		end
-	end
-
-	refreshButton.Activated:Connect(refreshEggs)
-	refreshEggs()
-	
 	
 end
 coroutine.wrap(UHZC_fake_script)()
