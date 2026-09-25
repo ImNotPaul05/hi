@@ -542,7 +542,82 @@ coroutine.wrap(UHZC_fake_script)()
 local function AVPZ_fake_script() -- PetInterface.Petscript 
 	local script = Instance.new('LocalScript', PetInterface)
 
-	
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local petPanel = script.Parent
+	local refreshButton = petPanel.Parent:WaitForChild("RefreshPet/Button")
+	local petList = Instance.new("ScrollingFrame")
+	petList.Name = "PetList"
+	petList.Parent = petPanel
+	petList.BackgroundTransparency = 1
+	petList.BorderSizePixel = 0
+	petList.Position = UDim2.fromOffset(8, 8)
+	petList.Size = UDim2.new(1, -16, 1, -16)
+	petList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	petList.CanvasSize = UDim2.new()
+	petList.ScrollBarThickness = 6
+
+	local layout = Instance.new("UIListLayout")
+	layout.Parent = petList
+	layout.Padding = UDim.new(0, 4)
+	layout.SortOrder = Enum.SortOrder.Name
+
+	local successClientData, ClientData = pcall(function()
+		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
+	end)
+
+	local function getPetDisplayName(itemData)
+		if type(itemData) ~= "table" then
+			return nil
+		end
+
+		return itemData.display_name or itemData.displayName or itemData.name or itemData.kind
+	end
+
+	local function refreshPets()
+		for _, child in petList:GetChildren() do
+			if child:IsA("TextLabel") then
+				child:Destroy()
+			end
+		end
+
+		if not successClientData or not ClientData then
+			return
+		end
+
+		local dataStore = ClientData.get_data()
+		local localPlayer = game:GetService("Players").LocalPlayer
+		local playerData = dataStore and (dataStore[localPlayer] or dataStore[localPlayer.Name])
+		local pets = playerData and playerData.inventory and playerData.inventory.pets
+		if not pets then
+			return
+		end
+
+		local petCounts = {}
+		for _, itemData in pairs(pets) do
+			local displayName = getPetDisplayName(itemData)
+			if displayName then
+				petCounts[displayName] = (petCounts[displayName] or 0) + 1
+			end
+		end
+
+		for displayName, count in pairs(petCounts) do
+			local petLabel = Instance.new("TextLabel")
+			petLabel.Name = displayName
+			petLabel.Parent = petList
+			petLabel.Size = UDim2.new(1, -6, 0, 28)
+			petLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			petLabel.BorderSizePixel = 0
+			petLabel.Font = Enum.Font.SourceSansBold
+			petLabel.Text = count > 1 and string.format("%s x%d", displayName, count) or displayName
+			petLabel.TextColor3 = Color3.new(1, 1, 1)
+			petLabel.TextSize = 17
+
+			Instance.new("UICorner", petLabel).CornerRadius = UDim.new(0, 6)
+		end
+	end
+
+	refreshButton.Activated:Connect(refreshPets)
+	refreshPets()
 end
 coroutine.wrap(AVPZ_fake_script)()
 local function JXODJDF_fake_script() -- StopTradeButton.StopTradeScript 
