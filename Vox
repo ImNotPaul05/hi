@@ -563,7 +563,7 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local layout = Instance.new("UIListLayout")
 	layout.Parent = list
 	layout.Padding = UDim.new(0, 5)
-	layout.SortOrder = Enum.SortOrder.Name
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
 
 	local successClientData, ClientData = pcall(function()
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
@@ -671,10 +671,11 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			return leftOrder < rightOrder
 		end)
 
-		for _, group in ipairs(groups) do
+		for groupIndex, group in ipairs(groups) do
 			local button = Instance.new("TextButton")
 			button.Name = group.displayName .. "_" .. group.form
 			button.Parent = list
+			button.LayoutOrder = (formOrder[group.form] or 4) * 100000 + groupIndex
 			button.Size = UDim2.new(1, -6, 0, 32)
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			button.BorderSizePixel = 0
