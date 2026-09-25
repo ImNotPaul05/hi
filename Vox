@@ -634,30 +634,14 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 	local selectedGroups = {}
 
 	local function isEgg(itemData)
-		local kind = string.lower(tostring(itemData.kind or "")):gsub("[%s%-]+", "_")
+		local kind = string.lower(tostring(itemData.kind or ""))
+		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
 		local category = string.lower(tostring(itemData.category or ""))
-		if category == "pet" or category == "pets" then
-			return false
-		end
-
 		return itemData.is_egg == true
+			or string.find(kind, "egg", 1, true) ~= nil
+			or string.find(displayName, "egg", 1, true) ~= nil
 			or category == "egg"
 			or category == "eggs"
-			or string.find(kind, "egg", 1, true) ~= nil
-	end
-
-	local function cleanEggName(displayName)
-		local cleanedName = tostring(displayName)
-			:gsub("[_%-]", " ")
-			:gsub("%s+%d%d%d%d%s*", " ")
-			:gsub("([Ee][Gg][Gg])%s+[Ee][Gg][Gg]$", "%1")
-		return cleanedName:gsub("^%s+", ""):gsub("%s+$", "")
-	end
-
-	local function capitalizeWords(displayName)
-		return displayName:gsub("(%S+)", function(word)
-			return word:sub(1, 1):upper() .. word:sub(2):lower()
-		end)
 	end
 
 	local function getDisplayName(itemData)
@@ -668,15 +652,12 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			or itemData.display_name
 			or itemData.displayName
 			or itemData.name
-		if displayName and displayName ~= "" then
-			local cleanedName = cleanEggName(displayName)
-			if cleanedName ~= "" then
-				return capitalizeWords(cleanedName)
-			end
-		end
-
-		local kind = tostring(itemData.kind or "Unknown egg")
-		return capitalizeWords(cleanEggName(kind))
+			or itemData.kind
+		return tostring(displayName or "Unknown egg")
+			:gsub("[_%-]", " ")
+			:gsub("(%S+)", function(word)
+				return word:sub(1, 1):upper() .. word:sub(2):lower()
+			end)
 	end
 
 	local function clearList()
@@ -746,7 +727,7 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			button.BorderSizePixel = 0
 			button.Font = Enum.Font.SourceSansBold
-			button.Text = string.format("%s  ×%d", group.displayName, #group.uniqueIds)
+			button.Text = string.format("%s x%d", group.displayName, #group.uniqueIds)
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 16
 			button.TextXAlignment = Enum.TextXAlignment.Center
