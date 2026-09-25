@@ -570,6 +570,11 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	end)
 	local selectedButton
 
+	local function removeEventPrefix(displayName)
+		local cleanedName = tostring(displayName):gsub("^[%a%s_%-]+%d%d%d%d[%s_%-]+", "")
+		return cleanedName:gsub("^%s+", ""):gsub("%s+$", "")
+	end
+
 	local function getDisplayName(itemData)
 		local properties = itemData.properties or {}
 		local displayName = properties.name
@@ -579,11 +584,14 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			or itemData.displayName
 			or itemData.name
 		if displayName and displayName ~= "" then
-			return tostring(displayName)
+			local cleanedName = removeEventPrefix(displayName)
+			if cleanedName ~= "" then
+				return cleanedName
+			end
 		end
 
 		local kind = tostring(itemData.kind or "Unknown pet")
-		return kind:gsub("^%l", string.upper):gsub("[_%-]", " ")
+		return removeEventPrefix(kind:gsub("^%l", string.upper):gsub("[_%-]", " "))
 	end
 
 	local function getForm(itemData)
