@@ -59,6 +59,15 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
 	end)
 
+	-- Helper function to convert internal keys (e.g. "easter_bunny") into proper display names ("Easter Bunny")
+	local function formatDisplayName(kind)
+		local words = {}
+		for word in kind:gmatch("[^_]+") do
+			table.insert(words, word:sub(1, 1):upper() .. word:sub(2):lower())
+		end
+		return table.concat(words, " ")
+	end
+
 	local function updatePetList()
 		-- Clear old labels first to avoid duplicates
 		for _, child in ipairs(container:GetChildren()) do
@@ -80,10 +89,10 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 
 		local petCounts = {}
 
-		-- Aggregate counts by pet kind and properties
+		-- Aggregate counts by formatted pet display name and properties
 		for uniqueId, itemData in pairs(playerData.inventory.pets) do
 			if itemData and itemData.kind then
-				local petName = itemData.kind
+				local formattedName = formatDisplayName(itemData.kind)
 				local properties = itemData.properties or {}
 				
 				local suffix = ""
@@ -93,14 +102,14 @@ local function SDDB_fake_script() -- PetInterface.Petscript
 					suffix = " (Neon)"
 				end
 
-				local displayName = petName .. suffix
+				local displayName = formattedName .. suffix
 				
-				-- Count occurrences
+				-- Count occurrences grouped together
 				petCounts[displayName] = (petCounts[displayName] or 0) + 1
 			end
 		end
 
-		-- Create visual text labels showing the total count per pet type
+		-- Create visual text labels showing the total count per pet display name
 		for displayName, count in pairs(petCounts) do
 			local textLabel = Instance.new("TextLabel")
 			textLabel.Size = UDim2.new(1, 0, 0, 30)
