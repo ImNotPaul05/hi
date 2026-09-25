@@ -603,10 +603,11 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 	local Players = game:GetService("Players")
 	local localPlayer = Players.LocalPlayer
 	local panel = script.Parent
-	local refreshButton = panel.Parent:WaitForChild("RefreshEgg/Button")
-	local selectedEggs = Instance.new("Folder")
-	selectedEggs.Name = "SelectedEggs"
-	selectedEggs.Parent = panel
+	local refreshButton = panel.Parent:WaitForChild("RefreshPet/Button")
+	local addItemRemote = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AddItemToOffer")
+	local selectedPets = Instance.new("Folder")
+	selectedPets.Name = "SelectedPets"
+	selectedPets.Parent = panel
 
 	local list = Instance.new("ScrollingFrame")
 	list.Name = "EggList"
@@ -659,11 +660,21 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		return capitalizeWords(removeEventPrefix(kind:gsub("[_%-]", " ")))
 	end
 
-	local function isEgg(itemData)
+	local function isPracticeDog(itemData)
+		local properties = itemData.properties or {}
 		local kind = string.lower(tostring(itemData.kind or ""))
-		local finalKindToken = kind:match("[%w]+$")
-		local category = string.lower(tostring(itemData.category or ""))
-		return itemData.is_egg_ == true
+		local displayName = string.lower(tostring(
+			properties.name
+				or properties.custom_name
+				or properties.display_name
+				or itemData.display_name
+				or itemData.displayName
+				or itemData.name
+				or ""
+		))
+		return kind == "practice_dog"
+			or string.find(kind, "practice_dog", 1, true) ~= nil
+			or string.find(displayName, "practice dog", 1, true) ~= nil
 	end
 
 	local function clearList()
@@ -673,24 +684,24 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			end
 		end
 		selectedGroups = {}
-		selectedEggs:ClearAllChildren()
+		selectedPets:ClearAllChildren()
 	end
 
-	local function syncSelectedEggs()
-		selectedEggs:ClearAllChildren()
+	local function syncSelectedPets()
+		selectedPets:ClearAllChildren()
 		local selectedIndex = 0
 		for group in pairs(selectedGroups) do
 			for index = 1, math.min(#group.uniqueIds, 18) do
 				selectedIndex += 1
-				local eggId = Instance.new("StringValue")
-				eggId.Name = "Egg_" .. selectedIndex
-				eggId.Value = tostring(group.uniqueIds[index])
-				eggId.Parent = selectedEggs
+				local petId = Instance.new("StringValue")
+				petId.Name = "Pet_" .. selectedIndex
+				petId.Value = tostring(group.uniqueIds[index])
+				petId.Parent = selectedPets
 			end
 		end
 	end
 
-	local function refreshEggs()
+	local function refreshPets()
 		clearList()
 		if not successClientData or not ClientData then
 			return
@@ -703,37 +714,45 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			return
 		end
 
-		local groupedEggs = {}
+		local groupedPets = {}
 		for uniqueId, itemData in pairs(pets) do
-			if itemData and isEgg(itemData) then
+			if itemData and not isEgg(itemData) and not isPracticeDog(itemData) then
 				local displayName = getDisplayName(itemData)
-				local group = groupedEggs[displayName]
+				local form = getForm(itemData)
+				local key = displayName .. "|" .. form
+				local group = groupedPets[key]
 				if not group then
-					group = {displayName = displayName, uniqueIds = {}}
-					groupedEggs[displayName] = group
+					group = {displayName = displayName, form = form, uniqueIds = {}}
+					groupedPets[key] = group
 				end
 				table.insert(group.uniqueIds, uniqueId)
 			end
 		end
 
 		local groups = {}
-		for _, group in pairs(groupedEggs) do
+		for _, group in pairs(groupedPets) do
 			table.insert(groups, group)
 		end
 		table.sort(groups, function(left, right)
-			return left.displayName < right.displayName
+			local leftOrder = formOrder[left.form] or 4
+			local rightOrder = formOrder[right.form] or 4
+			if leftOrder == rightOrder then
+				return left.displayName < right.displayName
+			end
+			return leftOrder < rightOrder
 		end)
 
 		for groupIndex, group in ipairs(groups) do
 			local button = Instance.new("TextButton")
-			button.Name = group.displayName
+			button.Name = group.displayName .. "_" .. group.form
 			button.Parent = list
-			button.LayoutOrder = groupIndex
+			button.LayoutOrder = (formOrder[group.form] or 4) * 100000 + groupIndex
 			button.Size = UDim2.new(1, -6, 0, 32)
 			button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			button.BorderSizePixel = 0
 			button.Font = Enum.Font.SourceSansBold
-			button.Text = string.format("%s ×%d", group.displayName, #group.uniqueIds)
+			local formLabel = group.form
+			button.Text = string.format("%s %s ×%d", formLabel, group.displayName, #group.uniqueIds)
 			button.TextColor3 = Color3.new(1, 1, 1)
 			button.TextSize = 16
 			button.TextXAlignment = Enum.TextXAlignment.Center
@@ -744,13 +763,13 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 				if selectedGroups[group] then
 					selectedGroups[group] = nil
 					button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-					print("Deselected egg:", button.Text)
+					print("Deselected pet:", button.Text)
 				else
 					selectedGroups[group] = true
 					button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
-					print("Selected egg:", button.Text)
+					print("Selected pet:", button.Text)
 				end
-				syncSelectedEggs()
+				syncSelectedPets()
 			end)
 		end
 	end
