@@ -597,11 +597,11 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local function getForm(itemData)
 		local properties = itemData.properties or {}
 		if properties.mega_neon == true then
-			return "MEGA NEON"
+			return "Mega"
 		elseif properties.neon == true then
-			return "NEON"
+			return "Neon"
 		end
-		return "NORMAL"
+		return "Normal"
 	end
 
 	local function isEgg(itemData)
