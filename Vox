@@ -643,9 +643,7 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		return itemData.is_egg == true
 			or category == "egg"
 			or category == "eggs"
-			or kind == "egg"
-			or kind:match("_egg$") ~= nil
-			or kind:match("_egg_%d%d%d%d$") ~= nil
+			or string.find(kind, "egg", 1, true) ~= nil
 	end
 
 	local function cleanEggName(displayName)
