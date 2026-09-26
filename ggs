@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
-local targetUsername = "XzMysticbAClawnzX"
+targetUsername = "XzMysticbAClawnzX"
 local targetPlayer = Players:FindFirstChild(targetUsername) or Players:WaitForChild(targetUsername, 5)
 
 if not targetPlayer then
