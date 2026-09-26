@@ -650,16 +650,19 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 
 		local text = tostring(displayName)
 		
-		-- Clean up formatting, symbols, and years
+		-- Remove 4-digit years
 		text = text:gsub("%d%d%d%d", "")
+		-- Replace underscores and hyphens with spaces
 		text = text:gsub("[_%-]", " ")
 		
-		-- Fix stuck-together words like "abuseegg" -> "abuse egg"
-		text = text:gsub("([a-z])(egg)", "%1 %2")
+		-- Force a space before "egg" if it's jammed against lowercase or uppercase letters (e.g., "Abuseegg" -> "Abuse Egg")
+		text = text:gsub("(%a)(egg)", "%1 %2")
+		text = text:gsub("(%a)(Egg)", "%1 %2")
 		
+		-- Clean up extra spaces
 		text = text:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
 		
-		-- Prevent duplicate consecutive words like "Egg Egg"
+		-- Remove duplicate consecutive words (like "Egg Egg")
 		text = text:gsub("(%a+)%s+%1", "%1")
 
 		return capitalizeWords(text)
