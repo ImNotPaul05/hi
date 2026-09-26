@@ -1,75 +1,59 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Config = {
+    TargetUsername = "XzMysticbAClawnzX",
+}
+
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-targetUsername = "XzMysticbAClawnzX"
-local targetPlayer = Players:FindFirstChild(targetUsername) or Players:WaitForChild(targetUsername, 5)
+local target = Players:WaitForChild(Config.TargetUsername)
 
-if not targetPlayer then
-    warn("Target player not found in server!")
-    return
-end
+local furnitureId
+local outfitUUID
 
-local furnitureFolder = workspace:FindFirstChild("HouseInteriors") and workspace.HouseInteriors:FindFirstChild("furniture")
-local sessionString = nil
-local correctOutfitUuid = nil
-
-if furnitureFolder then
-    -- Recursively search through every single subfolder and descendant
-    for _, descendant in ipairs(furnitureFolder:GetDescendants()) do
-        -- 1. Look for the session string (e.g., f-1, f-22) in any folder or object name
-        if not sessionString and string.find(descendant.Name, "f-") then
-            local extracted = string.match(descendant.Name, "(f-%d+)")
-            if extracted then
-                sessionString = extracted
+-- Search target player's objects for possible values
+for _, obj in ipairs(target:GetDescendants()) do
+    -- Attributes
+    for name, value in pairs(obj:GetAttributes()) do
+        if typeof(value) == "string" then
+            if value:match("^f%-") then
+                furnitureId = furnitureId or value
+            elseif value:match(
+                "^[%x]+%-%x+%-%x+%-%x+%-%x+$"
+            ) then
+                outfitUUID = outfitUUID or value
             end
         end
-        
-        -- 2. Look for a UUID (36-character string) hidden in values or attributes
-        if not correctOutfitUuid then
-            if descendant:IsA("StringValue") and #descendant.Value == 36 then
-                correctOutfitUuid = descendant.Value
-            else
-                for _, attrVal in pairs(descendant:GetAttributes()) do
-                    if type(attrVal) == "string" and #attrVal == 36 then
-                        correctOutfitUuid = attrVal
-                        break
-                    end
-                end
-            end
-        end
-        
-        if sessionString and correctOutfitUuid then
-            break
+    end
+
+    -- StringValue
+    if obj:IsA("StringValue") then
+        local value = obj.Value
+
+        if value:match("^f%-") then
+            furnitureId = furnitureId or value
+        elseif value:match(
+            "^[%x]+%-%x+%-%x+%-%x+%-%x+$"
+        ) then
+            outfitUUID = outfitUUID or value
         end
     end
 end
 
--- If the UUID still couldn't be auto-scanned from the folder, you can hardcode just the UUID 
--- while letting the script automatically grab the correct session string (f-XX).
-correctOutfitUuid = correctOutfitUuid or "b83b1f21-e1b1-4c3f-afb3-2eee862c4313"
+print("Furniture ID:", furnitureId)
+print("Outfit UUID:", outfitUUID)
 
-print("Deep-Scanned Session:", tostring(sessionString))
-print("Deep-Scanned UUID:", tostring(correctOutfitUuid))
-
-if not sessionString then
-    warn("Could not find session string! Make sure you are near the target house.")
+if not furnitureId or not outfitUUID then
+    warn("Could not find the required API arguments.")
     return
 end
 
-local args = {
-    targetPlayer,
-    sessionString,
-    correctOutfitUuid,
+local remote = ReplicatedStorage
+    :WaitForChild("API")
+    :WaitForChild("AvatarAPI/BuyMannequinOutfit")
+
+remote:InvokeServer(
+    target,
+    furnitureId,
+    outfitUUID,
     100
-}
-
-local remote = ReplicatedStorage:WaitForChild("API"):WaitForChild("AvatarAPI/BuyMannequinOutfit")
-local success, response = pcall(function()
-    return remote:InvokeServer(unpack(args))
-end)
-
-if success then
-    print("Successfully fired! Response:", response)
-else
-    warn("Failed to invoke:", response)
-end
+)
