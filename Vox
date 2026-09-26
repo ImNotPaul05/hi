@@ -1,4 +1,4 @@
--- 5:40am
+-- Gemini
 -- Version: 3.2
 
 -- Instances:
@@ -597,7 +597,7 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 end
 coroutine.wrap(ZEQSNX_fake_script)()
 
--- UPDATED EGG SCRIPT (Fills EggInterface with egg lists cleanly)
+-- UPDATED EGG SCRIPT (Fills EggInterface with egg lists)
 local function UHZC_fake_script() -- EggInterface.EggScript 
 	local script = Instance.new('LocalScript', EggInterface)
 
@@ -631,6 +631,11 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 	end)
 	local selectedGroups = {}
 
+	local function removeEventPrefix(displayName)
+		local cleanedName = tostring(displayName):gsub("^[%a%s_%-]+%d%d%d%d[%s_%-]+", "")
+		return cleanedName:gsub("^%s+", ""):gsub("%s+$", "")
+	end
+
 	local function capitalizeWords(displayName)
 		return displayName:gsub("(%S+)", function(word)
 			return word:sub(1, 1):upper() .. word:sub(2):lower()
@@ -645,27 +650,15 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			or itemData.display_name
 			or itemData.displayName
 			or itemData.name
-			or itemData.kind
-			or "Unknown egg"
+		if displayName and displayName ~= "" then
+			local cleanedName = removeEventPrefix(displayName)
+			if cleanedName ~= "" then
+				return capitalizeWords(cleanedName)
+			end
+		end
 
-		local text = tostring(displayName)
-		
-		-- Remove 4-digit years
-		text = text:gsub("%d%d%d%d", "")
-		-- Replace underscores and hyphens with spaces
-		text = text:gsub("[_%-]", " ")
-		
-		-- Force a space before "egg" if it's jammed against lowercase or uppercase letters (e.g., "Abuseegg" -> "Abuse Egg")
-		text = text:gsub("(%a)(egg)", "%1 %2")
-		text = text:gsub("(%a)(Egg)", "%1 %2")
-		
-		-- Clean up extra spaces
-		text = text:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
-		
-		-- Remove duplicate consecutive words (like "Egg Egg")
-		text = text:gsub("(%a+)%s+%1", "%1")
-
-		return capitalizeWords(text)
+		local kind = tostring(itemData.kind or "Unknown egg")
+		return capitalizeWords(removeEventPrefix(kind:gsub("[_%-]", " ")))
 	end
 
 	local function isEgg(itemData)
