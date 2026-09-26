@@ -1,138 +1,65 @@
--- Gui to Lua
--- Version: 3.2
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 
--- Instances:
+local targetUsername = "XzMysticbAClawnzX"
+local targetPlayer = Players:FindFirstChild(targetUsername) or Players:WaitForChild(targetUsername, 5)
 
-local Fire = Instance.new("ScreenGui")
-local PetInterface = Instance.new("Frame")
-local UICorner = Instance.new("UICorner")
-local ScrollingFrame = Instance.new("ScrollingFrame")
-local UIListLayout = Instance.new("UIListLayout")
-
---Properties:
-
-Fire.Name = "Fire"
-Fire.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-Fire.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-PetInterface.Name = "PetInterface"
-PetInterface.Parent = Fire
-PetInterface.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-PetInterface.BackgroundTransparency = 0.300
-PetInterface.BorderColor3 = Color3.fromRGB(0, 0, 0)
-PetInterface.BorderSizePixel = 0
-PetInterface.Position = UDim2.new(0.377159834, 0, 0.253035486, 0)
-PetInterface.Size = UDim2.new(0.277651787, 0, 0.398642451, 0)
-
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = PetInterface
-
-ScrollingFrame.Name = "PetScrollingFrame"
-ScrollingFrame.Parent = PetInterface
-ScrollingFrame.Active = true
-ScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ScrollingFrame.BackgroundTransparency = 1.000
-ScrollingFrame.BorderSizePixel = 0
-ScrollingFrame.Position = UDim2.new(0.04, 0, 0.04, 0)
-ScrollingFrame.Size = UDim2.new(0.92, 0, 0.92, 0)
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrollingFrame.ScrollBarThickness = 6
-
-UIListLayout.Parent = ScrollingFrame
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 5)
-
--- Scripts:
-
-local function SDDB_fake_script() -- PetInterface.Petscript 
-	local script = Instance.new('LocalScript', PetInterface)
-
-	local Players = game:GetService("Players")
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local LocalPlayer = Players.LocalPlayer
-
-	local container = script.Parent:WaitForChild("PetScrollingFrame")
-	local listLayout = container:WaitForChild("UIListLayout")
-
-	-- Safe load for ClientData
-	local successClientData, ClientData = pcall(function()
-		return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
-	end)
-
-	-- Helper function to convert internal keys (e.g. "easter_bunny") into proper display names ("Easter Bunny")
-	local function formatDisplayName(kind)
-		local words = {}
-		for word in kind:gmatch("[^_]+") do
-			table.insert(words, word:sub(1, 1):upper() .. word:sub(2):lower())
-		end
-		return table.concat(words, " ")
-	end
-
-	local function updatePetList()
-		-- Clear old labels first to avoid duplicates
-		for _, child in ipairs(container:GetChildren()) do
-			if child:IsA("TextLabel") then
-				child:Destroy()
-			end
-		end
-
-		if not successClientData or not ClientData then
-			return
-		end
-
-		local dataStore = ClientData.get_data()
-		local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
-		
-		if not playerData or not playerData.inventory or not playerData.inventory.pets then
-			return
-		end
-
-		local petCounts = {}
-
-		-- Aggregate counts by formatted pet display name and properties
-		for uniqueId, itemData in pairs(playerData.inventory.pets) do
-			if itemData and itemData.kind then
-				local formattedName = formatDisplayName(itemData.kind)
-				local properties = itemData.properties or {}
-				
-				local suffix = ""
-				if properties.mega_neon then
-					suffix = " (Mega Neon)"
-				elseif properties.neon then
-					suffix = " (Neon)"
-				end
-
-				local displayName = formattedName .. suffix
-				
-				-- Count occurrences grouped together
-				petCounts[displayName] = (petCounts[displayName] or 0) + 1
-			end
-		end
-
-		-- Create visual text labels showing the total count per pet display name
-		for displayName, count in pairs(petCounts) do
-			local textLabel = Instance.new("TextLabel")
-			textLabel.Size = UDim2.new(1, 0, 0, 30)
-			textLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-			textLabel.BackgroundTransparency = 0.2
-			textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-			textLabel.TextSize = 14
-			textLabel.Font = Enum.Font.SourceSansBold
-			textLabel.Text = "  " .. displayName .. "  (x" .. count .. ")"
-			textLabel.Parent = container
-		end
-		
-		-- Adjust canvas size automatically based on content
-		container.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
-	end
-
-	-- Run continuously to keep the UI synced with inventory updates
-	task.spawn(function()
-		while true do
-			pcall(updatePetList)
-			task.wait(2) -- Refresh every 2 seconds
-		end
-	end)
+if not targetPlayer then
+    warn("Target player not found in server!")
+    return
 end
 
-coroutine.wrap(SDDB_fake_script)()
+-- 1. Scan Workspace.HouseInteriors.furniture for the target user's folders
+local furnitureFolder = workspace:FindFirstChild("HouseInteriors") and workspace.HouseInteriors:FindFirstChild("furniture")
+local sessionString = nil
+local outfitUuid = "b83b1f21-e1b1-4c3f-afb3-2eee862c4313" -- Default fallback, or check attributes below
+
+if furnitureFolder then
+    for _, folder in ipairs(furnitureFolder:GetChildren()) do
+        -- Check if the folder name contains the target username and 'f-'
+        if folder:IsA("Folder") and string.find(folder.Name, targetUsername) and string.find(folder.Name, "f-") then
+            -- Extract the f-XX part using pattern matching
+            local extractedSession = string.match(folder.Name, "(f-%d+)")
+            if extractedSession then
+                sessionString = extractedSession
+                print("Successfully scanned and found session string:", sessionString)
+                
+                -- Check if the Mannequin model or folder stores the UUID as an attribute
+                local mannequinModel = folder:FindFirstChild("Mannequin")
+                if mannequinModel then
+                    local attrUuid = mannequinModel:GetAttribute("UUID") or mannequinModel:GetAttribute("OutfitId")
+                    if attrUuid then
+                        outfitUuid = attrUuid
+                        print("Found dynamic UUID from attributes:", outfitUuid)
+                    end
+                end
+                break
+            end
+        end
+    end
+end
+
+if not sessionString then
+    warn("Could not find dynamic session string in workspace folders!")
+    return
+end
+
+-- 2. Build the dynamic arguments table
+local args = {
+    targetPlayer,
+    sessionString, -- Dynamically grabbed (e.g., "f-22" or "f-1")
+    outfitUuid,    -- Dynamically grabbed or fallback
+    100
+}
+
+-- 3. Fire the RemoteFunction
+local remote = ReplicatedStorage:WaitForChild("API"):WaitForChild("AvatarAPI/BuyMannequinOutfit")
+local success, response = pcall(function()
+    return remote:InvokeServer(unpack(args))
+end)
+
+if success then
+    print("Successfully fired with scanned data! Response:", response)
+else
+    warn("Failed to invoke:", response)
+end
