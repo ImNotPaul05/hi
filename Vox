@@ -676,7 +676,7 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			return false
 		end
 
-		if string.find(displayName, "Starter Egg", 1, true) then
+		if string.find(kind, "starter_egg", 1, true) then
 			return false
 		end
 
