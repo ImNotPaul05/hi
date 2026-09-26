@@ -639,9 +639,14 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		text = text:gsub("%d%d%d%d", "")
 		-- Clean up extra spaces
 		text = text:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+		
 		return text
 	end
 
+	local cleanedText = string.gsub(originalText, "Pet Recycler", "")
+	  print(cleanedText)
+    end
+	
 	local function capitalizeWords(displayName)
 		local text = displayName:gsub("(%S+)", function(word)
 			return word:sub(1, 1):upper() .. word:sub(2):lower()
