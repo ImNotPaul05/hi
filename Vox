@@ -3,96 +3,142 @@ local Config = {
 }
 
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local furniture = workspace
+local furniture = Workspace
     :WaitForChild("HouseInteriors")
     :WaitForChild("furniture")
 
-local UUID_PATTERN =
-    "^[%x]+%-%x+%-%x+%-%x+%-%x+$"
-
 local targetPrefix = Config.TargetUsername .. "/"
+
+-- UUID format:
+-- xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+local UUID_PATTERN =
+    "^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$"
+
 local mannequinFolder
 local furnitureId
+local mannequin
 
 --==================================================
--- Find the target's furniture folder
+-- FIND TARGET USER'S f-* FURNITURE
 --==================================================
 
 for _, obj in ipairs(furniture:GetChildren()) do
+
+    -- Must belong to the configured username
     if obj.Name:sub(1, #targetPrefix) == targetPrefix then
-        local id = obj.Name:match("(f%-%d+)$")
+
+        -- Accept ANY f-* identifier
+        local id = obj.Name:match("(f%-.+)$")
 
         if id then
-            mannequinFolder = obj
-            furnitureId = id
 
-            print("=== MANNEQUIN FOUND ===")
-            print("Folder:", obj:GetFullName())
-            print("Furniture ID:", furnitureId)
+            -- Must contain a Mannequin somewhere inside
+            local foundMannequin =
+                obj:FindFirstChild("Mannequin", true)
 
-            break
+            if foundMannequin then
+                mannequinFolder = obj
+                furnitureId = id
+                mannequin = foundMannequin
+
+                print("================================")
+                print("MANNEQUIN FOUND")
+                print("================================")
+                print("Username:", Config.TargetUsername)
+                print("Folder:", obj:GetFullName())
+                print("Furniture ID:", furnitureId)
+                print("Mannequin:", mannequin:GetFullName())
+
+                break
+            end
         end
     end
 end
 
 if not mannequinFolder then
-    warn("Could not find a matching f-* mannequin for:", Config.TargetUsername)
+    warn(
+        "No f-* furniture containing a Mannequin found for "
+        .. Config.TargetUsername
+    )
+
     return
 end
 
 --==================================================
--- Search an instance tree for UUID candidates
+-- FIND UUID
 --==================================================
 
-local function searchTree(root, label)
-    print("\n=== SEARCHING:", label, "===")
+local function findUUID(root)
 
+    -- Check root attributes
+    for name, value in pairs(root:GetAttributes()) do
+
+        if typeof(value) == "string"
+            and value:match(UUID_PATTERN)
+        then
+            return value, root, "Attribute: " .. name
+        end
+    end
+
+    -- Check descendants
     for _, obj in ipairs(root:GetDescendants()) do
 
         -- Attributes
         for name, value in pairs(obj:GetAttributes()) do
-            if typeof(value) == "string" and value:match(UUID_PATTERN) then
-                print(
-                    "UUID candidate:",
-                    value,
-                    "| Attribute:",
-                    name,
-                    "| Object:",
-                    obj:GetFullName()
-                )
+
+            if typeof(value) == "string"
+                and value:match(UUID_PATTERN)
+            then
+                return value, obj, "Attribute: " .. name
             end
         end
 
         -- StringValue
         if obj:IsA("StringValue") then
+
             if obj.Value:match(UUID_PATTERN) then
-                print(
-                    "UUID candidate:",
-                    obj.Value,
-                    "| StringValue:",
-                    obj:GetFullName()
-                )
+                return obj.Value, obj, "StringValue"
             end
         end
     end
+
+    return nil
 end
 
--- Search the mannequin itself
-searchTree(mannequinFolder, "TARGET MANNEQUIN")
+local outfitUUID
+local uuidSource
+local uuidSourceType
 
--- Search common replicated locations
-searchTree(ReplicatedStorage, "REPLICATED STORAGE")
+outfitUUID,
+uuidSource,
+uuidSourceType = findUUID(mannequinFolder)
 
--- Search the target player's replicated objects
-local targetPlayer = Players:FindFirstChild(Config.TargetUsername)
+--==================================================
+-- PRINT RESULT
+--==================================================
 
-if targetPlayer then
-    searchTree(targetPlayer, "TARGET PLAYER")
-end
-
-print("\n=== RESULT ===")
-print("Username:", Config.TargetUsername)
+print("")
+print("================================")
+print("RESULT")
+print("================================")
+print("Target Username:", Config.TargetUsername)
 print("Furniture ID:", furnitureId)
-print("UUID must be located from another source if nothing was printed above.")
+
+if outfitUUID then
+
+    print("Outfit UUID:", outfitUUID)
+    print("UUID Source:", uuidSource:GetFullName())
+    print("UUID Type:", uuidSourceType)
+
+else
+
+    warn("Outfit UUID was NOT found.")
+    print("Furniture was found successfully:")
+    print("  ", furnitureFolder and furnitureFolder:GetFullName())
+    print("  Furniture ID:", furnitureId)
+    print("  Mannequin:", mannequin:GetFullName())
+
+end
