@@ -672,7 +672,7 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		local category = string.lower(tostring(itemData.category or ""))
 		
 		-- Exclude pet items (such as basic_egg_2022_parakeet or basic_egg_2022_ancient_dragon) from appearing in the egg list
-		if string.find(kind, "_egg_20_", 1, true) then
+		if string.find(kind, "_egg_20", 1, true) then
 			return false
 		end
 
