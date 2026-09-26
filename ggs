@@ -14,47 +14,48 @@ local sessionString = nil
 local correctOutfitUuid = nil
 
 if furnitureFolder then
-    for _, folder in ipairs(furnitureFolder:GetChildren()) do
-        -- Find the folder matching the target user
-        if folder:IsA("Folder") and string.find(folder.Name, targetUsername) then
-            -- Extract session string (e.g., f-1, f-22)
-            local extractedSession = string.match(folder.Name, "(f-%d+)")
-            if extractedSession then
-                sessionString = extractedSession
-                
-                -- Search inside this specific f-XX folder for the UUID
-                -- (Checking attributes first, then children values)
-                for _, attrName, attrVal in pairs(folder:GetAttributes()) do
-                    if type(attrVal) == "string" and #attrVal >= 30 then -- UUIDs are long strings
+    -- Recursively search through every single subfolder and descendant
+    for _, descendant in ipairs(furnitureFolder:GetDescendants()) do
+        -- 1. Look for the session string (e.g., f-1, f-22) in any folder or object name
+        if not sessionString and string.find(descendant.Name, "f-") then
+            local extracted = string.match(descendant.Name, "(f-%d+)")
+            if extracted then
+                sessionString = extracted
+            end
+        end
+        
+        -- 2. Look for a UUID (36-character string) hidden in values or attributes
+        if not correctOutfitUuid then
+            if descendant:IsA("StringValue") and #descendant.Value == 36 then
+                correctOutfitUuid = descendant.Value
+            else
+                for _, attrVal in pairs(descendant:GetAttributes()) do
+                    if type(attrVal) == "string" and #attrVal == 36 then
                         correctOutfitUuid = attrVal
                         break
                     end
                 end
-                
-                if not correctOutfitUuid then
-                    for _, desc in ipairs(folder:GetDescendants()) do
-                        if desc:IsA("StringValue") and #desc.Value >= 30 then
-                            correctOutfitUuid = desc.Value
-                            break
-                        end
-                    end
-                end
-                
-                break
             end
+        end
+        
+        if sessionString and correctOutfitUuid then
+            break
         end
     end
 end
 
-print("Auto-Scanned Session:", sessionString)
-print("Auto-Scanned UUID:", correctOutfitUuid)
+-- If the UUID still couldn't be auto-scanned from the folder, you can hardcode just the UUID 
+-- while letting the script automatically grab the correct session string (f-XX).
+correctOutfitUuid = correctOutfitUuid or "b83b1f21-e1b1-4c3f-afb3-2eee862c4313"
 
-if not sessionString or not correctOutfitUuid then
-    warn("Could not automatically scrape session or UUID from workspace folder!")
+print("Deep-Scanned Session:", tostring(sessionString))
+print("Deep-Scanned UUID:", tostring(correctOutfitUuid))
+
+if not sessionString then
+    warn("Could not find session string! Make sure you are near the target house.")
     return
 end
 
--- Build the arguments with the dynamically pulled values
 local args = {
     targetPlayer,
     sessionString,
