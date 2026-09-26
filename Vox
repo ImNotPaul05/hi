@@ -662,6 +662,13 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			or itemData.kind
 			or "Unknown egg"
 
+		-- Convert pet_recycler_YYYY_<egg> IDs to just the egg name
+		local kind = tostring(itemData.kind or "")
+		local recyclerEgg = kind:match("^pet_recycler_%d+_(.+)$")
+		if recyclerEgg then
+			displayName = recyclerEgg
+		end
+
 		local cleanedName = removeEventPrefix(displayName)
 		return capitalizeWords(cleanedName)
 	end
