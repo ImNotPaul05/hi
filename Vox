@@ -1,4 +1,4 @@
--- 5:40am
+-- Gemini
 -- Version: 3.2
 
 -- Instances:
@@ -650,13 +650,15 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			or itemData.display_name
 			or itemData.displayName
 			or itemData.name
-			
 		if displayName and displayName ~= "" then
-			return capitalizeWords(tostring(displayName))
+			local cleanedName = removeEventPrefix(displayName)
+			if cleanedName ~= "" then
+				return capitalizeWords(cleanedName)
+			end
 		end
 
 		local kind = tostring(itemData.kind or "Unknown egg")
-		return capitalizeWords(kind:gsub("[_%-]", " "))
+		return capitalizeWords(removeEventPrefix(kind:gsub("[_%-]", " ")))
 	end
 
 	local function isEgg(itemData)
@@ -817,12 +819,21 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			or itemData.display_name
 			or itemData.displayName
 			or itemData.name
-		if displayName and displayName ~= "" then
-			local cleanedName = removeEventPrefix(displayName)
-			if cleanedName ~= "" then
-				return capitalizeWords(cleanedName)
-			end
-		end
+			or itemData.kind
+			or "Unknown egg"
+
+		local text = tostring(displayName)
+		
+		-- Remove 4-digit years (like 2026) and clean up symbols
+		text = text:gsub("%d%d%d%d", "")
+		text = text:gsub("[_%-]", " ")
+		text = text:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+		
+		-- Prevent duplicate consecutive words like "Egg Egg"
+		text = text:gsub("(%a+)%s+%1", "%1")
+
+		return capitalizeWords(text)
+	end
 
 		local kind = tostring(itemData.kind or "Unknown pet")
 		return capitalizeWords(removeEventPrefix(kind:gsub("[_%-]", " ")))
