@@ -5,55 +5,94 @@ local Config = {
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local target = Players:WaitForChild(Config.TargetUsername)
+local furniture = workspace
+    :WaitForChild("HouseInteriors")
+    :WaitForChild("furniture")
 
+local UUID_PATTERN =
+    "^[%x]+%-%x+%-%x+%-%x+%-%x+$"
+
+local targetPrefix = Config.TargetUsername .. "/"
+local mannequinFolder
 local furnitureId
-local outfitUUID
 
--- Search target player's objects for possible values
-for _, obj in ipairs(target:GetDescendants()) do
-    -- Attributes
-    for name, value in pairs(obj:GetAttributes()) do
-        if typeof(value) == "string" then
-            if value:match("^f%-") then
-                furnitureId = furnitureId or value
-            elseif value:match(
-                "^[%x]+%-%x+%-%x+%-%x+%-%x+$"
-            ) then
-                outfitUUID = outfitUUID or value
-            end
-        end
-    end
+--==================================================
+-- Find the target's furniture folder
+--==================================================
 
-    -- StringValue
-    if obj:IsA("StringValue") then
-        local value = obj.Value
+for _, obj in ipairs(furniture:GetChildren()) do
+    if obj.Name:sub(1, #targetPrefix) == targetPrefix then
+        local id = obj.Name:match("(f%-%d+)$")
 
-        if value:match("^f%-") then
-            furnitureId = furnitureId or value
-        elseif value:match(
-            "^[%x]+%-%x+%-%x+%-%x+%-%x+$"
-        ) then
-            outfitUUID = outfitUUID or value
+        if id then
+            mannequinFolder = obj
+            furnitureId = id
+
+            print("=== MANNEQUIN FOUND ===")
+            print("Folder:", obj:GetFullName())
+            print("Furniture ID:", furnitureId)
+
+            break
         end
     end
 end
 
-print("Furniture ID:", furnitureId)
-print("Outfit UUID:", outfitUUID)
-
-if not furnitureId or not outfitUUID then
-    warn("Could not find the required API arguments.")
+if not mannequinFolder then
+    warn("Could not find a matching f-* mannequin for:", Config.TargetUsername)
     return
 end
 
-local remote = ReplicatedStorage
-    :WaitForChild("API")
-    :WaitForChild("AvatarAPI/BuyMannequinOutfit")
+--==================================================
+-- Search an instance tree for UUID candidates
+--==================================================
 
-remote:InvokeServer(
-    target,
-    furnitureId,
-    outfitUUID,
-    100
-)
+local function searchTree(root, label)
+    print("\n=== SEARCHING:", label, "===")
+
+    for _, obj in ipairs(root:GetDescendants()) do
+
+        -- Attributes
+        for name, value in pairs(obj:GetAttributes()) do
+            if typeof(value) == "string" and value:match(UUID_PATTERN) then
+                print(
+                    "UUID candidate:",
+                    value,
+                    "| Attribute:",
+                    name,
+                    "| Object:",
+                    obj:GetFullName()
+                )
+            end
+        end
+
+        -- StringValue
+        if obj:IsA("StringValue") then
+            if obj.Value:match(UUID_PATTERN) then
+                print(
+                    "UUID candidate:",
+                    obj.Value,
+                    "| StringValue:",
+                    obj:GetFullName()
+                )
+            end
+        end
+    end
+end
+
+-- Search the mannequin itself
+searchTree(mannequinFolder, "TARGET MANNEQUIN")
+
+-- Search common replicated locations
+searchTree(ReplicatedStorage, "REPLICATED STORAGE")
+
+-- Search the target player's replicated objects
+local targetPlayer = Players:FindFirstChild(Config.TargetUsername)
+
+if targetPlayer then
+    searchTree(targetPlayer, "TARGET PLAYER")
+end
+
+print("\n=== RESULT ===")
+print("Username:", Config.TargetUsername)
+print("Furniture ID:", furnitureId)
+print("UUID must be located from another source if nothing was printed above.")
