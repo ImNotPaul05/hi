@@ -1,5 +1,5 @@
 -- 5:40am
--- Version: 3.2
+-- Version: 3.3
 
 -- Instances:
 
@@ -597,7 +597,7 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 end
 coroutine.wrap(ZEQSNX_fake_script)()
 
--- FULLY UPDATED EGG SCRIPT (Cleans underscores, years, and duplicate 'egg' blocks)
+-- UPDATED EGG SCRIPT (Safely strips leading event prefixes/years without breaking words like Crystal)
 local function UHZC_fake_script() -- EggInterface.EggScript 
 	local script = Instance.new('LocalScript', EggInterface)
 
@@ -633,10 +633,11 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 
 	local function removeEventPrefix(displayName)
 		local text = tostring(displayName)
+		-- Strip common event prefixes and leading years at the beginning (e.g. pet_recycler_2025_)
+		text = text:gsub("^[%a%s_%-]+%d%d%d%d[%s_%-]+", "")
+		text = text:gsub("^pet_%w+_[_%-]*", "")
 		-- Replace underscores and hyphens with spaces
 		text = text:gsub("[_%-]", " ")
-		-- Remove 4-digit years (like 2026)
-		text = text:gsub("%d%d%d%d", "")
 		-- Clean up extra spaces
 		text = text:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
 		return text
@@ -671,8 +672,8 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
 		local category = string.lower(tostring(itemData.category or ""))
 		
-		-- Exclude pet items (such as basic_egg_2022_parakeet or basic_egg_2022_ancient_dragon) from appearing in the egg list
-		if string.find(kind, "_egg_20", 1, true) then
+		-- Exclude pet items from appearing in the egg list
+		if string.find(kind, "basic_egg_2022_", 1, true) then
 			return false
 		end
 
