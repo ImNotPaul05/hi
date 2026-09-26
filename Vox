@@ -650,15 +650,13 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			or itemData.display_name
 			or itemData.displayName
 			or itemData.name
+			
 		if displayName and displayName ~= "" then
-			local cleanedName = removeEventPrefix(displayName)
-			if cleanedName ~= "" then
-				return capitalizeWords(cleanedName)
-			end
+			return capitalizeWords(tostring(displayName))
 		end
 
 		local kind = tostring(itemData.kind or "Unknown egg")
-		return capitalizeWords(removeEventPrefix(kind:gsub("[_%-]", " ")))
+		return capitalizeWords(kind:gsub("[_%-]", " "))
 	end
 
 	local function isEgg(itemData)
