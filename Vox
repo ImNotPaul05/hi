@@ -1,4 +1,4 @@
--- Gemini
+-- 5:40am
 -- Version: 3.2
 
 -- Instances:
@@ -597,7 +597,7 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 end
 coroutine.wrap(ZEQSNX_fake_script)()
 
--- UPDATED EGG SCRIPT (Fills EggInterface with egg lists)
+-- UPDATED EGG SCRIPT (Fills EggInterface with egg lists cleanly)
 local function UHZC_fake_script() -- EggInterface.EggScript 
 	local script = Instance.new('LocalScript', EggInterface)
 
@@ -631,11 +631,6 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 	end)
 	local selectedGroups = {}
 
-	local function removeEventPrefix(displayName)
-		local cleanedName = tostring(displayName):gsub("^[%a%s_%-]+%d%d%d%d[%s_%-]+", "")
-		return cleanedName:gsub("^%s+", ""):gsub("%s+$", "")
-	end
-
 	local function capitalizeWords(displayName)
 		return displayName:gsub("(%S+)", function(word)
 			return word:sub(1, 1):upper() .. word:sub(2):lower()
@@ -664,10 +659,6 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		text = text:gsub("(%a+)%s+%1", "%1")
 
 		return capitalizeWords(text)
-	end
-
-		local kind = tostring(itemData.kind or "Unknown egg")
-		return capitalizeWords(kind:gsub("[_%-]", " "))
 	end
 
 	local function isEgg(itemData)
