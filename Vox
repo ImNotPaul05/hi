@@ -1,5 +1,5 @@
 -- 5:40am
--- Version: 3.2
+-- Version: 3.3
 
 -- Instances:
 
@@ -597,7 +597,6 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 end
 coroutine.wrap(ZEQSNX_fake_script)()
 
--- FULLY UPDATED EGG SCRIPT (Cleans underscores, years, and duplicate 'egg' blocks)
 local function UHZC_fake_script() -- EggInterface.EggScript 
 	local script = Instance.new('LocalScript', EggInterface)
 
@@ -631,27 +630,9 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 	end)
 	local selectedGroups = {}
 
-	local function removeEventPrefix(displayName)
-		local text = tostring(displayName)
-		-- Replace underscores and hyphens with spaces
-		text = text:gsub("[_%-]", " ")
-		-- Remove 4-digit years (like 2026)
-		text = text:gsub("%d%d%d%d", "")
-		-- Clean up extra spaces
-		text = text:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
-		return text
-	end
-
-	local function capitalizeWords(displayName)
-		local text = displayName:gsub("(%S+)", function(word)
-			return word:sub(1, 1):upper() .. word:sub(2):lower()
-		end)
-		-- Remove consecutive duplicate words anywhere (e.g., "Egg Egg" -> "Egg")
-		text = text:gsub("(%a+)%s+%1", "%1")
-		return text
-	end
-
 	local function getDisplayName(itemData)
+		local kind = tostring(itemData.kind or "")
+		
 		local properties = itemData.properties or {}
 		local displayName = properties.name
 			or properties.custom_name
@@ -659,11 +640,13 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			or itemData.display_name
 			or itemData.displayName
 			or itemData.name
-			or itemData.kind
+			or kind
 			or "Unknown egg"
 
-		local cleanedName = removeEventPrefix(displayName)
-		return capitalizeWords(cleanedName)
+		local text = tostring(displayName):gsub("[_%-]", " ")
+		return text:gsub("(%S+)", function(word)
+			return word:sub(1, 1):upper() .. word:sub(2):lower()
+		end)
 	end
 
 	local function isEgg(itemData)
@@ -671,7 +654,6 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
 		local category = string.lower(tostring(itemData.category or ""))
 		
-		-- Exclude pet items (such as basic_egg_2022_parakeet or basic_egg_2022_ancient_dragon) from appearing in the egg list
 		if string.find(kind, "_egg_20", 1, true) then
 			return false
 		end
@@ -762,11 +744,9 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 				if selectedGroups[group] then
 					selectedGroups[group] = nil
 					button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-					print("Deselected egg:", button.Text)
 				else
 					selectedGroups[group] = true
 					button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
-					print("Selected egg:", button.Text)
 				end
 				syncSelectedEggs()
 			end)
