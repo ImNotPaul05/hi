@@ -673,10 +673,10 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		))
 		local category = string.lower(tostring(itemData.category or ""))
 		return itemData.is_egg == true
-			or string.find(kind, "egg", 1, true) ~= nil
-			or string.find(displayName, "egg", 1, true) ~= nil
-			or category == "egg"
-			or category == "eggs"
+			or string.find(kind, "egg_20", 1, true) ~= nil
+			or string.find(displayName, "_egg", 1, true) ~= nil
+			or category == "Egg"
+			or category == "Eggs"
 	end
 
 	local function clearList()
@@ -852,7 +852,16 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		Normal = 3,
 	}
 
-
+	local function isEgg(itemData)
+		local kind = string.lower(tostring(itemData.kind or ""))
+		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
+		local category = string.lower(tostring(itemData.category or ""))
+		return itemData.is_egg == true
+			or string.find(kind, "egg", 1, true) ~= nil
+			or string.find(displayName, "egg", 1, true) ~= nil
+			or category == "egg"
+			or category == "eggs"
+	end
 
 	local function isPracticeDog(itemData)
 		local properties = itemData.properties or {}
