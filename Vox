@@ -643,10 +643,6 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		return text
 	end
 
-	local cleanedText = string.gsub(originalText, "Pet Recycler", "")
-	  print(cleanedText)
-    end
-	
 	local function capitalizeWords(displayName)
 		local text = displayName:gsub("(%S+)", function(word)
 			return word:sub(1, 1):upper() .. word:sub(2):lower()
@@ -667,8 +663,16 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 			or itemData.kind
 			or "Unknown egg"
 
-		local cleanedName = removeEventPrefix(displayName)
-		return capitalizeWords(cleanedName)
+		local text = removeEventPrefix(displayName)
+		
+		-- Dynamic gsub implementation to strip "Pet Recycler" and any following names
+		text = text:gsub("Pet Recycler.*", "")
+		text = text:match("^%s*(.-)%s*$") -- Clean leading/trailing spaces
+		if text == "" then
+			text = "Crystal Egg"
+		end
+
+		return capitalizeWords(text)
 	end
 
 	local function isEgg(itemData)
@@ -678,7 +682,7 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		
 		-- Exclude pet items (such as basic_egg_2022_parakeet or basic_egg_2022_ancient_dragon) from appearing in the egg list
 		if string.find(kind, "_egg_20", 1, true) then
-			return false
+			return false   
 		end
 
 		return itemData.is_egg == true
