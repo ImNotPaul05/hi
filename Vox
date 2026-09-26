@@ -383,10 +383,9 @@ UICorner_19.Parent = Icon2
 
 local function KDTGAY_fake_script() -- Main.MainLocalScript 
 	local script = Instance.new('LocalScript', Main)
-
-	
 end
 coroutine.wrap(KDTGAY_fake_script)()
+
 local function PZSESN_fake_script() -- userInterface.Userscript 
 	local script = Instance.new('LocalScript', userInterface)
 
@@ -525,6 +524,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 	end)
 end
 coroutine.wrap(PZSESN_fake_script)()
+
 local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript 
 	local script = Instance.new('LocalScript', SwitchButton)
 
@@ -596,6 +596,8 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 	end)
 end
 coroutine.wrap(ZEQSNX_fake_script)()
+
+-- UPDATED EGG SCRIPT (Fills EggInterface with egg lists)
 local function UHZC_fake_script() -- EggInterface.EggScript 
 	local script = Instance.new('LocalScript', EggInterface)
 
@@ -660,22 +662,12 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 	end
 
 	local function isEgg(itemData)
-		local properties = itemData.properties or {}
 		local kind = string.lower(tostring(itemData.kind or ""))
-		local displayName = string.lower(tostring(
-			properties.name
-				or properties.custom_name
-				or properties.display_name
-				or itemData.display_name
-				or itemData.displayName
-				or itemData.name
-				or ""
-		))
+		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
 		local category = string.lower(tostring(itemData.category or ""))
 		return itemData.is_egg == true
 			or string.find(kind, "egg", 1, true) ~= nil
-			or string.find(kind, "_egg", 1, true) ~= nil
-			or string.find(kind, "egg_20", 1, true) ~= nil
+			or string.find(displayName, "egg", 1, true) ~= nil
 			or category == "egg"
 			or category == "eggs"
 	end
@@ -721,18 +713,19 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		for uniqueId, itemData in pairs(pets) do
 			if itemData and isEgg(itemData) then
 				local displayName = getDisplayName(itemData)
-				local group = groupedEggs[displayName]
+				local key = displayName
+				local group = groupedEggs[key]
 				if not group then
 					group = {displayName = displayName, uniqueIds = {}}
-					groupedEggs[displayName] = group
+					groupedEggs[key] = group
 				end
 				table.insert(group.uniqueIds, uniqueId)
 			end
 		end
 
 		local groups = {}
-		for _, group in pairs(groupedEggs) do
-			table.insert(groups, group)
+		for _, g in pairs(groupedEggs) do
+			table.insert(groups, g)
 		end
 		table.sort(groups, function(left, right)
 			return left.displayName < right.displayName
@@ -773,6 +766,7 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 	refreshEggs()
 end
 coroutine.wrap(UHZC_fake_script)()
+
 local function AVPZ_fake_script() -- PetInterface.Petscript 
 	local script = Instance.new('LocalScript', PetInterface)
 
@@ -781,7 +775,6 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local localPlayer = Players.LocalPlayer
 	local panel = script.Parent
 	local refreshButton = panel.Parent:WaitForChild("RefreshPet/Button")
-	local addItemRemote = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AddItemToOffer")
 	local selectedPets = Instance.new("Folder")
 	selectedPets.Name = "SelectedPets"
 	selectedPets.Parent = panel
@@ -982,15 +975,14 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	refreshPets()
 end
 coroutine.wrap(AVPZ_fake_script)()
+
 local function JXODJDF_fake_script() -- StopTradeButton.StopTradeScript 
 	local script = Instance.new('LocalScript', StopTradeButton)
-
-	
 end
 coroutine.wrap(JXODJDF_fake_script)()
+
 local function MRVNXI_fake_script() -- SendTradeButton.SendTradeScript 
 	local script = Instance.new('LocalScript', SendTradeButton)
-
 	local TweenService = game:GetService("TweenService")
 	
 	local button = script.Parent
@@ -998,7 +990,6 @@ local function MRVNXI_fake_script() -- SendTradeButton.SendTradeScript
 	
 	local fill = button:FindFirstChild("ClickFill")
 	if not fill then
-	
 		fill = Instance.new("Frame")
 		fill.Name = "ClickFill"
 		fill.AnchorPoint = Vector2.new(0, 0.5)
@@ -1050,31 +1041,26 @@ local function MRVNXI_fake_script() -- SendTradeButton.SendTradeScript
 	end
 	
 	button.Activated:Connect(playClickFill)
-	
 end
 coroutine.wrap(MRVNXI_fake_script)()
+
 local function EZWTW_fake_script() -- RefreshPlrButton.RefreshplrScript 
 	local script = Instance.new('LocalScript', RefreshPlrButton)
-
-	
 end
 coroutine.wrap(EZWTW_fake_script)()
+
 local function VKIOV_fake_script() -- RefreshPetButton.RefreshpetScript 
 	local script = Instance.new('LocalScript', RefreshPetButton)
-
-	
 end
 coroutine.wrap(VKIOV_fake_script)()
+
 local function LEHU_fake_script() -- RefreshEggButton.RefresheggScript 
 	local script = Instance.new('LocalScript', RefreshEggButton)
-
-	print("Hello world!")
-	
 end
 coroutine.wrap(LEHU_fake_script)()
+
 local function WDNV_fake_script() -- TradingButton.LocalScript 
 	local script = Instance.new('LocalScript', TradingButton)
-
 	local button = script.Parent
 	local main = button:FindFirstAncestor("Main")
 	local potion = main:WaitForChild("Potion")
@@ -1090,9 +1076,9 @@ local function WDNV_fake_script() -- TradingButton.LocalScript
 	end)
 end
 coroutine.wrap(WDNV_fake_script)()
+
 local function MHXTEQ_fake_script() -- ShopButton.LocalScript 
 	local script = Instance.new('LocalScript', ShopButton)
-
 	local button = script.Parent
 	local main = button:FindFirstAncestor("Main")
 	local potion = main:WaitForChild("Potion")
@@ -1108,9 +1094,9 @@ local function MHXTEQ_fake_script() -- ShopButton.LocalScript
 	end)
 end
 coroutine.wrap(MHXTEQ_fake_script)()
+
 local function DSIPUNY_fake_script() -- PotionButton.LocalScript 
 	local script = Instance.new('LocalScript', PotionButton)
-
 	local button = script.Parent
 	local main = button:FindFirstAncestor("Main")
 	local potion = main:WaitForChild("Potion")
@@ -1123,14 +1109,12 @@ local function DSIPUNY_fake_script() -- PotionButton.LocalScript
 	button.Activated:Connect(function()
 		potion.Visible = true
 		trading.Visible = false
-		
-		
 	end)
 end
 coroutine.wrap(DSIPUNY_fake_script)()
+
 local function ZOBPAYS_fake_script() -- BucksButton.LocalScript 
 	local script = Instance.new('LocalScript', BucksButton)
-
 	local button = script.Parent
 	local main = button:FindFirstAncestor("Main")
 	local potion = main:WaitForChild("Potion")
@@ -1146,9 +1130,9 @@ local function ZOBPAYS_fake_script() -- BucksButton.LocalScript
 	end)
 end
 coroutine.wrap(ZOBPAYS_fake_script)()
+
 local function KWXFAE_fake_script() -- ClosedButton.ClosedScript 
 	local script = Instance.new('LocalScript', ClosedButton)
-
 	local button = script.Parent
 	local main = button:FindFirstAncestor("Main")
 	local trading = main:WaitForChild("Trading")
@@ -1160,9 +1144,9 @@ local function KWXFAE_fake_script() -- ClosedButton.ClosedScript
 	end)
 end
 coroutine.wrap(KWXFAE_fake_script)()
+
 local function TQGXY_fake_script() -- CosnoleButton.ConsoleScript 
 	local script = Instance.new('LocalScript', CosnoleButton)
-
 	local StarterGui = game:GetService("StarterGui")
 	
 	local button = script.Parent
@@ -1188,12 +1172,11 @@ local function TQGXY_fake_script() -- CosnoleButton.ConsoleScript
 	end
 	
 	button.Activated:Connect(openDeveloperConsole)
-	
 end
 coroutine.wrap(TQGXY_fake_script)()
+
 local function XOOWGMJ_fake_script() -- Icon2.LocalScript 
 	local script = Instance.new('LocalScript', Icon2)
-
 	local button = script.Parent
 	local main = button:FindFirstAncestor("Main")
 	local trading = main:WaitForChild("Trading")
