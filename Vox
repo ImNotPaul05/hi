@@ -650,9 +650,13 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 
 		local text = tostring(displayName)
 		
-		-- Remove 4-digit years (like 2026) and clean up symbols
+		-- Clean up formatting, symbols, and years
 		text = text:gsub("%d%d%d%d", "")
 		text = text:gsub("[_%-]", " ")
+		
+		-- Fix stuck-together words like "abuseegg" -> "abuse egg"
+		text = text:gsub("([a-z])(egg)", "%1 %2")
+		
 		text = text:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
 		
 		-- Prevent duplicate consecutive words like "Egg Egg"
