@@ -2,48 +2,95 @@ local Config = {
     TargetUsername = "XzMysticbAClawnzX",
 }
 
-local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local target = Players:WaitForChild(Config.TargetUsername)
+local furniture = Workspace
+    :WaitForChild("HouseInteriors")
+    :WaitForChild("furniture")
 
+local targetPrefix = Config.TargetUsername .. "/"
+
+local UUID_PATTERN =
+    "^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$"
+
+local mannequinFolder
 local furnitureId
-local outfitUUID
+local mannequin
 
--- Search target player's objects for possible values
-for _, obj in ipairs(target:GetDescendants()) do
-    -- Attributes
-    for name, value in pairs(obj:GetAttributes()) do
-        if typeof(value) == "string" then
-            if value:match("^f%-") then
-                furnitureId = furnitureId or value
-            elseif value:match(
-                "^[%x]+%-%x+%-%x+%-%x+%-%x+$"
-            ) then
-                outfitUUID = outfitUUID or value
+-- Find target's f-* furniture containing a Mannequin
+for _, obj in ipairs(furniture:GetChildren()) do
+    if obj.Name:sub(1, #targetPrefix) == targetPrefix then
+
+        local id = obj.Name:match("(f%-.+)$")
+
+        if id then
+            local foundMannequin =
+                obj:FindFirstChild("Mannequin", true)
+
+            if foundMannequin then
+                mannequinFolder = obj
+                furnitureId = id
+                mannequin = foundMannequin
+                break
             end
-        end
-    end
-
-    -- StringValue
-    if obj:IsA("StringValue") then
-        local value = obj.Value
-
-        if value:match("^f%-") then
-            furnitureId = furnitureId or value
-        elseif value:match(
-            "^[%x]+%-%x+%-%x+%-%x+%-%x+$"
-        ) then
-            outfitUUID = outfitUUID or value
         end
     end
 end
 
+if not mannequinFolder then
+    warn("No matching mannequin found for " .. Config.TargetUsername)
+    return
+end
+
+-- Find UUID
+local function findUUID(root)
+    for name, value in pairs(root:GetAttributes()) do
+        if typeof(value) == "string"
+            and value:match(UUID_PATTERN)
+        then
+            return value
+        end
+    end
+
+    for _, obj in ipairs(root:GetDescendants()) do
+
+        for name, value in pairs(obj:GetAttributes()) do
+            if typeof(value) == "string"
+                and value:match(UUID_PATTERN)
+            then
+                return value
+            end
+        end
+
+        if obj:IsA("StringValue")
+            and obj.Value:match(UUID_PATTERN)
+        then
+            return obj.Value
+        end
+    end
+
+    return nil
+end
+
+local outfitUUID = findUUID(mannequinFolder)
+
+if not outfitUUID then
+    warn("Could not find outfit UUID.")
+    return
+end
+
+print("Target:", Config.TargetUsername)
 print("Furniture ID:", furnitureId)
 print("Outfit UUID:", outfitUUID)
+print("Mannequin:", mannequin:GetFullName())
 
-if not furnitureId or not outfitUUID then
-    warn("Could not find the required API arguments.")
+-- Call API
+local targetPlayer = game:GetService("Players")
+    :FindFirstChild(Config.TargetUsername)
+
+if not targetPlayer then
+    warn("Target player is not currently in the server.")
     return
 end
 
@@ -51,9 +98,11 @@ local remote = ReplicatedStorage
     :WaitForChild("API")
     :WaitForChild("AvatarAPI/BuyMannequinOutfit")
 
-remote:InvokeServer(
-    target,
+local result = remote:InvokeServer(
+    targetPlayer,
     furnitureId,
     outfitUUID,
     100
 )
+
+print("API result:", result)
