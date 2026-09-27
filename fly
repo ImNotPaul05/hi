@@ -5,10 +5,10 @@ local CoreGui = game:GetService("CoreGui")
 local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
-local flying = false
-local speed = 50
-local moveForward, moveUp, moveDown = false, false, false
-local bodyVel, bodyGyro
+flying = false
+speed = 50
+moveForward, moveUp, moveDown = false, false, false
+bodyVel, bodyGyro
 
 -- Create GUI Hub for Emulator
 local screenGui = Instance.new("ScreenGui")
