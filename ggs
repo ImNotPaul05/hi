@@ -1,6 +1,4 @@
 local Config = {
-    TargetUsername = "R0gueX5gWarpB200323",
-
     PurchaseAmount = 100,
 
     PurchasesPerWindow = 3,
