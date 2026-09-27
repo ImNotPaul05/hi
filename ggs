@@ -1,7 +1,13 @@
 local Config = {
     TargetUsername = "XzMysticbAClawnzX",
+
     PurchaseAmount = 100,
-    Delay = 0.5,
+
+    PurchasesPerWindow = 3,
+    WindowSeconds = 120,
+
+    DelayBetweenPurchases = 1,
+    DeleteDelay = 0.5,
 }
 
 local Players = game:GetService("Players")
@@ -12,34 +18,47 @@ local furniture = Workspace
     :WaitForChild("HouseInteriors")
     :WaitForChild("furniture")
 
-local buyRemote = ReplicatedStorage
-    :WaitForChild("API")
-    :WaitForChild("AvatarAPI/BuyMannequinOutfit")
+local API = ReplicatedStorage:WaitForChild("API")
 
-local deleteRemote = ReplicatedStorage
-    :WaitForChild("API")
-    :WaitForChild("AvatarAPI/DeleteOutfit")
+local buyRemote =
+    API:WaitForChild("AvatarAPI/BuyMannequinOutfit")
 
-local targetPrefix = Config.TargetUsername .. "/"
+local deleteRemote =
+    API:WaitForChild("AvatarAPI/DeleteOutfit")
 
 local UUID_PATTERN =
-    "^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$"
+    "^%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$"
 
+
+-- Find the target player's mannequin
 local function findTargetMannequin()
+    local prefix = Config.TargetUsername .. "/"
+
     for _, obj in ipairs(furniture:GetChildren()) do
-        if obj.Name:sub(1, #targetPrefix) == targetPrefix then
-            local furnitureId = obj.Name:match("(f%-.+)$")
-            local mannequin = obj:FindFirstChild("Mannequin", true)
+
+        if obj.Name:sub(1, #prefix) == prefix then
+
+            local furnitureId =
+                obj.Name:match("(f%-.+)$")
+
+            local mannequin =
+                obj:FindFirstChild("Mannequin", true)
 
             if furnitureId and mannequin then
                 return obj, furnitureId, mannequin
             end
         end
     end
+
+    return nil
 end
 
+
+-- Find UUID inside the furniture/mannequin
 local function findUUID(root)
-    for name, value in pairs(root:GetAttributes()) do
+
+    -- Root attributes
+    for _, value in pairs(root:GetAttributes()) do
         if typeof(value) == "string"
             and value:match(UUID_PATTERN)
         then
@@ -47,8 +66,11 @@ local function findUUID(root)
         end
     end
 
+    -- Descendants
     for _, obj in ipairs(root:GetDescendants()) do
-        for name, value in pairs(obj:GetAttributes()) do
+
+        -- Attributes
+        for _, value in pairs(obj:GetAttributes()) do
             if typeof(value) == "string"
                 and value:match(UUID_PATTERN)
             then
@@ -56,68 +78,140 @@ local function findUUID(root)
             end
         end
 
+        -- StringValues
         if obj:IsA("StringValue")
             and obj.Value:match(UUID_PATTERN)
         then
             return obj.Value
         end
     end
+
+    return nil
 end
 
-local targetPlayer = Players:FindFirstChild(Config.TargetUsername)
+
+-- Make sure target exists
+local targetPlayer =
+    Players:FindFirstChild(Config.TargetUsername)
 
 if not targetPlayer then
     warn("Target player is not in the server.")
     return
 end
 
-local mannequinFolder, furnitureId, mannequin =
-    findTargetMannequin()
 
-if not mannequinFolder then
-    warn("Could not find target mannequin.")
-    return
-end
+--==================================================
+-- PURCHASE LOOP
+--==================================================
 
-local outfitUUID = findUUID(mannequinFolder)
+while true do
 
-if not outfitUUID then
-    warn("Could not find outfit UUID.")
-    return
-end
+    print("================================")
+    print("Starting purchase window")
+    print("Limit:", Config.PurchasesPerWindow)
+    print("================================")
 
-print("Target:", Config.TargetUsername)
-print("Furniture ID:", furnitureId)
-print("Outfit UUID:", outfitUUID)
+    for purchaseNumber = 1, Config.PurchasesPerWindow do
 
--- Buy, then delete the purchased outfit.
-local success, result = pcall(function()
-    return buyRemote:InvokeServer(
-        targetPlayer,
-        furnitureId,
-        outfitUUID,
-        Config.PurchaseAmount
+        local mannequinFolder, furnitureId, mannequin =
+            findTargetMannequin()
+
+        if not mannequinFolder then
+            warn("Could not find target mannequin.")
+            task.wait(Config.DelayBetweenPurchases)
+            continue
+        end
+
+        local outfitUUID =
+            findUUID(mannequinFolder)
+
+        if not outfitUUID then
+            warn("Could not find outfit UUID.")
+            task.wait(Config.DelayBetweenPurchases)
+            continue
+        end
+
+        print("")
+        print("Purchase:", purchaseNumber,
+            "/", Config.PurchasesPerWindow)
+
+        print("Target:", Config.TargetUsername)
+        print("Furniture ID:", furnitureId)
+        print("UUID:", outfitUUID)
+
+
+        -- BUY
+        local buySuccess, buyResult =
+            pcall(function()
+
+                return buyRemote:InvokeServer(
+                    targetPlayer,
+                    furnitureId,
+                    outfitUUID,
+                    Config.PurchaseAmount
+                )
+
+            end)
+
+
+        if buySuccess then
+
+            print("Purchase successful:", buyResult)
+
+            task.wait(Config.DeleteDelay)
+
+
+            -- DELETE
+            local deleteSuccess, deleteResult =
+                pcall(function()
+
+                    return deleteRemote:FireServer(
+                        "player",
+                        "Outfit"
+                    )
+
+                end)
+
+
+            if deleteSuccess then
+                print("Outfit deleted.")
+            else
+                warn(
+                    "Delete failed:",
+                    deleteResult
+                )
+            end
+
+        else
+
+            warn(
+                "Purchase failed:",
+                buyResult
+            )
+
+        end
+
+
+        -- Wait between purchases
+        if purchaseNumber < Config.PurchasesPerWindow then
+            task.wait(Config.DelayBetweenPurchases)
+        end
+    end
+
+
+    --==================================================
+    -- WAIT FOR NEXT 2-MINUTE WINDOW
+    --==================================================
+
+    print("")
+    print("================================")
+    print("3 purchases completed.")
+    print(
+        "Waiting",
+        Config.WindowSeconds,
+        "seconds..."
     )
-end)
+    print("================================")
 
-if not success then
-    warn("BuyMannequinOutfit failed:", result)
-    return
-end
-
-print("Purchase result:", result)
-
-task.wait(Config.Delay)
-
-local deleteSuccess, deleteResult = pcall(function()
-    return deleteRemote:FireServer(
-        "player",
-        "Outfit"
-    )
-end)
-
-if not deleteSuccess then
-    warn("DeleteOutfit failed:", deleteResult)
-else
-    print("Outfit deleted.")
+    task.wait(Config.WindowSeconds)
 end
