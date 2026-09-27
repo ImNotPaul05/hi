@@ -1,23 +1,39 @@
+local Config = {
+    TargetUsername = "XzMysticbAClawnzX",
+}
+
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local TargetUsername = "XzMysticbAClawnzX"
+local API = ReplicatedStorage:WaitForChild("API")
 
-local targetPlayer = Players:WaitForChild(TargetUsername)
-
--- Load target house
-ReplicatedStorage:WaitForChild("API")
-    :WaitForChild("HousingAPI/SubscribeToHouse")
-    :FireServer(targetPlayer)
-
-print("Loading house for:", TargetUsername)
-
--- Wait for furniture
-local furniture = workspace
+local furniture = Workspace
     :WaitForChild("HouseInteriors")
     :WaitForChild("furniture")
 
-local targetPrefix = TargetUsername .. "/"
+
+--==================================================
+-- LOAD TARGET HOUSE
+--==================================================
+
+local targetPlayer = Players:WaitForChild(Config.TargetUsername)
+
+local args = {
+    targetPlayer
+}
+
+API:WaitForChild("HousingAPI/SubscribeToHouse")
+    :FireServer(unpack(args))
+
+print("Loading house for:", Config.TargetUsername)
+
+
+--==================================================
+-- WAIT FOR TARGET HOUSE
+--==================================================
+
+local targetPrefix = Config.TargetUsername .. "/"
 local houseFolder
 
 repeat
@@ -33,11 +49,34 @@ until houseFolder
 
 print("Target house loaded:", houseFolder:GetFullName())
 
--- Inspect everything inside the furniture object
+
+--==================================================
+-- FIND MANNEQUIN
+--==================================================
+
+local mannequin = houseFolder:FindFirstChild("Mannequin", true)
+
+if mannequin then
+    print("Mannequin found:", mannequin:GetFullName())
+else
+    warn("No mannequin found in target house.")
+end
+
+
+--==================================================
+-- INSPECT HOUSE CONTENTS
+--==================================================
+
 print("=== TARGET HOUSE CONTENTS ===")
 
 for _, obj in ipairs(houseFolder:GetDescendants()) do
-    print(obj.ClassName, "->", obj.Name, "->", obj:GetFullName())
+    print(
+        obj.ClassName,
+        "->",
+        obj.Name,
+        "->",
+        obj:GetFullName()
+    )
 
     for name, value in pairs(obj:GetAttributes()) do
         print("    Attribute:", name, "=", value)
