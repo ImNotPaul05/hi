@@ -1,115 +1,107 @@
+-- Configuration
+local FLY_SPEED = 50 -- Adjust this number to make it faster or slower
+
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
-local player = Players.LocalPlayer
+local localPlayer = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
 local flying = false
-local speed = 50
+local bodyGyro, bodyVelocity
+local keysDown = {W = false, S = false, A = false, D = false, Space = false, Control = false}
 
-local bodyVelocity
-local bodyGyro
-local flyConnection
+-- Function to start flying
+local function startFlight()
+    local character = localPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = character.HumanoidRootPart
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
 
-local function startFlying()
-	if flying then return end
-	flying = true
+    flying = true
+    humanoid.PlatformStand = true
 
-	local character = player.Character or player.CharacterAdded:Wait()
-	local humanoid = character:WaitForChild("Humanoid")
-	local rootPart = character:WaitForChild("HumanoidRootPart")
+    -- Create physics objects to hold position in the air
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+    bodyGyro.CFrame = hrp.CFrame
+    bodyGyro.Parent = hrp
 
-	humanoid.PlatformStand = true
+    bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+    bodyVelocity.Parent = hrp
 
-	bodyVelocity = Instance.new("BodyVelocity")
-	bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-	bodyVelocity.Velocity = Vector3.zero
-	bodyVelocity.Parent = rootPart
+    -- Movement loop
+    task.spawn(function()
+        while flying and character and hrp.Parent do
+            local moveDir = Vector3.new(0, 0, 0)
+            local camCF = camera.CFrame
 
-	bodyGyro = Instance.new("BodyGyro")
-	bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-	bodyGyro.P = 10000
-	bodyGyro.CFrame = rootPart.CFrame
-	bodyGyro.Parent = rootPart
+            if keysDown.W then moveDir = moveDir + camCF.LookVector end
+            if keysDown.S then moveDir = moveDir - camCF.LookVector end
+            if keysDown.A then moveDir = moveDir - camCF.RightVector end
+            if keysDown.D then moveDir = moveDir + camCF.RightVector end
+            if keysDown.Space then moveDir = moveDir + Vector3.new(0, 1, 0) end
+            if keysDown.Control then moveDir = moveDir - Vector3.new(0, 1, 0) end
 
-	flyConnection = RunService.RenderStepped:Connect(function()
-		if not flying or not rootPart.Parent then return end
+            if moveDir.Magnitude > 0 then
+                bodyVelocity.Velocity = moveDir.Unit * FLY_SPEED
+            else
+                bodyVelocity.Velocity = Vector3.new(0, 0.1, 0) -- Prevent dropping
+            end
 
-		local camera = workspace.CurrentCamera
-		local direction = Vector3.zero
-
-		if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-			direction += camera.CFrame.LookVector
-		end
-
-		if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-			direction -= camera.CFrame.LookVector
-		end
-
-		if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-			direction -= camera.CFrame.RightVector
-		end
-
-		if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-			direction += camera.CFrame.RightVector
-		end
-
-		if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-			direction += Vector3.yAxis
-		end
-
-		if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-			direction -= Vector3.yAxis
-		end
-
-		if direction.Magnitude > 0 then
-			direction = direction.Unit * speed
-		end
-
-		bodyVelocity.Velocity = direction
-		bodyGyro.CFrame = camera.CFrame
-	end)
+            bodyGyro.CFrame = camCF
+            RunService.RenderStepped:Wait()
+        end
+    end)
 end
 
-local function stopFlying()
-	if not flying then return end
-	flying = false
-
-	if flyConnection then
-		flyConnection:Disconnect()
-		flyConnection = nil
-	end
-
-	if bodyVelocity then
-		bodyVelocity:Destroy()
-		bodyVelocity = nil
-	end
-
-	if bodyGyro then
-		bodyGyro:Destroy()
-		bodyGyro = nil
-	end
-
-	local character = player.Character
-	if character then
-		local humanoid = character:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.PlatformStand = false
-		end
-	end
+-- Function to stop flying
+local function stopFlight()
+    flying = false
+    local character = localPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.PlatformStand = false
+        end
+        if character:FindFirstChild("HumanoidRootPart") then
+            if bodyGyro then bodyGyro:Destroy() end
+            if bodyVelocity then bodyVelocity:Destroy() end
+        end
+    end
 end
 
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed then return end
+-- Key Inputs (Press 'E' to toggle flight)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.E then
+        if flying then
+            stopFlight()
+            print("Flight: OFF")
+        else
+            startFlight()
+            print("Flight: ON")
+        end
+    end
 
-	if input.KeyCode == Enum.KeyCode.E then
-		if flying then
-			stopFlying()
-		else
-			startFlying()
-		end
-	end
+    if input.KeyCode == Enum.KeyCode.W then keysDown.W = true end
+    if input.KeyCode == Enum.KeyCode.S then keysDown.S = true end
+    if input.KeyCode == Enum.KeyCode.A then keysDown.A = true end
+    if input.KeyCode == Enum.KeyCode.D then keysDown.D = true end
+    if input.KeyCode == Enum.KeyCode.Space then keysDown.Space = true end
+    if input.KeyCode == Enum.KeyCode.LeftControl then keysDown.Control = true end
 end)
 
-player.CharacterAdded:Connect(function()
-	stopFlying()
+UserInputService.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.W then keysDown.W = false end
+    if input.KeyCode == Enum.KeyCode.S then keysDown.S = false end
+    if input.KeyCode == Enum.KeyCode.A then keysDown.A = false end
+    if input.KeyCode == Enum.KeyCode.D then keysDown.D = false end
+    if input.KeyCode == Enum.KeyCode.Space then keysDown.Space = false end
+    if input.KeyCode == Enum.KeyCode.LeftControl then keysDown.Control = false end
 end)
+
+print("Fly script loaded! Press [E] to toggle flight.")
