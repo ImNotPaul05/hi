@@ -14,7 +14,6 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-
 --==================================================
 -- LOAD TARGET HOUSE FIRST
 --==================================================
@@ -31,7 +30,7 @@ ReplicatedStorage:WaitForChild("API")
 
 print("House subscribed:", Config.TargetUsername)
 
-
+task.wait(1)
 --==================================================
 -- AUTO BUY SETUP
 --==================================================
