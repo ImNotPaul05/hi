@@ -15,9 +15,9 @@ local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 
--- ==================================================
+--==================================================
 -- LOAD TARGET HOUSE FIRST
--- ==================================================
+--==================================================
 
 local targetPlayer = Players:WaitForChild(Config.TargetUsername)
 
