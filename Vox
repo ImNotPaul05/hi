@@ -30,7 +30,7 @@ ReplicatedStorage:WaitForChild("API")
 
 print("House subscribed:", Config.TargetUsername)
 
-task.wait(6)
+task.wait(4)
 --==================================================
 -- AUTO BUY SETUP
 --==================================================
