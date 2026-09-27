@@ -7,8 +7,8 @@ local camera = workspace.CurrentCamera
 
 flying = false
 speed = 50
-moveForward, moveUp, moveDown = false, false, false
-bodyVel, bodyGyro
+local moveForward, moveUp, moveDown = false, false, false
+local bodyVel, bodyGyro
 
 -- Create GUI Hub for Emulator
 local screenGui = Instance.new("ScreenGui")
