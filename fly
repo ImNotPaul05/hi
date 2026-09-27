@@ -6,7 +6,7 @@ local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 local flying = false
-speed = 50
+local speed = 50
 local moveForward, moveUp, moveDown = false, false, false
 local bodyVel, bodyGyro
 
