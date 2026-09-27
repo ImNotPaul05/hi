@@ -1,7 +1,10 @@
 local Config = {
     TargetUsername = "XzMysticbAClawnzX",
+    PurchaseAmount = 100,
+    Delay = 0.5,
 }
 
+local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -9,41 +12,32 @@ local furniture = Workspace
     :WaitForChild("HouseInteriors")
     :WaitForChild("furniture")
 
+local buyRemote = ReplicatedStorage
+    :WaitForChild("API")
+    :WaitForChild("AvatarAPI/BuyMannequinOutfit")
+
+local deleteRemote = ReplicatedStorage
+    :WaitForChild("API")
+    :WaitForChild("AvatarAPI/DeleteOutfit")
+
 local targetPrefix = Config.TargetUsername .. "/"
 
 local UUID_PATTERN =
     "^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$"
 
-local mannequinFolder
-local furnitureId
-local mannequin
+local function findTargetMannequin()
+    for _, obj in ipairs(furniture:GetChildren()) do
+        if obj.Name:sub(1, #targetPrefix) == targetPrefix then
+            local furnitureId = obj.Name:match("(f%-.+)$")
+            local mannequin = obj:FindFirstChild("Mannequin", true)
 
--- Find target's f-* furniture containing a Mannequin
-for _, obj in ipairs(furniture:GetChildren()) do
-    if obj.Name:sub(1, #targetPrefix) == targetPrefix then
-
-        local id = obj.Name:match("(f%-.+)$")
-
-        if id then
-            local foundMannequin =
-                obj:FindFirstChild("Mannequin", true)
-
-            if foundMannequin then
-                mannequinFolder = obj
-                furnitureId = id
-                mannequin = foundMannequin
-                break
+            if furnitureId and mannequin then
+                return obj, furnitureId, mannequin
             end
         end
     end
 end
 
-if not mannequinFolder then
-    warn("No matching mannequin found for " .. Config.TargetUsername)
-    return
-end
-
--- Find UUID
 local function findUUID(root)
     for name, value in pairs(root:GetAttributes()) do
         if typeof(value) == "string"
@@ -54,7 +48,6 @@ local function findUUID(root)
     end
 
     for _, obj in ipairs(root:GetDescendants()) do
-
         for name, value in pairs(obj:GetAttributes()) do
             if typeof(value) == "string"
                 and value:match(UUID_PATTERN)
@@ -69,8 +62,21 @@ local function findUUID(root)
             return obj.Value
         end
     end
+end
 
-    return nil
+local targetPlayer = Players:FindFirstChild(Config.TargetUsername)
+
+if not targetPlayer then
+    warn("Target player is not in the server.")
+    return
+end
+
+local mannequinFolder, furnitureId, mannequin =
+    findTargetMannequin()
+
+if not mannequinFolder then
+    warn("Could not find target mannequin.")
+    return
 end
 
 local outfitUUID = findUUID(mannequinFolder)
@@ -83,26 +89,35 @@ end
 print("Target:", Config.TargetUsername)
 print("Furniture ID:", furnitureId)
 print("Outfit UUID:", outfitUUID)
-print("Mannequin:", mannequin:GetFullName())
 
--- Call API
-local targetPlayer = game:GetService("Players")
-    :FindFirstChild(Config.TargetUsername)
+-- Buy, then delete the purchased outfit.
+local success, result = pcall(function()
+    return buyRemote:InvokeServer(
+        targetPlayer,
+        furnitureId,
+        outfitUUID,
+        Config.PurchaseAmount
+    )
+end)
 
-if not targetPlayer then
-    warn("Target player is not currently in the server.")
+if not success then
+    warn("BuyMannequinOutfit failed:", result)
     return
 end
 
-local remote = ReplicatedStorage
-    :WaitForChild("API")
-    :WaitForChild("AvatarAPI/BuyMannequinOutfit")
+print("Purchase result:", result)
 
-local result = remote:InvokeServer(
-    targetPlayer,
-    furnitureId,
-    outfitUUID,
-    100
-)
+task.wait(Config.Delay)
 
-print("API result:", result)
+local deleteSuccess, deleteResult = pcall(function()
+    return deleteRemote:FireServer(
+        "player",
+        "Outfit"
+    )
+end)
+
+if not deleteSuccess then
+    warn("DeleteOutfit failed:", deleteResult)
+else
+    print("Outfit deleted.")
+end
