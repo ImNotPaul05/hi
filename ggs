@@ -67,7 +67,43 @@ end
 -- INSPECT HOUSE CONTENTS
 --==================================================
 
-print("=== TARGET HOUSE CONTENTS ===")
+--==================================================
+-- WAIT FOR FURNITURE CONTENTS
+--==================================================
+
+print("Waiting for furniture contents...")
+
+local timeout = 15
+local startTime = os.clock()
+
+repeat
+    task.wait(0.25)
+
+    if #houseFolder:GetChildren() > 0 then
+        break
+    end
+until os.clock() - startTime >= timeout
+
+print("Children found:", #houseFolder:GetChildren())
+
+
+--==================================================
+-- INSPECT TARGET FURNITURE
+--==================================================
+
+print("=== TARGET FURNITURE ===")
+
+for _, obj in ipairs(houseFolder:GetChildren()) do
+    print(
+        obj.ClassName,
+        "->",
+        obj.Name,
+        "->",
+        obj:GetFullName()
+    )
+end
+
+print("=== DESCENDANTS ===")
 
 for _, obj in ipairs(houseFolder:GetDescendants()) do
     print(
@@ -77,14 +113,6 @@ for _, obj in ipairs(houseFolder:GetDescendants()) do
         "->",
         obj:GetFullName()
     )
-
-    for name, value in pairs(obj:GetAttributes()) do
-        print("    Attribute:", name, "=", value)
-    end
-
-    if obj:IsA("StringValue") then
-        print("    StringValue:", obj.Value)
-    end
 end
 
 print("=== END ===")
