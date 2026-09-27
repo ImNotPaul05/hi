@@ -8,11 +8,12 @@ local camera = workspace.CurrentCamera
 
 local flying = false
 local speed = 50
+local bodyVel, bodyGyro
 local keysDown = {W = false, S = false, A = false, D = false, Space = false, Control = false}
 
 -- Create Screen GUI and Button
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "AntiSunkFlyGui"
+screenGui.Name = "PhysicsFlyGui"
 screenGui.ResetOnSpawn = false
 pcall(function() screenGui.Parent = CoreGui end)
 if not screenGui.Parent then screenGui.Parent = localPlayer:WaitForChild("PlayerGui") end
@@ -29,51 +30,93 @@ flyButton.Font = Enum.Font.SourceSansBold
 flyButton.Text = "Fly: OFF"
 flyButton.Parent = screenGui
 
-local function toggleFlight()
-    flying = not flying
+local function startFlight()
     local character = localPlayer.Character
-    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = character.HumanoidRootPart
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
     
-    if flying then
-        flyButton.Text = "Fly: ON"
-        flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-        if humanoid then humanoid.PlatformStand = true end
-    else
-        flyButton.Text = "Fly: OFF"
-        flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-        if humanoid then humanoid.PlatformStand = false end
+    flying = true
+    flyButton.Text = "Fly: ON"
+    flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+    
+    if humanoid then
+        humanoid.PlatformStand = true
+    end
+    
+    -- Clean up old movers if any exist
+    if hrp:FindFirstChild("FlyVel") then hrp.FlyVel:Destroy() end
+    if hrp:FindFirstChild("FlyGyro") then hrp.FlyGyro:Destroy() end
+    
+    -- BodyVelocity forces the character to move and completely negates gravity
+    bodyVel = Instance.new("BodyVelocity")
+    bodyVel.Name = "FlyVel"
+    bodyVel.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bodyVel.Velocity = Vector3.new(0, 0, 0)
+    bodyVel.Parent = hrp
+    
+    -- BodyGyro locks your rotation smoothly to your camera view
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.Name = "FlyGyro"
+    bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    bodyGyro.CFrame = hrp.CFrame
+    bodyGyro.Parent = hrp
+end
+
+local function stopFlight()
+    flying = false
+    flyButton.Text = "Fly: OFF"
+    flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    
+    local character = localPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.PlatformStand = false
+        end
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            if hrp:FindFirstChild("FlyVel") then hrp.FlyVel:Destroy() end
+            if hrp:FindFirstChild("FlyGyro") then hrp.FlyGyro:Destroy() end
+        end
     end
 end
 
-flyButton.MouseButton1Click:Connect(toggleFlight)
+flyButton.MouseButton1Click:Connect(function()
+    if flying then
+        stopFlight()
+    else
+        startFlight()
+    end
+end)
 
--- Anti-Sunk Movement Loop
-RunService.RenderStepped:Connect(function(dt)
+-- Continuous Physics Update Loop
+RunService.RenderStepped:Connect(function()
     if not flying then return end
     
     local character = localPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     local hrp = character.HumanoidRootPart
     
-    local moveDir = Vector3.new(0, 0, 0)
-    local camCF = camera.CFrame
-    
-    if keysDown.W then moveDir = moveDir + camCF.LookVector end
-    if keysDown.S then moveDir = moveDir - camCF.LookVector end
-    if keysDown.A then moveDir = moveDir - camCF.RightVector end
-    if keysDown.D then moveDir = moveDir + camCF.RightVector end
-    if keysDown.Space then moveDir = moveDir + Vector3.new(0, 1, 0) end
-    if keysDown.Control then moveDir = moveDir - Vector3.new(0, 1, 0) end
-    
-    -- Kill all physics momentum so gravity can't drag you down
-    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-    hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-    
-    if moveDir.Magnitude > 0 then
-        hrp.CFrame = CFrame.new(hrp.Position + (moveDir.Unit * speed * dt), hrp.Position + camCF.LookVector)
-    else
-        -- When idling, freeze your exact position floating in place
-        hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + camCF.LookVector)
+    if bodyVel and bodyGyro then
+        local moveDir = Vector3.new(0, 0, 0)
+        local camCF = camera.CFrame
+        
+        if keysDown.W then moveDir = moveDir + camCF.LookVector end
+        if keysDown.S then moveDir = moveDir - camCF.LookVector end
+        if keysDown.A then moveDir = moveDir - camCF.RightVector end
+        if keysDown.D then moveDir = moveDir + camCF.RightVector end
+        if keysDown.Space then moveDir = moveDir + Vector3.new(0, 1, 0) end
+        if keysDown.Control then moveDir = moveDir - Vector3.new(0, 1, 0) end
+        
+        if moveDir.Magnitude > 0 then
+            bodyVel.Velocity = moveDir.Unit * speed
+        else
+            -- Small upward float velocity (0.1) counteracts any subtle gravity pull
+            bodyVel.Velocity = Vector3.new(0, 0.1, 0)
+        end
+        
+        bodyGyro.CFrame = camCF
     end
 end)
 
@@ -96,4 +139,4 @@ UserInputService.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftControl then keysDown.Control = false end
 end)
 
-print("Anti-Sunk Fly loaded!")
+print("Physics Fly loaded!")
