@@ -1,7 +1,11 @@
 local Config = {
+    TargetUsername = "R0gueX5gWarpB200323",
+
     PurchaseAmount = 100,
+
     PurchasesPerWindow = 3,
     WindowSeconds = 120,
+
     DelayBetweenPurchases = 1,
     DeleteDelay = 0.5,
 }
