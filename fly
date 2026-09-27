@@ -12,7 +12,7 @@ local keysDown = {W = false, S = false, A = false, D = false, Space = false, Con
 
 -- Create Screen GUI and Button
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FixedFlyGui"
+screenGui.Name = "AntiSunkFlyGui"
 screenGui.ResetOnSpawn = false
 pcall(function() screenGui.Parent = CoreGui end)
 if not screenGui.Parent then screenGui.Parent = localPlayer:WaitForChild("PlayerGui") end
@@ -47,7 +47,7 @@ end
 
 flyButton.MouseButton1Click:Connect(toggleFlight)
 
--- Fluid Movement Loop (Does not lock camera/character when idling)
+-- Anti-Sunk Movement Loop
 RunService.RenderStepped:Connect(function(dt)
     if not flying then return end
     
@@ -65,13 +65,15 @@ RunService.RenderStepped:Connect(function(dt)
     if keysDown.Space then moveDir = moveDir + Vector3.new(0, 1, 0) end
     if keysDown.Control then moveDir = moveDir - Vector3.new(0, 1, 0) end
     
+    -- Kill all physics momentum so gravity can't drag you down
+    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+    hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+    
     if moveDir.Magnitude > 0 then
-        -- Move smoothly and match camera orientation naturally
         hrp.CFrame = CFrame.new(hrp.Position + (moveDir.Unit * speed * dt), hrp.Position + camCF.LookVector)
     else
-        -- When you let go of keys, just hold your exact position without freezing rotation
-        hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-        hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+        -- When idling, freeze your exact position floating in place
+        hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + camCF.LookVector)
     end
 end)
 
@@ -94,4 +96,4 @@ UserInputService.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftControl then keysDown.Control = false end
 end)
 
-print("Fluid Fly loaded! Click the button to toggle.")
+print("Anti-Sunk Fly loaded!")
