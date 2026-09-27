@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
 local localPlayer = Players.LocalPlayer
@@ -8,28 +7,61 @@ local camera = workspace.CurrentCamera
 
 local flying = false
 local speed = 50
+local moveForward, moveUp, moveDown = false, false, false
 local bodyVel, bodyGyro
-local keysDown = {W = false, S = false, A = false, D = false, Space = false, Control = false}
 
--- Create Screen GUI and Button
+-- Create GUI Hub for Emulator
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "PhysicsFlyGui"
+screenGui.Name = "EmulatorFlyGui"
 screenGui.ResetOnSpawn = false
 pcall(function() screenGui.Parent = CoreGui end)
 if not screenGui.Parent then screenGui.Parent = localPlayer:WaitForChild("PlayerGui") end
 
+-- Main Toggle Button
 local flyButton = Instance.new("TextButton")
-flyButton.Size = UDim2.new(0, 120, 0, 50)
-flyButton.Position = UDim2.new(0.5, -60, 0.85, 0)
+flyButton.Size = UDim2.new(0, 100, 0, 45)
+flyButton.Position = UDim2.new(0.5, -50, 0.80, 0)
 flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-flyButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-flyButton.BorderSizePixel = 2
 flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyButton.TextSize = 16
+flyButton.TextSize = 14
 flyButton.Font = Enum.Font.SourceSansBold
 flyButton.Text = "Fly: OFF"
 flyButton.Parent = screenGui
 
+-- Forward Button (Hold to move where camera looks)
+local fwdButton = Instance.new("TextButton")
+fwdButton.Size = UDim2.new(0, 100, 0, 45)
+fwdButton.Position = UDim2.new(0.5, -50, 0.68, 0)
+fwdButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+fwdButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+fwdButton.TextSize = 14
+fwdButton.Font = Enum.Font.SourceSansBold
+fwdButton.Text = "Hold: Move"
+fwdButton.Parent = screenGui
+
+-- Up Button
+local upButton = Instance.new("TextButton")
+upButton.Size = UDim2.new(0, 45, 0, 45)
+upButton.Position = UDim2.new(0.5, 55, 0.68, 0)
+upButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+upButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+upButton.TextSize = 14
+upButton.Font = Enum.Font.SourceSansBold
+upButton.Text = "UP"
+upButton.Parent = screenGui
+
+-- Down Button
+local downButton = Instance.new("TextButton")
+downButton.Size = UDim2.new(0, 45, 0, 45)
+downButton.Position = UDim2.new(0.5, -105, 0.68, 0)
+downButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+downButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+downButton.TextSize = 14
+downButton.Font = Enum.Font.SourceSansBold
+downButton.Text = "DOWN"
+downButton.Parent = screenGui
+
+-- Flight Engine Logic
 local function startFlight()
     local character = localPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
@@ -40,24 +72,19 @@ local function startFlight()
     flyButton.Text = "Fly: ON"
     flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
     
-    if humanoid then
-        humanoid.PlatformStand = true
-    end
+    if humanoid then humanoid.PlatformStand = true end
     
-    -- Clean up old movers if any exist
-    if hrp:FindFirstChild("FlyVel") then hrp.FlyVel:Destroy() end
-    if hrp:FindFirstChild("FlyGyro") then hrp.FlyGyro:Destroy() end
+    if hrp:FindFirstChild("EmulatorVel") then hrp.EmulatorVel:Destroy() end
+    if hrp:FindFirstChild("EmulatorGyro") then hrp.EmulatorGyro:Destroy() end
     
-    -- BodyVelocity forces the character to move and completely negates gravity
     bodyVel = Instance.new("BodyVelocity")
-    bodyVel.Name = "FlyVel"
+    bodyVel.Name = "EmulatorVel"
     bodyVel.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    bodyVel.Velocity = Vector3.new(0, 0, 0)
+    bodyVel.Velocity = Vector3.new(0, 0.1, 0)
     bodyVel.Parent = hrp
     
-    -- BodyGyro locks your rotation smoothly to your camera view
     bodyGyro = Instance.new("BodyGyro")
-    bodyGyro.Name = "FlyGyro"
+    bodyGyro.Name = "EmulatorGyro"
     bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
     bodyGyro.CFrame = hrp.CFrame
     bodyGyro.Parent = hrp
@@ -71,72 +98,46 @@ local function stopFlight()
     local character = localPlayer.Character
     if character then
         local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.PlatformStand = false
-        end
+        if humanoid then humanoid.PlatformStand = false end
         local hrp = character:FindFirstChild("HumanoidRootPart")
         if hrp then
-            if hrp:FindFirstChild("FlyVel") then hrp.FlyVel:Destroy() end
-            if hrp:FindFirstChild("FlyGyro") then hrp.FlyGyro:Destroy() end
+            if hrp:FindFirstChild("EmulatorVel") then hrp.EmulatorVel:Destroy() end
+            if hrp:FindFirstChild("EmulatorGyro") then hrp.EmulatorGyro:Destroy() end
         end
     end
 end
 
 flyButton.MouseButton1Click:Connect(function()
-    if flying then
-        stopFlight()
-    else
-        startFlight()
-    end
+    if flying then stopFlight() else startFlight() end
 end)
 
--- Continuous Physics Update Loop
+-- Button Click Handlers for Emulator Touch/Mouse
+fwdButton.MouseButton1Down:Connect(function() moveForward = true end)
+fwdButton.MouseButton1Up:Connect(function() moveForward = false end)
+upButton.MouseButton1Down:Connect(function() moveUp = true end)
+upButton.MouseButton1Up:Connect(function() moveUp = false end)
+downButton.MouseButton1Down:Connect(function() moveDown = true end)
+downButton.MouseButton1Up:Connect(function() moveDown = false end)
+
+-- Movement Step Loop
 RunService.RenderStepped:Connect(function()
-    if not flying then return end
+    if not flying or not bodyVel or not bodyGyro then return end
     
-    local character = localPlayer.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = character.HumanoidRootPart
+    local camCF = camera.CFrame
+    local velocity = Vector3.new(0, 0.1, 0) -- anti-sunk hover
     
-    if bodyVel and bodyGyro then
-        local moveDir = Vector3.new(0, 0, 0)
-        local camCF = camera.CFrame
-        
-        if keysDown.W then moveDir = moveDir + camCF.LookVector end
-        if keysDown.S then moveDir = moveDir - camCF.LookVector end
-        if keysDown.A then moveDir = moveDir - camCF.RightVector end
-        if keysDown.D then moveDir = moveDir + camCF.RightVector end
-        if keysDown.Space then moveDir = moveDir + Vector3.new(0, 1, 0) end
-        if keysDown.Control then moveDir = moveDir - Vector3.new(0, 1, 0) end
-        
-        if moveDir.Magnitude > 0 then
-            bodyVel.Velocity = moveDir.Unit * speed
-        else
-            -- Small upward float velocity (0.1) counteracts any subtle gravity pull
-            bodyVel.Velocity = Vector3.new(0, 0.1, 0)
-        end
-        
-        bodyGyro.CFrame = camCF
+    if moveForward then
+        velocity = camCF.LookVector * speed
     end
+    if moveUp then
+        velocity = velocity + Vector3.new(0, speed, 0)
+    end
+    if moveDown then
+        velocity = velocity - Vector3.new(0, speed, 0)
+    end
+    
+    bodyVel.Velocity = velocity
+    bodyGyro.CFrame = camCF
 end)
 
--- Track Key Presses
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.W then keysDown.W = true end
-    if input.KeyCode == Enum.KeyCode.S then keysDown.S = true end
-    if input.KeyCode == Enum.KeyCode.A then keysDown.A = true end
-    if input.KeyCode == Enum.KeyCode.D then keysDown.D = true end
-    if input.KeyCode == Enum.KeyCode.Space then keysDown.Space = true end
-    if input.KeyCode == Enum.KeyCode.LeftControl then keysDown.Control = true end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.W then keysDown.W = false end
-    if input.KeyCode == Enum.KeyCode.S then keysDown.S = false end
-    if input.KeyCode == Enum.KeyCode.A then keysDown.A = false end
-    if input.KeyCode == Enum.KeyCode.D then keysDown.D = false end
-    if input.KeyCode == Enum.KeyCode.Space then keysDown.Space = false end
-    if input.KeyCode == Enum.KeyCode.LeftControl then keysDown.Control = false end
-end)
-
-print("Physics Fly loaded!")
+print("Emulator Fly GUI Loaded!")
