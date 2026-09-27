@@ -1,98 +1,233 @@
 local Config = {
     TargetUsername = "XzMysticbAClawnzX",
+
+    PurchaseAmount = 100,
+
+    PurchasesPerWindow = 3,
+    WindowSeconds = 120,
+
+    DelayBetweenPurchases = 1,
+    DeleteDelay = 0.5,
 }
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local API = ReplicatedStorage:WaitForChild("API")
-
 local furniture = Workspace
     :WaitForChild("HouseInteriors")
     :WaitForChild("furniture")
 
+local API = ReplicatedStorage:WaitForChild("API")
 
---==================================================
--- LOAD TARGET HOUSE
---==================================================
+local buyRemote =
+    API:WaitForChild("AvatarAPI/BuyMannequinOutfit")
 
-local targetPlayer = Players:WaitForChild(Config.TargetUsername)
+local deleteRemote =
+    API:WaitForChild("AvatarAPI/DeleteOutfit")
 
-API:WaitForChild("HousingAPI/SubscribeToHouse")
-    :FireServer(targetPlayer)
-
-print("Loading house for:", Config.TargetUsername)
+local UUID_PATTERN =
+    "^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$"
 
 
---==================================================
--- WAIT FOR TARGET HOUSE
---==================================================
 
-local targetPrefix = Config.TargetUsername .. "/"
-
-repeat
-    task.wait(0.2)
-
-    local found = false
+-- Find the target player's mannequin
+local function findTargetMannequin()
+    local prefix = Config.TargetUsername .. "/"
 
     for _, obj in ipairs(furniture:GetChildren()) do
-        if obj.Name:sub(1, #targetPrefix) == targetPrefix then
-            found = true
-            break
+
+        if obj.Name:sub(1, #prefix) == prefix then
+
+            local furnitureId =
+                obj.Name:match("(f%-.+)$")
+
+            local mannequin =
+                obj:FindFirstChild("Mannequin", true)
+
+            if furnitureId and mannequin then
+                return obj, furnitureId, mannequin
+            end
         end
     end
 
-until found
-
-print("Target house loaded")
-
-
---==================================================
--- SEARCH ALL TARGET FURNITURE
---==================================================
-
-print("Searching target furniture...")
-
-local mannequinFolder
-local mannequin
-local furnitureId
-
-for _, obj in ipairs(furniture:GetChildren()) do
-
-    if obj.Name:sub(1, #targetPrefix) == targetPrefix then
-
-        local id = obj.Name:match("(f%-.+)$")
-        local foundMannequin = obj:FindFirstChild("Mannequin", true)
-
-        if id then
-            print(
-                "Furniture:",
-                id,
-                "|",
-                obj:GetFullName()
-            )
-        end
-
-        if foundMannequin then
-            mannequinFolder = obj
-            mannequin = foundMannequin
-            furnitureId = id
-
-            print("================================")
-            print("MANNEQUIN FOUND")
-            print("Furniture ID:", furnitureId)
-            print("Mannequin:", mannequin:GetFullName())
-            print("================================")
-
-            break
-        end
-    end
+    return nil
 end
 
 
-if not mannequin then
-    warn("No mannequin found in target player's loaded house.")
-else
-    print("Ready for next step.")
+local function findUUID(root)
+
+    -- Check attributes on the root
+    for name, value in pairs(root:GetAttributes()) do
+        if typeof(value) == "string"
+            and value:match(UUID_PATTERN)
+        then
+            print("UUID found in attribute:", name)
+            return value
+        end
+    end
+
+    -- Check all descendants
+    for _, obj in ipairs(root:GetDescendants()) do
+
+        -- Check attributes
+        for name, value in pairs(obj:GetAttributes()) do
+            if typeof(value) == "string"
+                and value:match(UUID_PATTERN)
+            then
+                print(
+                    "UUID found:",
+                    value,
+                    "at",
+                    obj:GetFullName(),
+                    "attribute:",
+                    name
+                )
+
+                return value
+            end
+        end
+
+        -- Check StringValue
+        if obj:IsA("StringValue") then
+            if obj.Value:match(UUID_PATTERN) then
+                print(
+                    "UUID found:",
+                    obj.Value,
+                    "at",
+                    obj:GetFullName()
+                )
+
+                return obj.Value
+            end
+        end
+    end
+
+    return nil
+end
+
+-- Make sure target exists
+local targetPlayer =
+    Players:FindFirstChild(Config.TargetUsername)
+
+if not targetPlayer then
+    warn("Target player is not in the server.")
+    return
+end
+
+
+--==================================================
+-- PURCHASE LOOP
+--==================================================
+
+while true do
+
+    print("================================")
+    print("Starting purchase window")
+    print("Limit:", Config.PurchasesPerWindow)
+    print("================================")
+
+    for purchaseNumber = 1, Config.PurchasesPerWindow do
+
+        local mannequinFolder, furnitureId, mannequin =
+            findTargetMannequin()
+
+        if not mannequinFolder then
+            warn("Could not find target mannequin.")
+            task.wait(Config.DelayBetweenPurchases)
+            continue
+        end
+
+        local outfitUUID =
+            findUUID(mannequinFolder)
+
+        if not outfitUUID then
+            warn("Could not find outfit UUID.")
+            task.wait(Config.DelayBetweenPurchases)
+            continue
+        end
+
+        print("")
+        print("Purchase:", purchaseNumber,
+            "/", Config.PurchasesPerWindow)
+
+        print("Target:", Config.TargetUsername)
+        print("Furniture ID:", furnitureId)
+        print("UUID:", outfitUUID)
+
+
+        -- BUY
+        local buySuccess, buyResult =
+            pcall(function()
+
+                return buyRemote:InvokeServer(
+                    targetPlayer,
+                    furnitureId,
+                    outfitUUID,
+                    Config.PurchaseAmount
+                )
+
+            end)
+
+
+        if buySuccess then
+
+            print("Purchase successful:", buyResult)
+
+            task.wait(Config.DeleteDelay)
+
+
+            -- DELETE
+            local deleteSuccess, deleteResult =
+                pcall(function()
+
+                    return deleteRemote:FireServer(
+                        "player",
+                        "Outfit"
+                    )
+
+                end)
+
+
+            if deleteSuccess then
+                print("Outfit deleted.")
+            else
+                warn(
+                    "Delete failed:",
+                    deleteResult
+                )
+            end
+
+        else
+
+            warn(
+                "Purchase failed:",
+                buyResult
+            )
+
+        end
+
+
+        -- Wait between purchases
+        if purchaseNumber < Config.PurchasesPerWindow then
+            task.wait(Config.DelayBetweenPurchases)
+        end
+    end
+
+
+    --==================================================
+    -- WAIT FOR NEXT 2-MINUTE WINDOW
+    --==================================================
+
+    print("")
+    print("================================")
+    print("3 purchases completed.")
+    print(
+        "Waiting",
+        Config.WindowSeconds,
+        "seconds..."
+    )
+    print("================================")
+
+    task.wait(Config.WindowSeconds)
 end
