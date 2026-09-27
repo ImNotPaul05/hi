@@ -5,7 +5,7 @@ local CoreGui = game:GetService("CoreGui")
 local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
-flying = false
+local flying = false
 speed = 50
 local moveForward, moveUp, moveDown = false, false, false
 local bodyVel, bodyGyro
