@@ -6,6 +6,9 @@ local CoreGui = game:GetService("CoreGui")
 local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
+local flying = false
+local speed = 50
+local keysDown = {W = false, S = false, A = false, D = false, Space = false, Control = false}
 
 -- Create Screen GUI and Button
 local screenGui = Instance.new("ScreenGui")
