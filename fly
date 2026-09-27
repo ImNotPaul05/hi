@@ -1,97 +1,109 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
+local ContextActionService = game:GetService("ContextActionService")
 
 local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 local flying = false
 local speed = 50
-local keysDown = {W = false, S = false, A = false, D = false, Space = false, Control = false}
+local moveVector = Vector3.new(0, 0, 0)
+local bodyVel, bodyGyro
 
--- Create Screen GUI and Button
+-- Create a Simple On-Screen Toggle Button
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "SimpleFlyGui"
+screenGui.Name = "ThumbstickFlyGui"
 screenGui.ResetOnSpawn = false
 pcall(function() screenGui.Parent = CoreGui end)
 if not screenGui.Parent then screenGui.Parent = localPlayer:WaitForChild("PlayerGui") end
 
 local flyButton = Instance.new("TextButton")
-flyButton.Size = UDim2.new(0, 120, 0, 50)
-flyButton.Position = UDim2.new(0.5, -60, 0.85, 0)
+flyButton.Size = UDim2.new(0, 110, 0, 45)
+flyButton.Position = UDim2.new(0.5, -55, 0.82, 0)
 flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-flyButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-flyButton.BorderSizePixel = 2
 flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyButton.TextSize = 16
+flyButton.TextSize = 14
 flyButton.Font = Enum.Font.SourceSansBold
 flyButton.Text = "Fly: OFF"
 flyButton.Parent = screenGui
 
--- Toggle flight state
-local function toggleFlight()
-    flying = not flying
-    if flying then
-        flyButton.Text = "Fly: ON"
-        flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-    else
-        flyButton.Text = "Fly: OFF"
-        flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    end
-end
-
-flyButton.MouseButton1Click:Connect(toggleFlight)
-
--- Movement loop using CFrame (bypasses most physics blockers)
-RunService.RenderStepped:Connect(function(dt)
-    if not flying then return end
-    
+-- Flight Engine Logic
+local function startFlight()
     local character = localPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     local hrp = character.HumanoidRootPart
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     
-    if humanoid then
-        humanoid.PlatformStand = true -- Keep character stable
-    end
+    flying = true
+    flyButton.Text = "Fly: ON"
+    flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
     
-    local moveDir = Vector3.new(0, 0, 0)
+    if humanoid then humanoid.PlatformStand = true end
+    
+    if hrp:FindFirstChild("ThumbVel") then hrp.ThumbVel:Destroy() end
+    if hrp:FindFirstChild("ThumbGyro") then hrp.ThumbGyro:Destroy() end
+    
+    bodyVel = Instance.new("BodyVelocity")
+    bodyVel.Name = "ThumbVel"
+    bodyVel.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bodyVel.Velocity = Vector3.new(0, 0.1, 0)
+    bodyVel.Parent = hrp
+    
+    bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.Name = "ThumbGyro"
+    bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+    bodyGyro.CFrame = hrp.CFrame
+    bodyGyro.Parent = hrp
+end
+
+local function stopFlight()
+    flying = false
+    flyButton.Text = "Fly: OFF"
+    flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    
+    local character = localPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then humanoid.PlatformStand = false end
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            if hrp:FindFirstChild("ThumbVel") then hrp.ThumbVel:Destroy() end
+            if hrp:FindFirstChild("ThumbGyro") then hrp.ThumbGyro:Destroy() end
+        end
+    end
+end
+
+flyButton.MouseButton1Click:Connect(function()
+    if flying then stopFlight() else startFlight() end
+end)
+
+-- Capture Roblox's mobile thumbstick movement data automatically
+ContextActionService:BindAction("ThumbstickFlyMove", function(actionName, inputState, inputObject)
+    if inputState == Enum.UserInputState.Change or inputState == Enum.UserInputState.Begin then
+        -- Map the joystick axes to 3D space
+        moveVector = Vector3.new(inputObject.Position.X, 0, -inputObject.Position.Y)
+    elseif inputState == Enum.UserInputState.End then
+        moveVector = Vector3.new(0, 0, 0)
+    end
+end, false, Enum.KeyCode.Thumbstick1)
+
+-- Movement Step Loop
+RunService.RenderStepped:Connect(function()
+    if not flying or not bodyVel or not bodyGyro then return end
+    
     local camCF = camera.CFrame
+    local velocity = Vector3.new(0, 0.1, 0) -- Stops sinking completely when idle
     
-    if keysDown.W then moveDir = moveDir + camCF.LookVector end
-    if keysDown.S then moveDir = moveDir - camCF.LookVector end
-    if keysDown.A then moveDir = moveDir - camCF.RightVector end
-    if keysDown.D then moveDir = moveDir + camCF.RightVector end
-    if keysDown.Space then moveDir = moveDir + Vector3.new(0, 1, 0) end
-    if keysDown.Control then moveDir = moveDir - Vector3.new(0, 1, 0) end
-    
-    if moveDir.Magnitude > 0 then
-        hrp.CFrame = hrp.CFrame + (moveDir.Unit * speed * dt)
-    else
-        -- Hold position in place when not pressing keys
-        hrp.CFrame = CFrame.new(hrp.Position) + camCF.LookVector * 0 -- locks rotation to camera
+    if moveVector.Magnitude > 0 then
+        -- Convert thumbstick directions relative to where your camera is pointing
+        local forward = camCF.LookVector * moveVector.Z
+        local right = camCF.RightVector * moveVector.X
+        velocity = (forward + right).Unit * speed
     end
-    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0) -- Kill momentum
+    
+    bodyVel.Velocity = velocity
+    bodyGyro.CFrame = camCF
 end)
 
--- Track Key Presses
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.W then keysDown.W = true end
-    if input.KeyCode == Enum.KeyCode.S then keysDown.S = true end
-    if input.KeyCode == Enum.KeyCode.A then keysDown.A = true end
-    if input.KeyCode == Enum.KeyCode.D then keysDown.D = true end
-    if input.KeyCode == Enum.KeyCode.Space then keysDown.Space = true end
-    if input.KeyCode == Enum.KeyCode.LeftControl then keysDown.Control = true end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.W then keysDown.W = false end
-    if input.KeyCode == Enum.KeyCode.S then keysDown.S = false end
-    if input.KeyCode == Enum.KeyCode.A then keysDown.A = false end
-    if input.KeyCode == Enum.KeyCode.D then keysDown.D = false end
-    if input.KeyCode == Enum.KeyCode.Space then keysDown.Space = false end
-    if input.KeyCode == Enum.KeyCode.LeftControl then keysDown.Control = false end
-end)
-
-print("Simple CFrame Fly loaded! Click the button on your screen to toggle.")
+print("Thumbstick Fly Loaded!")
