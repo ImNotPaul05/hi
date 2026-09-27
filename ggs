@@ -27,7 +27,8 @@ local deleteRemote =
     API:WaitForChild("AvatarAPI/DeleteOutfit")
 
 local UUID_PATTERN =
-    "^%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$"
+    "^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$"
+
 
 
 -- Find the target player's mannequin
@@ -54,41 +55,56 @@ local function findTargetMannequin()
 end
 
 
--- Find UUID inside the furniture/mannequin
 local function findUUID(root)
 
-    -- Root attributes
-    for _, value in pairs(root:GetAttributes()) do
+    -- Check attributes on the root
+    for name, value in pairs(root:GetAttributes()) do
         if typeof(value) == "string"
             and value:match(UUID_PATTERN)
         then
+            print("UUID found in attribute:", name)
             return value
         end
     end
 
-    -- Descendants
+    -- Check all descendants
     for _, obj in ipairs(root:GetDescendants()) do
 
-        -- Attributes
-        for _, value in pairs(obj:GetAttributes()) do
+        -- Check attributes
+        for name, value in pairs(obj:GetAttributes()) do
             if typeof(value) == "string"
                 and value:match(UUID_PATTERN)
             then
+                print(
+                    "UUID found:",
+                    value,
+                    "at",
+                    obj:GetFullName(),
+                    "attribute:",
+                    name
+                )
+
                 return value
             end
         end
 
-        -- StringValues
-        if obj:IsA("StringValue")
-            and obj.Value:match(UUID_PATTERN)
-        then
-            return obj.Value
+        -- Check StringValue
+        if obj:IsA("StringValue") then
+            if obj.Value:match(UUID_PATTERN) then
+                print(
+                    "UUID found:",
+                    obj.Value,
+                    "at",
+                    obj:GetFullName()
+                )
+
+                return obj.Value
+            end
         end
     end
 
     return nil
 end
-
 
 -- Make sure target exists
 local targetPlayer =
