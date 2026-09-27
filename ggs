@@ -19,12 +19,8 @@ local furniture = Workspace
 
 local targetPlayer = Players:WaitForChild(Config.TargetUsername)
 
-local args = {
-    targetPlayer
-}
-
 API:WaitForChild("HousingAPI/SubscribeToHouse")
-    :FireServer(unpack(args))
+    :FireServer(targetPlayer)
 
 print("Loading house for:", Config.TargetUsername)
 
@@ -34,85 +30,69 @@ print("Loading house for:", Config.TargetUsername)
 --==================================================
 
 local targetPrefix = Config.TargetUsername .. "/"
-local houseFolder
 
 repeat
     task.wait(0.2)
 
+    local found = false
+
     for _, obj in ipairs(furniture:GetChildren()) do
         if obj.Name:sub(1, #targetPrefix) == targetPrefix then
-            houseFolder = obj
+            found = true
             break
         end
     end
-until houseFolder
 
-print("Target house loaded:", houseFolder:GetFullName())
+until found
 
-
---==================================================
--- FIND MANNEQUIN
---==================================================
-
-local mannequin = houseFolder:FindFirstChild("Mannequin", true)
-
-if mannequin then
-    print("Mannequin found:", mannequin:GetFullName())
-else
-    warn("No mannequin found in target house.")
-end
+print("Target house loaded")
 
 
 --==================================================
--- INSPECT HOUSE CONTENTS
+-- SEARCH ALL TARGET FURNITURE
 --==================================================
 
---==================================================
--- WAIT FOR FURNITURE CONTENTS
---==================================================
+print("Searching target furniture...")
 
-print("Waiting for furniture contents...")
+local mannequinFolder
+local mannequin
+local furnitureId
 
-local timeout = 15
-local startTime = os.clock()
+for _, obj in ipairs(furniture:GetChildren()) do
 
-repeat
-    task.wait(0.25)
+    if obj.Name:sub(1, #targetPrefix) == targetPrefix then
 
-    if #houseFolder:GetChildren() > 0 then
-        break
+        local id = obj.Name:match("(f%-.+)$")
+        local foundMannequin = obj:FindFirstChild("Mannequin", true)
+
+        if id then
+            print(
+                "Furniture:",
+                id,
+                "|",
+                obj:GetFullName()
+            )
+        end
+
+        if foundMannequin then
+            mannequinFolder = obj
+            mannequin = foundMannequin
+            furnitureId = id
+
+            print("================================")
+            print("MANNEQUIN FOUND")
+            print("Furniture ID:", furnitureId)
+            print("Mannequin:", mannequin:GetFullName())
+            print("================================")
+
+            break
+        end
     end
-until os.clock() - startTime >= timeout
-
-print("Children found:", #houseFolder:GetChildren())
-
-
---==================================================
--- INSPECT TARGET FURNITURE
---==================================================
-
-print("=== TARGET FURNITURE ===")
-
-for _, obj in ipairs(houseFolder:GetChildren()) do
-    print(
-        obj.ClassName,
-        "->",
-        obj.Name,
-        "->",
-        obj:GetFullName()
-    )
 end
 
-print("=== DESCENDANTS ===")
 
-for _, obj in ipairs(houseFolder:GetDescendants()) do
-    print(
-        obj.ClassName,
-        "->",
-        obj.Name,
-        "->",
-        obj:GetFullName()
-    )
+if not mannequin then
+    warn("No mannequin found in target player's loaded house.")
+else
+    print("Ready for next step.")
 end
-
-print("=== END ===")
