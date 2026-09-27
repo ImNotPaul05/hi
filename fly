@@ -1,6 +1,3 @@
--- Configuration
-local FLY_SPEED = 50 -- Change this to make it faster or slower
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -10,25 +7,19 @@ local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 local flying = false
-local bodyGyro, bodyVelocity
+local speed = 50
 local keysDown = {W = false, S = false, A = false, D = false, Space = false, Control = false}
 
 -- Create Screen GUI and Button
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FlyGuiButton"
+screenGui.Name = "SimpleFlyGui"
 screenGui.ResetOnSpawn = false
--- Use CoreGui if supported by your executor, otherwise fallback to PlayerGui
-pcall(function()
-    screenGui.Parent = CoreGui
-end)
-if not screenGui.Parent then
-    screenGui.Parent = localPlayer:WaitForChild("PlayerGui")
-end
+pcall(function() screenGui.Parent = CoreGui end)
+if not screenGui.Parent then screenGui.Parent = localPlayer:WaitForChild("PlayerGui") end
 
 local flyButton = Instance.new("TextButton")
-flyButton.Name = "ToggleFly"
 flyButton.Size = UDim2.new(0, 120, 0, 50)
-flyButton.Position = UDim2.new(0.5, -60, 0.85, 0) -- Centered near the bottom
+flyButton.Position = UDim2.new(0.5, -60, 0.85, 0)
 flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 flyButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
 flyButton.BorderSizePixel = 2
@@ -38,104 +29,54 @@ flyButton.Font = Enum.Font.SourceSansBold
 flyButton.Text = "Fly: OFF"
 flyButton.Parent = screenGui
 
--- Make the button draggable just in case it blocks your view
-local dragging, dragInput, dragStart, startPos
-flyButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = flyButton.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
+-- Toggle flight state
+local function toggleFlight()
+    flying = not flying
+    if flying then
+        flyButton.Text = "Fly: ON"
+        flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+    else
+        flyButton.Text = "Fly: OFF"
+        flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     end
-end)
+end
 
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        flyButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+flyButton.MouseButton1Click:Connect(toggleFlight)
 
--- Flight Physics Logic
-local function startFlight()
+-- Movement loop using CFrame (bypasses most physics blockers)
+RunService.RenderStepped:Connect(function(dt)
+    if not flying then return end
+    
     local character = localPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     local hrp = character.HumanoidRootPart
     local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
-
-    flying = true
-    humanoid.PlatformStand = true
-    flyButton.Text = "Fly: ON"
-    flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0) -- Green when active
-
-    bodyGyro = Instance.new("BodyGyro")
-    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-    bodyGyro.CFrame = hrp.CFrame
-    bodyGyro.Parent = hrp
-
-    bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    bodyVelocity.Parent = hrp
-
-    task.spawn(function()
-        while flying and character and hrp.Parent do
-            local moveDir = Vector3.new(0, 0, 0)
-            local camCF = camera.CFrame
-
-            if keysDown.W then moveDir = moveDir + camCF.LookVector end
-            if keysDown.S then moveDir = moveDir - camCF.LookVector end
-            if keysDown.A then moveDir = moveDir - camCF.RightVector end
-            if keysDown.D then moveDir = moveDir + camCF.RightVector end
-            if keysDown.Space then moveDir = moveDir + Vector3.new(0, 1, 0) end
-            if keysDown.Control then moveDir = moveDir - Vector3.new(0, 1, 0) end
-
-            if moveDir.Magnitude > 0 then
-                bodyVelocity.Velocity = moveDir.Unit * FLY_SPEED
-            else
-                bodyVelocity.Velocity = Vector3.new(0, 0.1, 0)
-            end
-
-            bodyGyro.CFrame = camCF
-            RunService.RenderStepped:Wait()
-        end
-    end)
-end
-
-local function stopFlight()
-    flying = false
-    flyButton.Text = "Fly: OFF"
-    flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35) -- Dark grey when off
-
-    local character = localPlayer.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.PlatformStand = false
-        end
-        if character:FindFirstChild("HumanoidRootPart") then
-            if bodyGyro then bodyGyro:Destroy() end
-            if bodyVelocity then bodyVelocity:Destroy() end
-        end
+    
+    if humanoid then
+        humanoid.PlatformStand = true -- Keep character stable
     end
-end
-
--- Button click event to toggle
-flyButton.MouseButton1Click:Connect(function()
-    if flying then
-        stopFlight()
+    
+    local moveDir = Vector3.new(0, 0, 0)
+    local camCF = camera.CFrame
+    
+    if keysDown.W then moveDir = moveDir + camCF.LookVector end
+    if keysDown.S then moveDir = moveDir - camCF.LookVector end
+    if keysDown.A then moveDir = moveDir - camCF.RightVector end
+    if keysDown.D then moveDir = moveDir + camCF.RightVector end
+    if keysDown.Space then moveDir = moveDir + Vector3.new(0, 1, 0) end
+    if keysDown.Control then moveDir = moveDir - Vector3.new(0, 1, 0) end
+    
+    if moveDir.Magnitude > 0 then
+        hrp.CFrame = hrp.CFrame + (moveDir.Unit * speed * dt)
     else
-        startFlight()
+        -- Hold position in place when not pressing keys
+        hrp.CFrame = CFrame.new(hrp.Position) + camCF.LookVector * 0 -- locks rotation to camera
     end
+    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0) -- Kill momentum
 end)
 
--- Keyboard movement detection
-UserInputService.InputBegan:Connect(function(input)
+-- Track Key Presses
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.W then keysDown.W = true end
     if input.KeyCode == Enum.KeyCode.S then keysDown.S = true end
     if input.KeyCode == Enum.KeyCode.A then keysDown.A = true end
@@ -153,4 +94,4 @@ UserInputService.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftControl then keysDown.Control = false end
 end)
 
-print("Fly GUI loaded! Click the on-screen button to toggle flying.")
+print("Simple CFrame Fly loaded! Click the button on your screen to toggle.")
