@@ -14,11 +14,38 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local API = ReplicatedStorage:WaitForChild("API")
+
+
+--==================================================
+-- TARGET PLAYER
+--==================================================
+
+local targetPlayer = Players:FindFirstChild(Config.TargetUsername)
+
+if not targetPlayer then
+    warn("Target player is not in the server.")
+    return
+end
+
+
+--==================================================
+-- LOAD TARGET HOUSE FIRST
+--==================================================
+
+API:WaitForChild("HousingAPI/SubscribeToHouse")
+    :FireServer(targetPlayer)
+
+print("House subscribed:", Config.TargetUsername)
+
+
+--==================================================
+-- EXISTING AUTO-BUY SETUP
+--==================================================
+
 local furniture = Workspace
     :WaitForChild("HouseInteriors")
     :WaitForChild("furniture")
-
-local API = ReplicatedStorage:WaitForChild("API")
 
 local buyRemote =
     API:WaitForChild("AvatarAPI/BuyMannequinOutfit")
@@ -30,8 +57,10 @@ local UUID_PATTERN =
     "^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$"
 
 
+--==================================================
+-- FIND TARGET MANNEQUIN
+--==================================================
 
--- Find the target player's mannequin
 local function findTargetMannequin()
     local prefix = Config.TargetUsername .. "/"
 
@@ -55,10 +84,14 @@ local function findTargetMannequin()
 end
 
 
+--==================================================
+-- FIND UUID
+--==================================================
+
 local function findUUID(root)
 
-    -- Check attributes on the root
     for name, value in pairs(root:GetAttributes()) do
+
         if typeof(value) == "string"
             and value:match(UUID_PATTERN)
         then
@@ -67,11 +100,11 @@ local function findUUID(root)
         end
     end
 
-    -- Check all descendants
+
     for _, obj in ipairs(root:GetDescendants()) do
 
-        -- Check attributes
         for name, value in pairs(obj:GetAttributes()) do
+
             if typeof(value) == "string"
                 and value:match(UUID_PATTERN)
             then
@@ -88,9 +121,11 @@ local function findUUID(root)
             end
         end
 
-        -- Check StringValue
+
         if obj:IsA("StringValue") then
+
             if obj.Value:match(UUID_PATTERN) then
+
                 print(
                     "UUID found:",
                     obj.Value,
@@ -106,15 +141,6 @@ local function findUUID(root)
     return nil
 end
 
--- Make sure target exists
-local targetPlayer =
-    Players:FindFirstChild(Config.TargetUsername)
-
-if not targetPlayer then
-    warn("Target player is not in the server.")
-    return
-end
-
 
 --==================================================
 -- PURCHASE LOOP
@@ -127,10 +153,12 @@ while true do
     print("Limit:", Config.PurchasesPerWindow)
     print("================================")
 
+
     for purchaseNumber = 1, Config.PurchasesPerWindow do
 
         local mannequinFolder, furnitureId, mannequin =
             findTargetMannequin()
+
 
         if not mannequinFolder then
             warn("Could not find target mannequin.")
@@ -138,8 +166,10 @@ while true do
             continue
         end
 
+
         local outfitUUID =
             findUUID(mannequinFolder)
+
 
         if not outfitUUID then
             warn("Could not find outfit UUID.")
@@ -147,9 +177,14 @@ while true do
             continue
         end
 
+
         print("")
-        print("Purchase:", purchaseNumber,
-            "/", Config.PurchasesPerWindow)
+        print(
+            "Purchase:",
+            purchaseNumber,
+            "/",
+            Config.PurchasesPerWindow
+        )
 
         print("Target:", Config.TargetUsername)
         print("Furniture ID:", furnitureId)
@@ -208,7 +243,6 @@ while true do
         end
 
 
-        -- Wait between purchases
         if purchaseNumber < Config.PurchasesPerWindow then
             task.wait(Config.DelayBetweenPurchases)
         end
@@ -216,7 +250,7 @@ while true do
 
 
     --==================================================
-    -- WAIT FOR NEXT 2-MINUTE WINDOW
+    -- WAIT FOR NEXT WINDOW
     --==================================================
 
     print("")
