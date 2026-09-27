@@ -1,5 +1,5 @@
 local Config = {
-    TargetUsername = "R0gueX5gWarpB200323",
+    TargetUsername = "XzMysticbAClawnzX",
 
     PurchaseAmount = 100,
 
@@ -14,38 +14,33 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local API = ReplicatedStorage:WaitForChild("API")
-
-
---==================================================
--- TARGET PLAYER
---==================================================
-
-local targetPlayer = Players:FindFirstChild(Config.TargetUsername)
-
-if not targetPlayer then
-    warn("Target player is not in the server.")
-    return
-end
-
 
 --==================================================
 -- LOAD TARGET HOUSE FIRST
 --==================================================
 
-API:WaitForChild("HousingAPI/SubscribeToHouse")
-    :FireServer(targetPlayer)
+local targetPlayer = Players:WaitForChild(Config.TargetUsername)
+
+local houseArgs = {
+    targetPlayer
+}
+
+ReplicatedStorage:WaitForChild("API")
+    :WaitForChild("HousingAPI/SubscribeToHouse")
+    :FireServer(unpack(houseArgs))
 
 print("House subscribed:", Config.TargetUsername)
 
 
 --==================================================
--- EXISTING AUTO-BUY SETUP
+-- AUTO BUY SETUP
 --==================================================
 
 local furniture = Workspace
     :WaitForChild("HouseInteriors")
     :WaitForChild("furniture")
+
+local API = ReplicatedStorage:WaitForChild("API")
 
 local buyRemote =
     API:WaitForChild("AvatarAPI/BuyMannequinOutfit")
@@ -58,7 +53,7 @@ local UUID_PATTERN =
 
 
 --==================================================
--- FIND TARGET MANNEQUIN
+-- FIND TARGET PLAYER'S MANNEQUIN
 --==================================================
 
 local function findTargetMannequin()
@@ -139,6 +134,16 @@ local function findUUID(root)
     end
 
     return nil
+end
+
+
+--==================================================
+-- MAKE SURE TARGET EXISTS
+--==================================================
+
+if not targetPlayer then
+    warn("Target player is not in the server.")
+    return
 end
 
 
@@ -250,7 +255,7 @@ while true do
 
 
     --==================================================
-    -- WAIT FOR NEXT WINDOW
+    -- WAIT FOR NEXT 2-MINUTE WINDOW
     --==================================================
 
     print("")
