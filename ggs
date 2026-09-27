@@ -6,22 +6,17 @@ local TargetUsername = "XzMysticbAClawnzX"
 local targetPlayer = Players:WaitForChild(TargetUsername)
 
 -- Load target house
-local args = {
-    targetPlayer
-}
-
 ReplicatedStorage:WaitForChild("API")
     :WaitForChild("HousingAPI/SubscribeToHouse")
-    :FireServer(unpack(args))
+    :FireServer(targetPlayer)
 
 print("Loading house for:", TargetUsername)
 
--- Find furniture folder
+-- Wait for furniture
 local furniture = workspace
     :WaitForChild("HouseInteriors")
     :WaitForChild("furniture")
 
--- Wait for target furniture to appear
 local targetPrefix = TargetUsername .. "/"
 local houseFolder
 
@@ -38,29 +33,19 @@ until houseFolder
 
 print("Target house loaded:", houseFolder:GetFullName())
 
--- Find mannequin
-local mannequin = houseFolder:FindFirstChild("Mannequin", true)
+-- Inspect everything inside the furniture object
+print("=== TARGET HOUSE CONTENTS ===")
 
-if not mannequin then
-    warn("No mannequin found in target house")
-    return
-end
-
-print("Mannequin found:", mannequin:GetFullName())
-
--- Inspect mannequin
-for name, value in pairs(mannequin:GetAttributes()) do
-    print("Attribute:", name, "=", value)
-end
-
-for _, obj in ipairs(mannequin:GetDescendants()) do
-    print(obj.ClassName, obj:GetFullName())
+for _, obj in ipairs(houseFolder:GetDescendants()) do
+    print(obj.ClassName, "->", obj.Name, "->", obj:GetFullName())
 
     for name, value in pairs(obj:GetAttributes()) do
-        print("  Attribute:", name, "=", value)
+        print("    Attribute:", name, "=", value)
     end
 
     if obj:IsA("StringValue") then
-        print("  StringValue:", obj.Value)
+        print("    StringValue:", obj.Value)
     end
 end
+
+print("=== END ===")
