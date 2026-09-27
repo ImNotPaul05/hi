@@ -6,7 +6,6 @@ local localPlayer = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 local flying = false
-local speed = 150
 local bodyVel, bodyGyro
 
 -- Safely grab Roblox's native mobile/pc control module
