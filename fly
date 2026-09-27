@@ -12,7 +12,7 @@ local keysDown = {W = false, S = false, A = false, D = false, Space = false, Con
 
 -- Create Screen GUI and Button
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "SimpleFlyGui"
+screenGui.Name = "FixedFlyGui"
 screenGui.ResetOnSpawn = false
 pcall(function() screenGui.Parent = CoreGui end)
 if not screenGui.Parent then screenGui.Parent = localPlayer:WaitForChild("PlayerGui") end
@@ -29,32 +29,31 @@ flyButton.Font = Enum.Font.SourceSansBold
 flyButton.Text = "Fly: OFF"
 flyButton.Parent = screenGui
 
--- Toggle flight state
 local function toggleFlight()
     flying = not flying
+    local character = localPlayer.Character
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    
     if flying then
         flyButton.Text = "Fly: ON"
         flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        if humanoid then humanoid.PlatformStand = true end
     else
         flyButton.Text = "Fly: OFF"
         flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        if humanoid then humanoid.PlatformStand = false end
     end
 end
 
 flyButton.MouseButton1Click:Connect(toggleFlight)
 
--- Movement loop using CFrame (bypasses most physics blockers)
+-- Fluid Movement Loop (Does not lock camera/character when idling)
 RunService.RenderStepped:Connect(function(dt)
     if not flying then return end
     
     local character = localPlayer.Character
     if not character or not character:FindFirstChild("HumanoidRootPart") then return end
     local hrp = character.HumanoidRootPart
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    
-    if humanoid then
-        humanoid.PlatformStand = true -- Keep character stable
-    end
     
     local moveDir = Vector3.new(0, 0, 0)
     local camCF = camera.CFrame
@@ -67,16 +66,17 @@ RunService.RenderStepped:Connect(function(dt)
     if keysDown.Control then moveDir = moveDir - Vector3.new(0, 1, 0) end
     
     if moveDir.Magnitude > 0 then
-        hrp.CFrame = hrp.CFrame + (moveDir.Unit * speed * dt)
+        -- Move smoothly and match camera orientation naturally
+        hrp.CFrame = CFrame.new(hrp.Position + (moveDir.Unit * speed * dt), hrp.Position + camCF.LookVector)
     else
-        -- Hold position in place when not pressing keys
-        hrp.CFrame = CFrame.new(hrp.Position) + camCF.LookVector * 0 -- locks rotation to camera
+        -- When you let go of keys, just hold your exact position without freezing rotation
+        hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
     end
-    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0) -- Kill momentum
 end)
 
 -- Track Key Presses
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
+UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.W then keysDown.W = true end
     if input.KeyCode == Enum.KeyCode.S then keysDown.S = true end
     if input.KeyCode == Enum.KeyCode.A then keysDown.A = true end
@@ -94,4 +94,4 @@ UserInputService.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftControl then keysDown.Control = false end
 end)
 
-print("Simple CFrame Fly loaded! Click the button on your screen to toggle.")
+print("Fluid Fly loaded! Click the button to toggle.")
