@@ -11,7 +11,9 @@ local Config = {
     Pet = "summer_2026_storm_condor", -- Pet kind / ID
     PetForm = "normal",                -- "normal" or "neon"
 
-    MaxPotionBatch = 10,
+    -- Maximum number of Age-Up Potions sent in one batch.
+    MaxPotionBatch = 15,
+
     FeedDelay = 0.5,
 }
 
@@ -223,11 +225,9 @@ local function GetCurrentAge()
     for _, ageName in ipairs(ageList) do
         local ageObject = Content:FindFirstChild(ageName, true)
 
-        if ageObject then
-            if ageObject:IsA("GuiObject") then
-                if ageObject.Visible then
-                    return ageName
-                end
+        if ageObject and ageObject:IsA("GuiObject") then
+            if ageObject.Visible then
+                return ageName
             end
         end
     end
@@ -309,7 +309,12 @@ local function UseAgeUpPotions(petUniqueId)
         return false
     end
 
-    print("Using", #potionIds, "Age-Up Potion(s)")
+    print("--------------------------------")
+    print("Potion batch size:", #potionIds)
+
+    for i, potionId in ipairs(potionIds) do
+        print("Potion", i, ":", potionId)
+    end
 
     local firstPotionId = potionIds[1]
 
@@ -319,7 +324,10 @@ local function UseAgeUpPotions(petUniqueId)
         table.insert(additionalPotions, potionIds[i])
     end
 
-    -- START Age-Up Potion
+    --==================================================
+    -- START AGE-UP POTION
+    --==================================================
+
     local startSuccess, startResult = pcall(function()
         return ReplicatedStorage
             :WaitForChild("API")
@@ -337,15 +345,20 @@ local function UseAgeUpPotions(petUniqueId)
 
     task.wait(0.2)
 
-    -- Create pet object / consume potion(s)
+    --==================================================
+    -- CREATE PET OBJECT
+    --==================================================
+
     local createSuccess, createResult = pcall(function()
         local args = {
             "__Enum_PetObjectCreatorType_2",
             {
                 additional_consume_uniques = additionalPotions,
+
                 pet_unique = petUniqueId,
 
-                -- The game generates/uses a unique object ID here.
+                -- Kept consistent with the captured
+                -- one-potion request.
                 unique_id = firstPotionId
             }
         }
@@ -369,18 +382,27 @@ end
 --==================================================
 
 local function AgePet(petUniqueId)
+    print("")
     print("================================")
     print("Processing pet:", petUniqueId)
 
-    -- Equip the target pet.
+    --==================================================
+    -- EQUIP PET
+    --==================================================
+
     if not EquipItem(petUniqueId) then
         warn("Failed to equip pet:", petUniqueId)
         return false
     end
 
-    -- VERY IMPORTANT:
-    -- Wait for BackpackApp to update to this pet.
+    -- IMPORTANT:
+    -- Wait for BackpackApp to update to the newly
+    -- equipped pet before reading its age.
     task.wait(1)
+
+    --==================================================
+    -- READ AGE
+    --==================================================
 
     local age = WaitForCurrentAge(5)
 
@@ -391,15 +413,25 @@ local function AgePet(petUniqueId)
 
     print("Current age:", age)
 
-    -- Never feed a Full Grown / Luminous pet.
+    --==================================================
+    -- ALREADY MAX?
+    --==================================================
+
     if IsMaxAge(age) then
         print("Already max age. Skipping:", petUniqueId)
         return true
     end
 
+    --==================================================
+    -- KEEP AGING UNTIL MAX
+    --==================================================
+
     while not IsMaxAge(age) do
-        print("Feeding pet:", petUniqueId)
-        print("Age before feeding:", age)
+
+        print("--------------------------------")
+        print("Pet:", petUniqueId)
+        print("Age before batch:", age)
+        print("Using up to", Config.MaxPotionBatch, "potions...")
 
         local success = UseAgeUpPotions(petUniqueId)
 
@@ -408,17 +440,24 @@ local function AgePet(petUniqueId)
             return false
         end
 
-        -- Wait for server/UI to update.
+        -- Give the server/UI time to update.
         task.wait(1)
 
-        -- Re-equip the same pet.
+        --==================================================
+        -- RE-EQUIP SAME PET
+        --==================================================
+
         if not EquipItem(petUniqueId) then
             warn("Failed to re-equip:", petUniqueId)
             return false
         end
 
-        -- Give BackpackApp time to switch.
+        -- Wait for BackpackApp to refresh.
         task.wait(0.75)
+
+        --==================================================
+        -- READ UPDATED AGE
+        --==================================================
 
         local newAge = WaitForCurrentAge(5)
 
@@ -429,7 +468,11 @@ local function AgePet(petUniqueId)
 
         age = newAge
 
-        print("Updated age:", age)
+        print("Age after batch:", age)
+
+        --==================================================
+        -- MAX AGE?
+        --==================================================
 
         if IsMaxAge(age) then
             print("Reached max age:", petUniqueId)
@@ -446,12 +489,18 @@ end
 -- MAIN
 --==================================================
 
+print("")
 print("================================")
 print("AUTO PET AGING STARTED")
+print("================================")
 print("Pet:", Config.Pet)
 print("Form:", Config.PetForm)
 print("Max potion batch:", Config.MaxPotionBatch)
 print("================================")
+
+--==================================================
+-- FIND ALL MATCHING PETS
+--==================================================
 
 local pets = GetMatchingPets()
 
@@ -462,10 +511,17 @@ if #pets == 0 then
     return
 end
 
+--==================================================
+-- PROCESS EVERY PET
+--==================================================
+
 for index, petUniqueId in ipairs(pets) do
+
     print("")
-    print("Pet", index, "of", #pets)
+    print("================================")
+    print("PET", index, "OF", #pets)
     print("Unique ID:", petUniqueId)
+    print("================================")
 
     local success = AgePet(petUniqueId)
 
@@ -477,6 +533,11 @@ for index, petUniqueId in ipairs(pets) do
     task.wait(0.5)
 end
 
+--==================================================
+-- FINISHED
+--==================================================
+
+print("")
 print("================================")
 print("AUTO PET AGING FINISHED")
 print("================================")
