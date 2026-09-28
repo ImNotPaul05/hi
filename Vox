@@ -12,7 +12,7 @@ local Config = {
     PetForm = "normal", -- "normal" or "neon"
 
     -- Maximum number of Age-Up Potions to request
-    MaxPotionBatch = 15,
+    MaxPotionBatch = 10,
 
     -- Delay after using a batch
     FeedDelay = 0.5,
