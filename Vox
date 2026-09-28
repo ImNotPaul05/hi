@@ -1,168 +1,425 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HttpService = game:GetService("HttpService")
 
-local Player = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
 
---==================================================
+--------------------------------------------------
 -- CONFIG
---==================================================
+--------------------------------------------------
 
 local Config = {
     Pet = "summer_2026_storm_condor",
+    PetForm = "normal", -- "normal" or "neon"
     Food = "Age-Up Potion",
-
     FeedDelay = 0.5,
-    CheckDelay = 0.25,
 }
 
---==================================================
--- REMOTES
---==================================================
+--------------------------------------------------
+-- LOAD CLIENT DATA
+--------------------------------------------------
 
-local API = ReplicatedStorage:WaitForChild("API")
+local successClientData, ClientData = pcall(function()
+    return require(
+        ReplicatedStorage
+            :WaitForChild("ClientModules")
+            :WaitForChild("Core")
+            :WaitForChild("ClientData")
+    )
+end)
 
-local EquipRemote =
-    API:WaitForChild("ToolAPI/Equip")
-
-local ConsumeFoodRemote =
-    API:WaitForChild("PetAPI/ConsumeFoodObject")
-
-local CreatePetObjectRemote =
-    API:WaitForChild("PetObjectAPI/CreatePetObject")
-
---==================================================
--- GAME-SPECIFIC LOOKUPS
---==================================================
-
--- TODO:
--- Return the unique ID of an available pet matching Config.Pet.
-local function FindPet()
-    -- Replace this with the game's actual itemData/inventory lookup.
-    return nil
+if not successClientData or not ClientData then
+    warn("Failed to load ClientData")
+    return
 end
 
--- TODO:
--- Return the unique ID of an available Age Up Potion.
-local function FindFood()
-    -- Replace this with the game's actual itemData/inventory lookup.
-    return nil
+print("ClientData loaded:", ClientData)
+
+--------------------------------------------------
+-- GET PLAYER DATA
+--------------------------------------------------
+
+local function GetPlayerData()
+    local dataStore = ClientData.get_data()
+
+    if not dataStore then
+        return nil
+    end
+
+    return dataStore[LocalPlayer] or dataStore[LocalPlayer.Name]
 end
 
--- TODO:
--- Return true when the currently equipped pet is maxed.
--- This needs the actual location/name of the "Friend" indicator.
-local function IsPetMaxed()
-    return false
+--------------------------------------------------
+-- FIND MATCHING PETS
+--------------------------------------------------
+
+local function GetMatchingPets()
+    local playerData = GetPlayerData()
+
+    if not playerData
+        or not playerData.inventory
+        or not playerData.inventory.pets then
+
+        warn("Could not find pet inventory")
+        return {}
+    end
+
+    local pets = {}
+
+    for uniqueId, itemData in pairs(playerData.inventory.pets) do
+        if itemData and itemData.kind == Config.Pet then
+
+            local properties = itemData.properties or {}
+
+            local isNeon = properties.neon == true
+            local isMega = properties.mega_neon == true
+
+            if Config.PetForm == "normal" then
+
+                -- Normal pet:
+                -- neon must NOT be true
+                -- mega_neon must NOT be true
+                if not isNeon and not isMega then
+                    table.insert(pets, uniqueId)
+                end
+
+            elseif Config.PetForm == "neon" then
+
+                -- Neon pet:
+                -- neon must be true
+                -- mega must NOT be true
+                if isNeon and not isMega then
+                    table.insert(pets, uniqueId)
+                end
+
+            end
+        end
+    end
+
+    return pets
 end
 
---==================================================
--- EQUIP FOOD
---==================================================
+--------------------------------------------------
+-- EQUIP PET / FOOD
+--------------------------------------------------
 
-local function EquipFood(foodUnique)
-    if not foodUnique then
+local function EquipItem(uniqueId)
+    if not uniqueId then
         return false
     end
 
     local args = {
-        foodUnique,
+        uniqueId,
         {
             use_sound_delay = false,
             equip_as_last = false
         }
     }
 
-    EquipRemote:InvokeServer(unpack(args))
+    local success, result = pcall(function()
+        return ReplicatedStorage
+            :WaitForChild("API")
+            :WaitForChild("ToolAPI/Equip")
+            :InvokeServer(unpack(args))
+    end)
+
+    if not success then
+        warn("Equip failed:", result)
+        return false
+    end
 
     return true
 end
 
---==================================================
--- FEED PET
---==================================================
+--------------------------------------------------
+-- FIND AGE-UP POTION
+--------------------------------------------------
 
-local function FeedPet(foodUnique, petUnique)
-    if not foodUnique or not petUnique then
+local function FindAgeUpPotion()
+    local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+
+    if not PlayerGui then
+        return nil
+    end
+
+    local BackpackApp = PlayerGui:FindFirstChild("BackpackApp")
+
+    if not BackpackApp then
+        return nil
+    end
+
+    local Food = BackpackApp:FindFirstChild("Food", true)
+
+    if not Food then
+        return nil
+    end
+
+    for _, object in ipairs(Food:GetDescendants()) do
+
+        if object:IsA("GuiObject") then
+
+            local button = object:FindFirstChild("Button")
+
+            if button and button:IsA("ImageButton") then
+
+                if button.Image == "rbxassetid://2577318741" then
+                    return object.Name
+                end
+
+            end
+        end
+    end
+
+    return nil
+end
+
+--------------------------------------------------
+-- CHECK FULL GROWN
+--------------------------------------------------
+
+local function IsFullGrown()
+    local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+
+    if not PlayerGui then
         return false
     end
 
-    local character = Player.Character
-    local root = character and character:FindFirstChild("HumanoidRootPart")
+    local BackpackApp = PlayerGui:FindFirstChild("BackpackApp")
+
+    if not BackpackApp then
+        return false
+    end
+
+    local FullGrown = BackpackApp:FindFirstChild("Full Grown", true)
+
+    if not FullGrown then
+        return false
+    end
+
+    if FullGrown:IsA("GuiObject") then
+        return FullGrown.Visible
+    end
+
+    return true
+end
+
+--------------------------------------------------
+-- CREATE PET OBJECT
+--------------------------------------------------
+
+local function CreatePetObject(petUniqueId)
+    local character = LocalPlayer.Character
+
+    if not character then
+        return false
+    end
+
+    local root = character:FindFirstChild("HumanoidRootPart")
 
     if not root then
         return false
     end
 
+    local objectUniqueId =
+        "2_" .. HttpService:GenerateGUID(false):gsub("-", "")
+
     local args = {
         "__Enum_PetObjectCreatorType_2",
         {
-            pet_unique = petUnique,
+            pet_unique = petUniqueId,
             spawn_cframe = root.CFrame,
             additional_consume_uniques = {},
-            unique_id = "2_" .. game:GetService("HttpService"):GenerateGUID(false)
+            unique_id = objectUniqueId
         }
     }
 
-    CreatePetObjectRemote:InvokeServer(unpack(args))
+    local success, result = pcall(function()
+        return ReplicatedStorage
+            :WaitForChild("API")
+            :WaitForChild("PetObjectAPI/CreatePetObject")
+            :InvokeServer(unpack(args))
+    end)
 
-    task.wait(Config.FeedDelay)
-
-    ConsumeFoodRemote:FireServer(
-        Instance.new("Model"),
-        foodUnique
-    )
+    if not success then
+        warn("CreatePetObject failed:", result)
+        return false
+    end
 
     return true
 end
 
---==================================================
--- MAIN LOOP
---==================================================
+--------------------------------------------------
+-- CONSUME FOOD
+--------------------------------------------------
 
-task.spawn(function()
+local function ConsumeFood(foodUniqueId)
+    if not foodUniqueId then
+        return false
+    end
+
+    local args = {
+        Instance.new("Model", nil),
+        foodUniqueId
+    }
+
+    local success, result = pcall(function()
+        ReplicatedStorage
+            :WaitForChild("API")
+            :WaitForChild("PetAPI/ConsumeFoodObject")
+            :FireServer(unpack(args))
+    end)
+
+    if not success then
+        warn("ConsumeFood failed:", result)
+        return false
+    end
+
+    return true
+end
+
+--------------------------------------------------
+-- AGE ONE PET
+--------------------------------------------------
+
+local function AgePet(petUniqueId, petNumber)
+
+    print("================================")
+    print("Pet", petNumber)
+    print("Unique ID:", petUniqueId)
+    print("================================")
+
+    --------------------------------------------------
+    -- EQUIP PET
+    --------------------------------------------------
+
+    print("Equipping pet...")
+
+    if not EquipItem(petUniqueId) then
+        warn("Could not equip pet:", petUniqueId)
+        return
+    end
+
+    task.wait(0.5)
+
+    --------------------------------------------------
+    -- CHECK IF ALREADY FULL GROWN
+    --------------------------------------------------
+
+    if IsFullGrown() then
+        print("Pet is already Full Grown.")
+        return
+    end
+
+    print("Pet needs aging.")
+
+    --------------------------------------------------
+    -- FEED UNTIL FULL GROWN
+    --------------------------------------------------
+
     while true do
 
-        local petUnique = FindPet()
+        --------------------------------------------------
+        -- CHECK MAX AGE
+        --------------------------------------------------
 
-        if not petUnique then
-            warn("No pet found:", Config.Pet)
-            task.wait(1)
-            continue
+        if IsFullGrown() then
+            print("Pet reached Full Grown!")
+            break
         end
 
-        local foodUnique = FindFood()
+        --------------------------------------------------
+        -- FIND FRESH AGE-UP POTION
+        --------------------------------------------------
 
-        if not foodUnique then
-            warn("No food found:", Config.Food)
-            task.wait(1)
-            continue
+        local potionUniqueId = FindAgeUpPotion()
+
+        if not potionUniqueId then
+            warn("No Age-Up Potion remaining.")
+            return
         end
 
-        -- Equip the configured pet.
-        -- The actual pet-equipping API wasn't included
-        -- in the captures, so this remains game-specific.
+        print("Age-Up Potion found:", potionUniqueId)
 
-        EquipFood(foodUnique)
+        --------------------------------------------------
+        -- EQUIP POTION
+        --------------------------------------------------
 
-        -- Feed until the Friend/max indicator appears.
-        while not IsPetMaxed() do
+        print("Equipping potion...")
 
-            foodUnique = FindFood()
-
-            if not foodUnique then
-                warn("Out of", Config.Food)
-                break
-            end
-
-            FeedPet(foodUnique, petUnique)
-
-            task.wait(Config.CheckDelay)
+        if not EquipItem(potionUniqueId) then
+            warn("Could not equip potion.")
+            return
         end
 
-        -- Current pet reached max.
-        -- Go back to FindPet(), which should return
-        -- another instance of Config.Pet.
+        task.wait(0.2)
 
-        task.wait(0.5)
+        --------------------------------------------------
+        -- CREATE PET OBJECT
+        --------------------------------------------------
+
+        print("Creating pet object...")
+
+        if not CreatePetObject(petUniqueId) then
+            warn("Could not create pet object.")
+            return
+        end
+
+        task.wait(0.2)
+
+        --------------------------------------------------
+        -- CONSUME POTION
+        --------------------------------------------------
+
+        print("Consuming potion...")
+
+        if not ConsumeFood(potionUniqueId) then
+            warn("Could not consume potion.")
+            return
+        end
+
+        --------------------------------------------------
+        -- WAIT FOR PET UI / DATA TO UPDATE
+        --------------------------------------------------
+
+        task.wait(Config.FeedDelay)
+
     end
-end)
+end
+
+--------------------------------------------------
+-- MAIN
+--------------------------------------------------
+
+print("================================")
+print("AUTO AGE STARTED")
+print("Pet:", Config.Pet)
+print("Form:", Config.PetForm)
+print("Food:", Config.Food)
+print("================================")
+
+local pets = GetMatchingPets()
+
+print("Matching pets found:", #pets)
+
+if #pets == 0 then
+    warn("No matching pets found:", Config.Pet)
+    return
+end
+
+--------------------------------------------------
+-- PROCESS EVERY PET
+--------------------------------------------------
+
+for index, petUniqueId in ipairs(pets) do
+
+    AgePet(
+        petUniqueId,
+        index
+    )
+
+    task.wait(0.5)
+end
+
+print("================================")
+print("AUTO AGE FINISHED")
+print("================================")
