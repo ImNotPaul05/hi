@@ -8,7 +8,7 @@ local Player = Players.LocalPlayer
 --==================================================
 
 local Config = {
-    Pet = "Storm Condor",
+    Pet = "summer_2026_storm_condor",
     Food = "Age-Up Potion",
 
     FeedDelay = 0.5,
