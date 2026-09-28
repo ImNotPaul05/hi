@@ -28,6 +28,7 @@ local NormalAges = {
     "Pre-Teen",
     "Teen",
     "Post-Teen",
+    "Full Grown",
 }
 
 local NeonAges = {
@@ -170,46 +171,75 @@ end
 --------------------------------------------------
 
 local function GetCurrentAge()
-
     local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
-
     if not PlayerGui then
         return nil
     end
 
     local BackpackApp = PlayerGui:FindFirstChild("BackpackApp")
-
     if not BackpackApp then
+        return nil
+    end
+
+    -- Exact Age UI path
+    local AgeContent =
+        BackpackApp
+        :FindFirstChild("Frame")
+        and BackpackApp.Frame:FindFirstChild("Filter")
+        and BackpackApp.Frame.Filter:FindFirstChild("Content")
+        and BackpackApp.Frame.Filter.Content:FindFirstChild("ScrollComplex")
+        and BackpackApp.Frame.Filter.Content.ScrollComplex:FindFirstChild("ScrollingFrame")
+        and BackpackApp.Frame.Filter.Content.ScrollComplex.ScrollingFrame:FindFirstChild("Content")
+        and BackpackApp.Frame.Filter.Content.ScrollComplex.ScrollingFrame.Content:FindFirstChild("Age")
+
+    if not AgeContent then
+        return nil
+    end
+
+    local Container = AgeContent:FindFirstChild("Container")
+    if not Container then
+        return nil
+    end
+
+    local Content = Container:FindFirstChild("Content")
+    if not Content then
         return nil
     end
 
     local ageList
 
-    if Config.PetForm == "normal" then
-        ageList = NormalAges
+    if string.lower(Config.PetForm) == "neon" then
+        ageList = {
+            "Reborn",
+            "Twinkle",
+            "Sparkle",
+            "Flare",
+            "Sunshine",
+            "Luminous"
+        }
     else
-        ageList = NeonAges
+        ageList = {
+            "Newborn",
+            "Junior",
+            "Pre-Teen",
+            "Teen",
+            "Post-Teen",
+            "Full Grown"
+        }
     end
 
-    local AgeContainer = BackpackApp:FindFirstChild("Age", true)
-
-    if not AgeContainer then
-        return nil
-    end
-
+    -- Only accept an age object that is actually visible.
+    -- Do NOT simply search the whole BackpackApp for "Full Grown".
     for _, ageName in ipairs(ageList) do
+        local ageObject = Content:FindFirstChild(ageName, true)
 
-        for _, object in ipairs(AgeContainer:GetDescendants()) do
-
-            if object.Name == ageName then
-
-                if object:IsA("GuiObject") then
-
-                    if object.Visible then
-                        return ageName
-                    end
-
-                else
+        if ageObject then
+            if ageObject:IsA("GuiObject") then
+                if ageObject.Visible then
+                    return ageName
+                end
+            elseif ageObject:IsA("TextLabel") or ageObject:IsA("TextButton") then
+                if ageObject.Visible then
                     return ageName
                 end
             end
@@ -217,6 +247,102 @@ local function GetCurrentAge()
     end
 
     return nil
+end
+
+
+local function WaitForCurrentAge(timeout)
+    timeout = timeout or 5
+
+    local start = tick()
+
+    while tick() - start < timeout do
+        local age = GetCurrentAge()
+
+        if age then
+            return age
+        end
+
+        task.wait(0.15)
+    end
+
+    return nil
+end
+
+
+local function IsMaxAge(age)
+    if string.lower(Config.PetForm) == "neon" then
+        return age == "Luminous"
+    else
+        return age == "Full Grown"
+    end
+end
+
+
+local function AgePet(petUniqueId)
+    print("================================")
+    print("Processing pet:", petUniqueId)
+
+    -- Equip pet
+    if not EquipItem(petUniqueId) then
+        warn("Failed to equip:", petUniqueId)
+        return false
+    end
+
+    -- IMPORTANT:
+    -- Give BackpackApp time to switch from the previous pet.
+    task.wait(1)
+
+    local age = WaitForCurrentAge(5)
+
+    if not age then
+        warn("Could not determine age for:", petUniqueId)
+        return false
+    end
+
+    print("Current age:", age)
+
+    -- NEVER feed an already maxed pet
+    if IsMaxAge(age) then
+        print("Already max age, skipping:", petUniqueId)
+        return true
+    end
+
+    while not IsMaxAge(age) do
+        print("Using Age-Up Potions on:", petUniqueId)
+
+        local success = UseAgeUpPotions(petUniqueId)
+
+        if not success then
+            warn("No more Age-Up Potions or feeding failed.")
+            return false
+        end
+
+        -- Let the game update the equipped pet/UI
+        task.wait(1)
+
+        -- Re-equip so BackpackApp definitely belongs to this pet
+        EquipItem(petUniqueId)
+
+        task.wait(0.75)
+
+        age = WaitForCurrentAge(5)
+
+        if not age then
+            warn("Could not read updated age.")
+            return false
+        end
+
+        print("Updated age:", age)
+
+        if IsMaxAge(age) then
+            print("Pet reached max age:", petUniqueId)
+            break
+        end
+
+        task.wait(Config.FeedDelay)
+    end
+
+    return true
 end
 
 --------------------------------------------------
