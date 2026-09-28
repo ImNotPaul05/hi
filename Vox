@@ -12,7 +12,7 @@ local Config = {
     PetForm = "normal", -- "normal" or "neon"
 
     -- Maximum number of Age-Up Potions to request
-    MaxPotionBatch = 10,
+    MaxPotionBatch = 15,
 
     -- Delay after using a batch
     FeedDelay = 0.5,
@@ -28,7 +28,6 @@ local NormalAges = {
     "Pre-Teen",
     "Teen",
     "Post-Teen",
-    "Full Grown",
 }
 
 local NeonAges = {
