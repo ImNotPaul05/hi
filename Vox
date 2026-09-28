@@ -3,46 +3,21 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
 
---------------------------------------------------
+--==================================================
 -- CONFIG
---------------------------------------------------
+--==================================================
 
 local Config = {
-    Pet = "summer_2026_storm_condor",
-    PetForm = "normal", -- "normal" or "neon"
+    Pet = "summer_2026_storm_condor", -- Pet kind / ID
+    PetForm = "normal",                -- "normal" or "neon"
 
-    -- Maximum number of Age-Up Potions to request
-    MaxPotionBatch = 15,
-
-    -- Delay after using a batch
+    MaxPotionBatch = 10,
     FeedDelay = 0.5,
 }
 
---------------------------------------------------
--- AGE LISTS
---------------------------------------------------
-
-local NormalAges = {
-    "Newborn",
-    "Junior",
-    "Pre-Teen",
-    "Teen",
-    "Post-Teen",
-    "Full Grown",
-}
-
-local NeonAges = {
-    "Reborn",
-    "Twinkle",
-    "Sparkle",
-    "Flare",
-    "Sunshine",
-    "Luminous",
-}
-
---------------------------------------------------
--- LOAD CLIENT DATA
---------------------------------------------------
+--==================================================
+-- CLIENT DATA
+--==================================================
 
 local successClientData, ClientData = pcall(function()
     return require(
@@ -54,18 +29,14 @@ local successClientData, ClientData = pcall(function()
 end)
 
 if not successClientData or not ClientData then
-    warn("Failed to load ClientData")
-    return
+    error("Failed to load ClientData")
 end
 
-print("ClientData loaded:", ClientData)
-
---------------------------------------------------
+--==================================================
 -- GET PLAYER DATA
---------------------------------------------------
+--==================================================
 
 local function GetPlayerData()
-
     local dataStore = ClientData.get_data()
 
     if not dataStore then
@@ -76,71 +47,58 @@ local function GetPlayerData()
         or dataStore[LocalPlayer.Name]
 end
 
---------------------------------------------------
+--==================================================
 -- GET MATCHING PETS
---------------------------------------------------
+--==================================================
 
 local function GetMatchingPets()
-
     local playerData = GetPlayerData()
 
     if not playerData
         or not playerData.inventory
         or not playerData.inventory.pets then
-
-        warn("Could not find pet inventory")
         return {}
     end
 
-    local pets = {}
+    local uniqueIds = {}
+
+    local wantedKind = Config.Pet
+    local wantedForm = string.lower(Config.PetForm)
 
     for uniqueId, itemData in pairs(playerData.inventory.pets) do
-
-        if itemData
-            and itemData.kind == Config.Pet then
-
+        if itemData and itemData.kind == wantedKind then
             local properties = itemData.properties or {}
 
             local isNeon = properties.neon == true
-            local isMega = properties.mega_neon == true
+            local isMegaNeon = properties.mega_neon == true
 
-            --------------------------------------------------
-            -- NORMAL PET
-            --------------------------------------------------
+            local matchesForm =
+                (
+                    wantedForm == "neon"
+                    and isNeon
+                    and not isMegaNeon
+                )
+                or
+                (
+                    wantedForm == "normal"
+                    and not isNeon
+                    and not isMegaNeon
+                )
 
-            if Config.PetForm == "normal" then
-
-                if not isNeon and not isMega then
-                    table.insert(pets, uniqueId)
-                end
-
-            --------------------------------------------------
-            -- NEON PET
-            --------------------------------------------------
-
-            elseif Config.PetForm == "neon" then
-
-                if isNeon and not isMega then
-                    table.insert(pets, uniqueId)
-                end
-
+            if matchesForm then
+                table.insert(uniqueIds, uniqueId)
             end
         end
     end
 
-    return pets
+    return uniqueIds
 end
 
---------------------------------------------------
+--==================================================
 -- EQUIP ITEM
---------------------------------------------------
+--==================================================
 
 local function EquipItem(uniqueId)
-
-    if not uniqueId then
-        return false
-    end
-
     local args = {
         uniqueId,
         {
@@ -150,12 +108,10 @@ local function EquipItem(uniqueId)
     }
 
     local success, result = pcall(function()
-
         return ReplicatedStorage
             :WaitForChild("API")
             :WaitForChild("ToolAPI/Equip")
             :InvokeServer(unpack(args))
-
     end)
 
     if not success then
@@ -166,37 +122,72 @@ local function EquipItem(uniqueId)
     return true
 end
 
---------------------------------------------------
--- GET CURRENT AGE
---------------------------------------------------
+--==================================================
+-- GET CURRENT PET AGE
+--==================================================
 
 local function GetCurrentAge()
     local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+
     if not PlayerGui then
         return nil
     end
 
     local BackpackApp = PlayerGui:FindFirstChild("BackpackApp")
+
     if not BackpackApp then
         return nil
     end
 
-    -- Exact Age UI path
-    local AgeContent =
-        BackpackApp
-        :FindFirstChild("Frame")
-        and BackpackApp.Frame:FindFirstChild("Filter")
-        and BackpackApp.Frame.Filter:FindFirstChild("Content")
-        and BackpackApp.Frame.Filter.Content:FindFirstChild("ScrollComplex")
-        and BackpackApp.Frame.Filter.Content.ScrollComplex:FindFirstChild("ScrollingFrame")
-        and BackpackApp.Frame.Filter.Content.ScrollComplex.ScrollingFrame:FindFirstChild("Content")
-        and BackpackApp.Frame.Filter.Content.ScrollComplex.ScrollingFrame.Content:FindFirstChild("Age")
+    -- Exact path:
+    --
+    -- BackpackApp
+    --   Frame
+    --     Filter
+    --       Content
+    --         ScrollComplex
+    --           ScrollingFrame
+    --             Content
+    --               Age
+    --                 Container
+    --                   Content
 
-    if not AgeContent then
+    local Frame = BackpackApp:FindFirstChild("Frame")
+    if not Frame then
         return nil
     end
 
-    local Container = AgeContent:FindFirstChild("Container")
+    local Filter = Frame:FindFirstChild("Filter")
+    if not Filter then
+        return nil
+    end
+
+    local MainContent = Filter:FindFirstChild("Content")
+    if not MainContent then
+        return nil
+    end
+
+    local ScrollComplex = MainContent:FindFirstChild("ScrollComplex")
+    if not ScrollComplex then
+        return nil
+    end
+
+    local ScrollingFrame = ScrollComplex:FindFirstChild("ScrollingFrame")
+    if not ScrollingFrame then
+        return nil
+    end
+
+    local ScrollContent = ScrollingFrame:FindFirstChild("Content")
+    if not ScrollContent then
+        return nil
+    end
+
+    local Age = ScrollContent:FindFirstChild("Age")
+    if not Age then
+        return nil
+    end
+
+    local Container = Age:FindFirstChild("Container")
     if not Container then
         return nil
     end
@@ -228,17 +219,12 @@ local function GetCurrentAge()
         }
     end
 
-    -- Only accept an age object that is actually visible.
-    -- Do NOT simply search the whole BackpackApp for "Full Grown".
+    -- Only accept visible age objects.
     for _, ageName in ipairs(ageList) do
         local ageObject = Content:FindFirstChild(ageName, true)
 
         if ageObject then
             if ageObject:IsA("GuiObject") then
-                if ageObject.Visible then
-                    return ageName
-                end
-            elseif ageObject:IsA("TextLabel") or ageObject:IsA("TextButton") then
                 if ageObject.Visible then
                     return ageName
                 end
@@ -249,13 +235,16 @@ local function GetCurrentAge()
     return nil
 end
 
+--==================================================
+-- WAIT FOR AGE UI
+--==================================================
 
 local function WaitForCurrentAge(timeout)
     timeout = timeout or 5
 
-    local start = tick()
+    local startTime = tick()
 
-    while tick() - start < timeout do
+    while tick() - startTime < timeout do
         local age = GetCurrentAge()
 
         if age then
@@ -268,150 +257,35 @@ local function WaitForCurrentAge(timeout)
     return nil
 end
 
+--==================================================
+-- MAX AGE CHECK
+--==================================================
 
 local function IsMaxAge(age)
     if string.lower(Config.PetForm) == "neon" then
         return age == "Luminous"
-    else
-        return age == "Full Grown"
     end
+
+    return age == "Full Grown"
 end
 
-
-local function AgePet(petUniqueId)
-    print("================================")
-    print("Processing pet:", petUniqueId)
-
-    -- Equip pet
-    if not EquipItem(petUniqueId) then
-        warn("Failed to equip:", petUniqueId)
-        return false
-    end
-
-    -- IMPORTANT:
-    -- Give BackpackApp time to switch from the previous pet.
-    task.wait(1)
-
-    local age = WaitForCurrentAge(5)
-
-    if not age then
-        warn("Could not determine age for:", petUniqueId)
-        return false
-    end
-
-    print("Current age:", age)
-
-    -- NEVER feed an already maxed pet
-    if IsMaxAge(age) then
-        print("Already max age, skipping:", petUniqueId)
-        return true
-    end
-
-    while not IsMaxAge(age) do
-        print("Using Age-Up Potions on:", petUniqueId)
-
-        local success = UseAgeUpPotions(petUniqueId)
-
-        if not success then
-            warn("No more Age-Up Potions or feeding failed.")
-            return false
-        end
-
-        -- Let the game update the equipped pet/UI
-        task.wait(1)
-
-        -- Re-equip so BackpackApp definitely belongs to this pet
-        EquipItem(petUniqueId)
-
-        task.wait(0.75)
-
-        age = WaitForCurrentAge(5)
-
-        if not age then
-            warn("Could not read updated age.")
-            return false
-        end
-
-        print("Updated age:", age)
-
-        if IsMaxAge(age) then
-            print("Pet reached max age:", petUniqueId)
-            break
-        end
-
-        task.wait(Config.FeedDelay)
-    end
-
-    return true
-end
-
---------------------------------------------------
--- WAIT FOR AGE
---------------------------------------------------
-
-local function WaitForCurrentAge()
-
-    for _ = 1, 30 do
-
-        local age = GetCurrentAge()
-
-        if age then
-            return age
-        end
-
-        task.wait(0.1)
-    end
-
-    return nil
-end
-
---------------------------------------------------
--- CHECK MAX AGE
---------------------------------------------------
-
-local function IsMaxAge(age)
-
-    if Config.PetForm == "normal" then
-        return age == "Full Grown"
-    end
-
-    if Config.PetForm == "neon" then
-        return age == "Luminous"
-    end
-
-    return false
-end
-
---------------------------------------------------
--- GET AGE-UP POTION IDs
---
--- Gets them directly from:
---
--- ClientData
---   inventory
---      food
---
--- kind = "pet_age_potion"
---------------------------------------------------
+--==================================================
+-- GET AGE-UP POTIONS
+--==================================================
 
 local function GetAgeUpPotions(maxAmount)
-
     local playerData = GetPlayerData()
 
     if not playerData
         or not playerData.inventory
         or not playerData.inventory.food then
-
         return {}
     end
 
     local potionIds = {}
 
     for uniqueId, itemData in pairs(playerData.inventory.food) do
-
-        if itemData
-            and itemData.kind == "pet_age_potion" then
-
+        if itemData and itemData.kind == "pet_age_potion" then
             table.insert(potionIds, uniqueId)
 
             if #potionIds >= maxAmount then
@@ -423,387 +297,186 @@ local function GetAgeUpPotions(maxAmount)
     return potionIds
 end
 
---------------------------------------------------
--- USE AGE-UP POTION
---
--- The first potion:
---     unique_id
---
--- Additional potions:
---     additional_consume_uniques
---
--- Your captured API showed this structure.
---------------------------------------------------
+--==================================================
+-- USE AGE-UP POTIONS
+--==================================================
 
 local function UseAgeUpPotions(petUniqueId)
-
-    --------------------------------------------------
-    -- GET UP TO 15 FRESH POTION IDs
-    --------------------------------------------------
-
-    local potionIds =
-        GetAgeUpPotions(Config.MaxPotionBatch)
+    local potionIds = GetAgeUpPotions(Config.MaxPotionBatch)
 
     if #potionIds == 0 then
-
-        warn("No Age-Up Potions remaining.")
-
+        warn("No Age-Up Potions available.")
         return false
     end
 
-    print("")
-    print("Potions selected:", #potionIds)
-
-    for index, potionId in ipairs(potionIds) do
-        print("Potion", index, ":", potionId)
-    end
-
-    --------------------------------------------------
-    -- FIRST POTION
-    --------------------------------------------------
+    print("Using", #potionIds, "Age-Up Potion(s)")
 
     local firstPotionId = potionIds[1]
 
-    --------------------------------------------------
-    -- ADDITIONAL POTIONS
-    --------------------------------------------------
-
     local additionalPotions = {}
 
-    for index = 2, #potionIds do
-
-        table.insert(
-            additionalPotions,
-            potionIds[index]
-        )
+    for i = 2, #potionIds do
+        table.insert(additionalPotions, potionIds[i])
     end
 
-    --------------------------------------------------
-    -- START POTION
-    --
-    -- This is the API you captured:
-    --
-    -- ServerUseTool(potionID, "START")
-    --------------------------------------------------
-
-    print("Starting Age-Up Potion:", firstPotionId)
-
-    local startArgs = {
-        firstPotionId,
-        "START"
-    }
-
+    -- START Age-Up Potion
     local startSuccess, startResult = pcall(function()
-
         return ReplicatedStorage
             :WaitForChild("API")
             :WaitForChild("ToolAPI/ServerUseTool")
-            :InvokeServer(unpack(startArgs))
-
+            :InvokeServer(
+                firstPotionId,
+                "START"
+            )
     end)
 
     if not startSuccess then
-
-        warn(
-            "ServerUseTool failed:",
-            startResult
-        )
-
+        warn("ServerUseTool failed:", startResult)
         return false
     end
 
     task.wait(0.2)
 
-    --------------------------------------------------
-    -- CREATE PET OBJECT
-    --------------------------------------------------
+    -- Create pet object / consume potion(s)
+    local createSuccess, createResult = pcall(function()
+        local args = {
+            "__Enum_PetObjectCreatorType_2",
+            {
+                additional_consume_uniques = additionalPotions,
+                pet_unique = petUniqueId,
 
-    local character = LocalPlayer.Character
-
-    if not character then
-        warn("Character not found")
-        return false
-    end
-
-    local root =
-        character:FindFirstChild("HumanoidRootPart")
-
-    if not root then
-        warn("HumanoidRootPart not found")
-        return false
-    end
-
-    --------------------------------------------------
-    -- CREATE PET OBJECT
-    --------------------------------------------------
-
-    local args = {
-        "__Enum_PetObjectCreatorType_2",
-        {
-            additional_consume_uniques = additionalPotions,
-            pet_unique = petUniqueId,
-            spawn_cframe = root.CFrame,
-            unique_id = firstPotionId
+                -- The game generates/uses a unique object ID here.
+                unique_id = firstPotionId
+            }
         }
-    }
-
-    print(
-        "Creating pet object with",
-        #potionIds,
-        "potion(s)"
-    )
-
-    local success, result = pcall(function()
 
         return ReplicatedStorage
             :WaitForChild("API")
             :WaitForChild("PetObjectAPI/CreatePetObject")
             :InvokeServer(unpack(args))
-
     end)
 
-    if not success then
-
-        warn(
-            "CreatePetObject failed:",
-            result
-        )
-
+    if not createSuccess then
+        warn("CreatePetObject failed:", createResult)
         return false
     end
 
     return true
 end
 
---------------------------------------------------
+--==================================================
 -- AGE ONE PET
---------------------------------------------------
+--==================================================
 
-local function AgePet(
-    petUniqueId,
-    petNumber
-)
+local function AgePet(petUniqueId)
+    print("================================")
+    print("Processing pet:", petUniqueId)
 
-    print("")
-    print("========================================")
-    print("PET", petNumber)
-    print("Unique ID:", petUniqueId)
-    print("========================================")
-
-    --------------------------------------------------
-    -- EQUIP PET
-    --------------------------------------------------
-
-    print("Equipping pet...")
-
+    -- Equip the target pet.
     if not EquipItem(petUniqueId) then
-
-        warn("Failed to equip pet.")
-
+        warn("Failed to equip pet:", petUniqueId)
         return false
     end
 
-    task.wait(0.5)
+    -- VERY IMPORTANT:
+    -- Wait for BackpackApp to update to this pet.
+    task.wait(1)
 
-    --------------------------------------------------
-    -- GET AGE
-    --------------------------------------------------
+    local age = WaitForCurrentAge(5)
 
-    local currentAge =
-        WaitForCurrentAge()
-
-    if not currentAge then
-
-        warn(
-            "Could not determine current age."
-        )
-
+    if not age then
+        warn("Could not determine age for:", petUniqueId)
         return false
     end
 
-    print("Current age:", currentAge)
+    print("Current age:", age)
 
-    --------------------------------------------------
-    -- ALREADY MAX
-    --------------------------------------------------
-
-    if IsMaxAge(currentAge) then
-
-        print("Pet is already max age.")
-        print("Skipping.")
-
+    -- Never feed a Full Grown / Luminous pet.
+    if IsMaxAge(age) then
+        print("Already max age. Skipping:", petUniqueId)
         return true
     end
 
-    --------------------------------------------------
-    -- KEEP AGING
-    --------------------------------------------------
+    while not IsMaxAge(age) do
+        print("Feeding pet:", petUniqueId)
+        print("Age before feeding:", age)
 
-    while true do
-
-        --------------------------------------------------
-        -- USE UP TO 15 POTIONS
-        --------------------------------------------------
-
-        print("")
-        print("Current age:", currentAge)
-        print(
-            "Requesting up to",
-            Config.MaxPotionBatch,
-            "potions..."
-        )
-
-        local success =
-            UseAgeUpPotions(petUniqueId)
+        local success = UseAgeUpPotions(petUniqueId)
 
         if not success then
-
-            warn(
-                "Unable to use Age-Up Potions."
-            )
-
+            warn("Unable to use Age-Up Potion(s).")
             return false
         end
 
-        --------------------------------------------------
-        -- WAIT FOR AGE UPDATE
-        --------------------------------------------------
+        -- Wait for server/UI to update.
+        task.wait(1)
+
+        -- Re-equip the same pet.
+        if not EquipItem(petUniqueId) then
+            warn("Failed to re-equip:", petUniqueId)
+            return false
+        end
+
+        -- Give BackpackApp time to switch.
+        task.wait(0.75)
+
+        local newAge = WaitForCurrentAge(5)
+
+        if not newAge then
+            warn("Could not read updated age.")
+            return false
+        end
+
+        age = newAge
+
+        print("Updated age:", age)
+
+        if IsMaxAge(age) then
+            print("Reached max age:", petUniqueId)
+            break
+        end
 
         task.wait(Config.FeedDelay)
-
-        --------------------------------------------------
-        -- RE-EQUIP SAME PET
-        --------------------------------------------------
-
-        print("Re-equipping pet...")
-
-        if not EquipItem(petUniqueId) then
-
-            warn(
-                "Failed to re-equip pet."
-            )
-
-            return false
-        end
-
-        task.wait(0.5)
-
-        --------------------------------------------------
-        -- READ NEW AGE
-        --------------------------------------------------
-
-        currentAge =
-            WaitForCurrentAge()
-
-        if not currentAge then
-
-            warn(
-                "Could not determine new age."
-            )
-
-            return false
-        end
-
-        print("New age:", currentAge)
-
-        --------------------------------------------------
-        -- MAX?
-        --------------------------------------------------
-
-        if IsMaxAge(currentAge) then
-
-            print("")
-            print("========================================")
-            print("PET", petNumber, "MAX AGE!")
-            print("Final age:", currentAge)
-            print("========================================")
-
-            return true
-        end
-
-        --------------------------------------------------
-        -- NOT MAX
-        --------------------------------------------------
-
-        print(
-            "Pet is still growing:",
-            currentAge
-        )
-
     end
+
+    return true
 end
 
---------------------------------------------------
+--==================================================
 -- MAIN
---------------------------------------------------
+--==================================================
 
-print("")
-print("========================================")
-print("AUTO AGE STARTED")
-print("========================================")
+print("================================")
+print("AUTO PET AGING STARTED")
 print("Pet:", Config.Pet)
 print("Form:", Config.PetForm)
-print(
-    "Maximum potion batch:",
-    Config.MaxPotionBatch
-)
-print("========================================")
-
---------------------------------------------------
--- FIND PETS
---------------------------------------------------
+print("Max potion batch:", Config.MaxPotionBatch)
+print("================================")
 
 local pets = GetMatchingPets()
 
-print(
-    "Matching pets found:",
-    #pets
-)
+print("Matching pets found:", #pets)
 
 if #pets == 0 then
-
-    warn(
-        "No matching pets found:",
-        Config.Pet
-    )
-
+    warn("No matching pets found.")
     return
 end
 
---------------------------------------------------
--- PROCESS ALL PETS
---------------------------------------------------
-
 for index, petUniqueId in ipairs(pets) do
+    print("")
+    print("Pet", index, "of", #pets)
+    print("Unique ID:", petUniqueId)
 
-    local success =
-        AgePet(
-            petUniqueId,
-            index
-        )
-
-    --------------------------------------------------
-    -- STOP IF POTIONS RUN OUT
-    --------------------------------------------------
+    local success = AgePet(petUniqueId)
 
     if not success then
-
-        warn(
-            "Auto-age stopped at pet:",
-            index
-        )
-
+        warn("Stopped processing because feeding failed.")
         break
     end
 
     task.wait(0.5)
 end
 
---------------------------------------------------
--- DONE
---------------------------------------------------
-
-print("")
-print("========================================")
-print("AUTO AGE FINISHED")
-print("========================================")
+print("================================")
+print("AUTO PET AGING FINISHED")
+print("================================")
