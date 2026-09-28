@@ -177,30 +177,48 @@ end
 -- CHECK FULL GROWN
 --------------------------------------------------
 
-local function IsFullGrown()
-    local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+local function DebugFullGrown()
 
+    local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
     if not PlayerGui then
-        return false
+        warn("No PlayerGui")
+        return
     end
 
     local BackpackApp = PlayerGui:FindFirstChild("BackpackApp")
-
     if not BackpackApp then
-        return false
+        warn("No BackpackApp")
+        return
     end
 
-    local FullGrown = BackpackApp:FindFirstChild("Full Grown", true)
+    print("========== FULL GROWN DEBUG ==========")
 
-    if not FullGrown then
-        return false
+    local found = 0
+
+    for _, obj in ipairs(BackpackApp:GetDescendants()) do
+        if obj.Name == "Full Grown" then
+
+            found += 1
+
+            local visible = "N/A"
+
+            if obj:IsA("GuiObject") then
+                visible = tostring(obj.Visible)
+            end
+
+            print(
+                "Full Grown:",
+                obj:GetFullName(),
+                "Visible:",
+                visible,
+                "Class:",
+                obj.ClassName
+            )
+        end
     end
 
-    if FullGrown:IsA("GuiObject") then
-        return FullGrown.Visible
-    end
-
-    return true
+    print("Total Full Grown objects:", found)
+    print("======================================")
 end
 
 --------------------------------------------------
