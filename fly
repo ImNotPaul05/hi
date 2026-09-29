@@ -844,23 +844,43 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	end
 
 	local function getDisplayName(itemData)
-		local properties = itemData.properties or {}
-		local displayName = properties.name
+		local kind = tostring(itemData.kind or "")
+		local kindData = KindDB[kind]
+	
+        -- Use the actual pet name from KindDB
+        if kindData and kindData.name and kindData.name ~= "" then
+            return tostring(kindData.name)
+        end
+
+       -- Fallback
+       local properties = itemData.properties or {}
+
+       local KindDB = require(
+            ReplicatedStorage
+                :WaitForChild("ClientDB")
+                :WaitForChild("Inventory")
+                :WaitForChild("KindDB")
+        )
+       local displayName = properties.name
 			or properties.custom_name
 			or properties.display_name
 			or itemData.display_name
 			or itemData.displayName
 			or itemData.name
-		if displayName and displayName ~= "" then
-			local cleanedName = removeEventPrefix(displayName)
-			if cleanedName ~= "" then
-				return capitalizeWords(cleanedName)
-			end
-		end
+			or kind
 
-		local kind = tostring(itemData.kind or "Unknown pet")
-		return capitalizeWords(removeEventPrefix(kind:gsub("[_%-]", " ")))
-	end
+        if displayName and displayName ~= "" then
+            local cleanedName = removeEventPrefix(displayName)
+
+            if cleanedName ~= "" then
+                return capitalizeWords(cleanedName)
+            end
+        end
+
+        return capitalizeWords(
+            removeEventPrefix(kind:gsub("[_%-]", " "))
+        )
+    end
 
 	local function getForm(itemData)
 		local properties = itemData.properties or {}
@@ -877,13 +897,6 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		Neon = 2,
 		Normal = 3,
 	}
-
-	local KindDB = require(
-    ReplicatedStorage
-        :WaitForChild("ClientDB")
-        :WaitForChild("Inventory")
-        :WaitForChild("KindDB")
-)
 
 local function isPet(itemData)
     if not itemData then
