@@ -1,72 +1,116 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local function inspectModule(path, name)
-    local module = path
-    local ok, result = pcall(require, module)
+local player = Players.LocalPlayer
 
-    print("\n==========", name, "==========")
+-- ClientData
+local ClientData = require(
+    ReplicatedStorage
+        :WaitForChild("ClientModules")
+        :WaitForChild("Core")
+        :WaitForChild("ClientData")
+)
 
-    if not ok then
-        warn("REQUIRE FAILED:", result)
-        return
-    end
+-- KindDB
+local KindDB = require(
+    ReplicatedStorage
+        :WaitForChild("ClientDB")
+        :WaitForChild("Inventory")
+        :WaitForChild("KindDB")
+)
 
-    if type(result) ~= "table" then
-        print("RETURN TYPE:", typeof(result))
-        print("VALUE:", result)
-        return
-    end
+local data = ClientData.get_data()
+local playerData = data[player] or data[player.Name]
 
-    for key, value in pairs(result) do
-        print(
-            tostring(key),
-            "=",
-            typeof(value),
-            type(value) == "table" and ("table:" .. tostring(value)) or tostring(value)
+local pets = playerData.inventory.pets
+
+local function isEgg(itemData)
+    local kind = string.lower(tostring(itemData.kind or ""))
+
+    local displayName = string.lower(
+        tostring(
+            itemData.display_name
+                or itemData.displayName
+                or itemData.name
+                or ""
         )
+    )
 
-        if type(value) == "table" then
-            local count = 0
+    local category = string.lower(
+        tostring(itemData.category or "")
+    )
 
-            for k, v in pairs(value) do
-                print("   ", tostring(k), "=", typeof(v), tostring(v))
-                count += 1
+    return itemData.is_egg == true
+        or string.find(kind, "egg", 1, true) ~= nil
+        or string.find(displayName, "egg", 1, true) ~= nil
+        or category == "egg"
+        or category == "eggs"
+end
 
-                if count >= 10 then
-                    print("   ...")
-                    break
-                end
+local rarityNames = {
+    common = "Common",
+    uncommon = "Uncommon",
+    rare = "Rare",
+    ultra_rare = "Ultra-Rare",
+    legendary = "Legendary"
+}
+
+local counts = {
+    Common = 0,
+    Uncommon = 0,
+    Rare = 0,
+    ["Ultra-Rare"] = 0,
+    Legendary = 0
+}
+
+for uniqueId, petData in pairs(pets) do
+
+    -- Completely exclude eggs
+    if not isEgg(petData) then
+
+        local kind = petData.kind
+        local kindData = kind and KindDB[kind]
+
+        if kindData then
+            local rarity = kindData.rarity
+            local rarityName = rarity and rarityNames[string.lower(rarity)]
+
+            if rarityName then
+                counts[rarityName] += 1
+
+                print(
+                    "PET:",
+                    uniqueId,
+                    "|",
+                    kindData.name or kind,
+                    "|",
+                    rarityName
+                )
+            else
+                print(
+                    "RARITY NOT FOUND:",
+                    uniqueId,
+                    "|",
+                    kind
+                )
             end
+        else
+            print(
+                "KIND NOT FOUND:",
+                uniqueId,
+                "|",
+                kind
+            )
         end
+
     end
 end
 
-local journalAppFolder = ReplicatedStorage
-    :WaitForChild("ClientModules")
-    :WaitForChild("Core")
-    :WaitForChild("UIManager")
-    :WaitForChild("Apps")
-    :WaitForChild("JournalApp")
-
-inspectModule(
-    journalAppFolder:WaitForChild("JournalCollectionData"),
-    "JournalCollectionData"
-)
-
-inspectModule(
-    ReplicatedStorage
-        :WaitForChild("SharedModules")
-        :WaitForChild("SB")
-        :WaitForChild("JournalCollectionTypesDB"),
-    "JournalCollectionTypesDB"
-)
-
-inspectModule(
-    ReplicatedStorage
-        :WaitForChild("new")
-        :WaitForChild("modules")
-        :WaitForChild("PetProgression")
-        :WaitForChild("PetDiscoveryAppClient")
-        :WaitForChild("FakeJournalEntries"),
-    "FakeJournalEntries"
-)
+print("")
+print("===== YOUR INVENTORY PET TOTALS =====")
+print("Common:", counts.Common)
+print("Uncommon:", counts.Uncommon)
+print("Rare:", counts.Rare)
+print("Ultra-Rare:", counts["Ultra-Rare"])
+print("Legendary:", counts.Legendary)
+print("====================================")
