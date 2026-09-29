@@ -967,19 +967,28 @@ end
 		end
 
 		local groupedPets = {}
-		for uniqueId, itemData in pairs(pets) do
-			if itemData and not isEgg(itemData) and not isPracticeDog(itemData) then
-				local displayName = getDisplayName(itemData)
-				local form = getForm(itemData)
-				local key = displayName .. "|" .. form
-				local group = groupedPets[key]
-				if not group then
-					group = {displayName = displayName, form = form, uniqueIds = {}}
-					groupedPets[key] = group
-				end
-				table.insert(group.uniqueIds, uniqueId)
-			end
-		end
+
+        for uniqueId, itemData in pairs(pets) do
+            if itemData and isPet(itemData) and not isPracticeDog(itemData) then
+                local displayName = getDisplayName(itemData)
+                local form = getForm(itemData)
+                local key = displayName .. "|" .. form
+
+                local group = groupedPets[key]
+
+                if not group then
+                    group = {
+                        displayName = displayName,
+                        form = form,
+                        uniqueIds = {}
+                    }
+
+                    groupedPets[key] = group
+                end
+
+                table.insert(group.uniqueIds, uniqueId)
+            end
+        end
 
 		local groups = {}
 		for _, group in pairs(groupedPets) do
@@ -1027,27 +1036,7 @@ end
 	end
 
 	refreshButton.Activated:Connect(refreshPets)
-	refreshPets(for uniqueId, itemData in pairs(pets) do
-    if itemData and isPet(itemData) and not isPracticeDog(itemData) then
-        local displayName = getDisplayName(itemData)
-        local form = getForm(itemData)
-        local key = displayName .. "|" .. form
-
-        local group = groupedPets[key]
-
-        if not group then
-            group = {
-                displayName = displayName,
-                form = form,
-                uniqueIds = {}
-            }
-
-            groupedPets[key] = group
-        end
-
-        table.insert(group.uniqueIds, uniqueId)
-    end
-end)
+	refreshPets()
 end
 coroutine.wrap(AVPZ_fake_script)()
 
