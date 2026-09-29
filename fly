@@ -2,7 +2,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
-local gui = player.PlayerGui
 
 -- ClientData
 local ClientData = require(
@@ -16,14 +15,18 @@ local data = ClientData.get_data()
 local playerData = data[player] or data[player.Name]
 
 local pets = playerData.inventory.pets
-local journal = gui:FindFirstChild("JournalApp")
 
-if not journal then
-    warn("JournalApp not found")
-    return
-end
+-- Journal
+local content = player.PlayerGui
+    .JournalApp
+    .Book
+    .Category
+    .Body
+    .ScrollComplex
+    .ScrollingFrame
+    .Content
 
-local rarities = {
+local rarityNames = {
     common = "Common",
     uncommon = "UnCommon",
     rare = "Rare",
@@ -31,45 +34,43 @@ local rarities = {
     legendary = "Legendary",
 }
 
-local function getRarityFromPath(obj)
-    local current = obj
+local kindRarity = {}
 
-    while current and current ~= journal do
-        local rarity = rarities[string.lower(current.Name)]
+-- Find which rarity section contains each Journal pet kind
+for sectionName, rarity in pairs(rarityNames) do
+    local section
 
-        if rarity then
-            return rarity
+    for _, obj in ipairs(content:GetChildren()) do
+        if string.lower(obj.Name) == sectionName then
+            section = obj
+            break
         end
-
-        current = current.Parent
     end
 
-    return nil
-end
+    if section then
+        for _, obj in ipairs(section:GetDescendants()) do
+            local kind = obj.Name
 
-local function findJournalPet(kind)
-    for _, obj in ipairs(journal:GetDescendants()) do
-        -- Pet entry itself may be named with its kind
-        if obj.Name == kind then
-            return obj
-        end
+            -- Ignore normal UI objects
+            if kind ~= "Row0"
+                and kind ~= "Row1"
+                and kind ~= "Row2"
+                and kind ~= "GridFrame"
+                and kind ~= "UIListLayout"
+                and kind ~= "UIGridLayout"
+                and kind ~= "Spacer"
+                and kind ~= "MiddleSpacer" then
 
-        -- Or it may have the kind as an attribute
-        for _, value in pairs(obj:GetAttributes()) do
-            if value == kind then
-                return obj
+                -- Only treat it as a pet if it is a Frame/ImageButton/etc.
+                if obj:IsA("GuiObject") then
+                    kindRarity[kind] = rarity
+                end
             end
         end
-
-        -- Or a StringValue inside it may contain the kind
-        if obj:IsA("StringValue") and obj.Value == kind then
-            return obj
-        end
     end
-
-    return nil
 end
 
+-- Count owned pets
 local counts = {
     Common = 0,
     UnCommon = 0,
@@ -78,32 +79,18 @@ local counts = {
     Legendary = 0,
 }
 
-local checkedKinds = {}
+local notFound = {}
 
 for uniqueId, petData in pairs(pets) do
     local kind = petData and petData.kind
 
-    if kind and not checkedKinds[kind] then
-        checkedKinds[kind] = true
+    if kind then
+        local rarity = kindRarity[kind]
 
-        local journalPet = findJournalPet(kind)
-
-        if journalPet then
-            local rarity = getRarityFromPath(journalPet)
-
-            print(
-                kind,
-                "=>",
-                rarity or "RARITY NOT FOUND",
-                "|",
-                journalPet:GetFullName()
-            )
-
-            if rarity then
-                counts[rarity] += 1
-            end
+        if rarity then
+            counts[rarity] += 1
         else
-            print(kind, "=> JOURNAL PET NOT FOUND")
+            table.insert(notFound, kind)
         end
     end
 end
@@ -114,3 +101,10 @@ print("UnCommon:", counts.UnCommon)
 print("Rare:", counts.Rare)
 print("Ultra_Rare:", counts.Ultra_Rare)
 print("Legendary:", counts.Legendary)
+
+if #notFound > 0 then
+    print("===== NOT FOUND IN JOURNAL =====")
+    for _, kind in ipairs(notFound) do
+        print(kind)
+    end
+end
