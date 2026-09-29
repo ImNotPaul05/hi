@@ -498,7 +498,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 ConfirmTrade:FireServer()
             end)
 
-            task.wait(1)
+            task.wait(2)
         end
     end)
 end
