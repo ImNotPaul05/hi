@@ -1,116 +1,72 @@
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local player = Players.LocalPlayer
+local function inspectModule(path, name)
+    local module = path
+    local ok, result = pcall(require, module)
 
--- Client data
-local ClientData = require(
-    ReplicatedStorage
-        :WaitForChild("ClientModules")
-        :WaitForChild("Core")
-        :WaitForChild("ClientData")
-)
+    print("\n==========", name, "==========")
 
-local data = ClientData.get_data()
-local playerData = data[player] or data[player.Name]
+    if not ok then
+        warn("REQUIRE FAILED:", result)
+        return
+    end
 
--- YOUR INVENTORY
-local pets = playerData.inventory.pets
+    if type(result) ~= "table" then
+        print("RETURN TYPE:", typeof(result))
+        print("VALUE:", result)
+        return
+    end
 
--- Journal
-local journal = player.PlayerGui.JournalApp
-local content = journal.Book.Category.Body.ScrollComplex.ScrollingFrame.Content
-local grid = content.GridFrame
-
--- Egg checker
-local function isEgg(itemData)
-    local kind = string.lower(tostring(itemData.kind or ""))
-    local displayName = string.lower(
-        tostring(
-            itemData.display_name
-                or itemData.displayName
-                or itemData.name
-                or ""
+    for key, value in pairs(result) do
+        print(
+            tostring(key),
+            "=",
+            typeof(value),
+            type(value) == "table" and ("table:" .. tostring(value)) or tostring(value)
         )
-    )
-    local category = string.lower(tostring(itemData.category or ""))
 
-    return itemData.is_egg == true
-        or string.find(kind, "egg", 1, true) ~= nil
-        or string.find(displayName, "egg", 1, true) ~= nil
-        or category == "egg"
-        or category == "eggs"
-end
+        if type(value) == "table" then
+            local count = 0
 
--- Find rarity using the inventory pet's kind
-local function getRarity(kind)
-    for _, row in ipairs(grid:GetChildren()) do
-        if row:IsA("Frame") then
-            local entry = row:FindFirstChild(kind)
+            for k, v in pairs(value) do
+                print("   ", tostring(k), "=", typeof(v), tostring(v))
+                count += 1
 
-            if entry then
-                local button = entry:FindFirstChild("Button")
-
-                if button then
-                    firesignal(button.Activated)
-
-                    task.wait(0.1)
-
-                    return journal.Book.Popup.Polaroid.PetRarity.Text
+                if count >= 10 then
+                    print("   ...")
+                    break
                 end
             end
         end
     end
-
-    return nil
 end
 
-local counts = {
-    Common = 0,
-    Uncommon = 0,
-    Rare = 0,
-    ["Ultra-Rare"] = 0,
-    Legendary = 0
-}
+local journalAppFolder = ReplicatedStorage
+    :WaitForChild("ClientModules")
+    :WaitForChild("Core")
+    :WaitForChild("UIManager")
+    :WaitForChild("Apps")
+    :WaitForChild("JournalApp")
 
--- ONLY pets that actually exist in YOUR inventory are processed
-for uniqueId, petData in pairs(pets) do
+inspectModule(
+    journalAppFolder:WaitForChild("JournalCollectionData"),
+    "JournalCollectionData"
+)
 
-    -- Completely exclude eggs
-    if not isEgg(petData) then
+inspectModule(
+    ReplicatedStorage
+        :WaitForChild("SharedModules")
+        :WaitForChild("SB")
+        :WaitForChild("JournalCollectionTypesDB"),
+    "JournalCollectionTypesDB"
+)
 
-        local kind = petData.kind
-
-        if kind then
-            local rarity = getRarity(kind)
-
-            if rarity then
-                counts[rarity] = (counts[rarity] or 0) + 1
-
-                print(
-                    "INVENTORY PET:",
-                    uniqueId,
-                    "|",
-                    kind,
-                    "|",
-                    rarity
-                )
-            else
-                print(
-                    "RARITY NOT FOUND:",
-                    uniqueId,
-                    "|",
-                    kind
-                )
-            end
-        end
-    end
-end
-
-print("===== YOUR INVENTORY PET TOTALS =====")
-print("Common:", counts.Common)
-print("Uncommon:", counts.Uncommon)
-print("Rare:", counts.Rare)
-print("Ultra-Rare:", counts["Ultra-Rare"])
-print("Legendary:", counts.Legendary)
-print("====================================")
+inspectModule(
+    ReplicatedStorage
+        :WaitForChild("new")
+        :WaitForChild("modules")
+        :WaitForChild("PetProgression")
+        :WaitForChild("PetDiscoveryAppClient")
+        :WaitForChild("FakeJournalEntries"),
+    "FakeJournalEntries"
+)
