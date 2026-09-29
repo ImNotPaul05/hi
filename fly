@@ -1,4 +1,4 @@
--- 5:40am
+-- 5:401m
 -- Version: 3.2
 
 -- Instances:
@@ -1027,7 +1027,27 @@ end
 	end
 
 	refreshButton.Activated:Connect(refreshPets)
-	refreshPets()
+	refreshPets(for uniqueId, itemData in pairs(pets) do
+    if itemData and isPet(itemData) and not isPracticeDog(itemData) then
+        local displayName = getDisplayName(itemData)
+        local form = getForm(itemData)
+        local key = displayName .. "|" .. form
+
+        local group = groupedPets[key]
+
+        if not group then
+            group = {
+                displayName = displayName,
+                form = form,
+                uniqueIds = {}
+            }
+
+            groupedPets[key] = group
+        end
+
+        table.insert(group.uniqueIds, uniqueId)
+    end
+end)
 end
 coroutine.wrap(AVPZ_fake_script)()
 
