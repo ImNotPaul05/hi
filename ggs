@@ -30,6 +30,8 @@ local status = Instance.new("TextLabel")
 local Legendarytxt = Instance.new("TextLabel")
 local UITextSizeConstraint = Instance.new("UITextSizeConstraint")
 local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+local Icon2 = Instance.new("TextButton")
+local UICorner_10 = Instance.new("UICorner")
 
 --Properties:
 
@@ -42,7 +44,7 @@ Potion.Parent = Main
 Potion.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Potion.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Potion.BorderSizePixel = 0
-Potion.Position = UDim2.new(0.330901176, 0, 0.0188152455, 0)
+Potion.Position = UDim2.new(0.280462593, 0, -0.000489773753, 0)
 Potion.Size = UDim2.new(0.458353192, 0, 1.00048983, 0)
 
 Title.Name = "Title"
@@ -246,9 +248,26 @@ UIAspectRatioConstraint.AspectRatio = 0.807
 UIAspectRatioConstraint.AspectType = Enum.AspectType.ScaleWithParentSize
 UIAspectRatioConstraint.DominantAxis = Enum.DominantAxis.Height
 
+Icon2.Name = "Icon2"
+Icon2.Parent = Main
+Icon2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Icon2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Icon2.BorderSizePixel = 0
+Icon2.Position = UDim2.new(0.470772773, 0, 0.0934317037, 0)
+Icon2.Size = UDim2.new(0.0389164649, 0, 0.0621546954, 0)
+Icon2.Visible = false
+Icon2.Font = Enum.Font.SourceSansBold
+Icon2.Text = "vox"
+Icon2.TextColor3 = Color3.fromRGB(255, 0, 255)
+Icon2.TextSize = 20.000
+Icon2.TextWrapped = true
+
+UICorner_10.CornerRadius = UDim.new(0, 100)
+UICorner_10.Parent = Icon2
+
 -- Scripts:
 
-local function IWRDDR_fake_script() -- TradingButton.LocalScript 
+local function BSNAN_fake_script() -- TradingButton.LocalScript 
 	local script = Instance.new('LocalScript', TradingButton)
 
 	local button = script.Parent
@@ -265,8 +284,8 @@ local function IWRDDR_fake_script() -- TradingButton.LocalScript
 		trading.Visible = true
 	end)
 end
-coroutine.wrap(IWRDDR_fake_script)()
-local function EJBXM_fake_script() -- ShopButton.LocalScript 
+coroutine.wrap(BSNAN_fake_script)()
+local function MXCVITW_fake_script() -- ShopButton.LocalScript 
 	local script = Instance.new('LocalScript', ShopButton)
 
 	local button = script.Parent
@@ -283,8 +302,8 @@ local function EJBXM_fake_script() -- ShopButton.LocalScript
 		shop.Visible = false
 	end)
 end
-coroutine.wrap(EJBXM_fake_script)()
-local function ZRMA_fake_script() -- PotionButton.LocalScript 
+coroutine.wrap(MXCVITW_fake_script)()
+local function VOPFCY_fake_script() -- PotionButton.LocalScript 
 	local script = Instance.new('LocalScript', PotionButton)
 
 	local button = script.Parent
@@ -303,8 +322,8 @@ local function ZRMA_fake_script() -- PotionButton.LocalScript
 		
 	end)
 end
-coroutine.wrap(ZRMA_fake_script)()
-local function PXHEFR_fake_script() -- BucksButton.LocalScript 
+coroutine.wrap(VOPFCY_fake_script)()
+local function DTMXPF_fake_script() -- BucksButton.LocalScript 
 	local script = Instance.new('LocalScript', BucksButton)
 
 	local button = script.Parent
@@ -321,8 +340,8 @@ local function PXHEFR_fake_script() -- BucksButton.LocalScript
 		bucks.Visible = true
 	end)
 end
-coroutine.wrap(PXHEFR_fake_script)()
-local function YFJIXV_fake_script() -- ClosedButton.ClosedScript 
+coroutine.wrap(DTMXPF_fake_script)()
+local function UWGJNQJ_fake_script() -- ClosedButton.ClosedScript 
 	local script = Instance.new('LocalScript', ClosedButton)
 
 	local button = script.Parent
@@ -335,8 +354,8 @@ local function YFJIXV_fake_script() -- ClosedButton.ClosedScript
 		icon.Visible = true
 	end)
 end
-coroutine.wrap(YFJIXV_fake_script)()
-local function XJVIZPD_fake_script() -- CosnoleButton.ConsoleScript 
+coroutine.wrap(UWGJNQJ_fake_script)()
+local function ZVFDWLM_fake_script() -- CosnoleButton.ConsoleScript 
 	local script = Instance.new('LocalScript', CosnoleButton)
 
 	local StarterGui = game:GetService("StarterGui")
@@ -366,10 +385,24 @@ local function XJVIZPD_fake_script() -- CosnoleButton.ConsoleScript
 	button.Activated:Connect(openDeveloperConsole)
 	
 end
-coroutine.wrap(XJVIZPD_fake_script)()
-local function BLOEQXO_fake_script() -- AgeButton.Age1Script 
+coroutine.wrap(ZVFDWLM_fake_script)()
+local function KGZQZ_fake_script() -- AgeButton.Age1Script 
 	local script = Instance.new('LocalScript', AgeButton)
 
 	
 end
-coroutine.wrap(BLOEQXO_fake_script)()
+coroutine.wrap(KGZQZ_fake_script)()
+local function SHHE_fake_script() -- Icon2.LocalScript 
+	local script = Instance.new('LocalScript', Icon2)
+
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local trading = main:WaitForChild("Trading")
+	local icon = main:WaitForChild("Icon2")
+	
+	button.Activated:Connect(function()
+		trading.Visible = true
+		icon.Visible = false
+	end)
+end
+coroutine.wrap(SHHE_fake_script)()
