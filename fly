@@ -673,26 +673,22 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		return capitalizeWords(cleanedName)
 	end
 
-	local KindDB = require(
-    ReplicatedStorage
-        :WaitForChild("ClientDB")
-        :WaitForChild("Inventory")
-        :WaitForChild("KindDB")
-)
+	local function isEgg(itemData)
+		local kind = string.lower(tostring(itemData.kind or ""))
+		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
+		local category = string.lower(tostring(itemData.category or ""))
+		
+		-- Exclude pet items (such as basic_egg_2022_parakeet or basic_egg_2022_ancient_dragon) from appearing in the egg list
+		if string.find(kind, "_egg_20", 1, true) then
+			return false
+		end
 
-local function isEgg(itemData)
-    local kindData = KindDB[itemData.kind]
-
-    if kindData then
-        return kindData.is_egg == true
-            or string.lower(tostring(kindData.category or "")) == "egg"
-            or string.lower(tostring(kindData.category or "")) == "eggs"
-    end
-
-    -- Fallback if KindDB has no entry
-    local kind = string.lower(tostring(itemData.kind or ""))
-    return string.find(kind, "egg", 1, true) ~= nil
-end
+		return itemData.is_egg == true
+			or string.find(kind, "egg", 1, true) ~= nil
+			or string.find(displayName, "egg", 1, true) ~= nil
+			or category == "egg"
+			or category == "eggs"
+	end
 	
 	local function clearList()
 		for _, child in ipairs(list:GetChildren()) do
