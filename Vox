@@ -309,21 +309,37 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 
 local function getPlayerData()
-	local success, clientData = pcall(function()
-		return require(
-			ReplicatedStorage
-				:WaitForChild("ClientModules")
-				:WaitForChild("Core")
-				:WaitForChild("ClientData")
-		)
-	end)
+	local clientModules = ReplicatedStorage:FindFirstChild("ClientModules")
+	if not clientModules then
+		return nil
+	end
 
+	local core = clientModules:FindFirstChild("Core")
+	if not core then
+		return nil
+	end
+
+	local clientDataModule = core:FindFirstChild("ClientData")
+	if not clientDataModule then
+		return nil
+	end
+
+	local success, clientData = pcall(require, clientDataModule)
 	if not success or not clientData then
 		return nil
 	end
 
-	local dataStore = clientData.get_data()
-	return dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
+	local getData = clientData.get_data
+	if type(getData) ~= "function" then
+		return nil
+	end
+
+	local dataStore = getData()
+	if not dataStore then
+		return nil
+	end
+
+	return dataStore[LocalPlayer] or dataStore[LocalPlayer.Name]
 end
 
 local petDefinitions
@@ -333,15 +349,13 @@ local function getPetDefinitions()
 		return petDefinitions
 	end
 
-	-- Different game versions use different names for this module.
 	for _, moduleName in ipairs({ "PetData", "PetDatabase", "PetDefinitions" }) do
-		for _, object in ipairs(ReplicatedStorage:GetDescendants()) do
-			if object:IsA("ModuleScript") and object.Name == moduleName then
-				local success, definitions = pcall(require, object)
-				if success and type(definitions) == "table" then
-					petDefinitions = definitions
-					return petDefinitions
-				end
+		local moduleObject = ReplicatedStorage:FindFirstChild(moduleName, true)
+		if moduleObject and moduleObject:IsA("ModuleScript") then
+			local success, definitions = pcall(require, moduleObject)
+			if success and type(definitions) == "table" then
+				petDefinitions = definitions
+				return petDefinitions
 			end
 		end
 	end
@@ -396,23 +410,21 @@ end
 
 local function refreshLegendaryPet()
 	local playerData = getPlayerData()
-	local pets = playerData and playerData.inventory and playerData.inventory.pets
-
-	if not pets then
+	if not playerData or not playerData.inventory or not playerData.inventory.pets then
+		ImageLabel.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
 		status.Text = "Inventory unavailable"
 		return
 	end
 
-	for _, petData in pairs(pets) do
-		local definition = petData and getPetDefinition(petData.kind)
-		if petData and isLegendary(petData, definition) then
-			local image = getPetImage(definition)
-			if image then
-				ImageLabel.Image = image
+	for _, petData in pairs(playerData.inventory.pets) do
+		if petData and type(petData.kind) == "string" then
+			local definition = getPetDefinition(petData.kind)
+			if isLegendary(petData, definition) then
+				local image = getPetImage(definition)
+				ImageLabel.Image = image or "rbxasset://textures/ui/GuiImagePlaceholder.png"
+				status.Text = (definition and (definition.name or definition.display_name)) or petData.kind
+				return
 			end
-
-			status.Text = (definition and (definition.name or definition.display_name)) or petData.kind
-			return
 		end
 	end
 
@@ -423,7 +435,7 @@ end
 task.spawn(function()
 	while Main.Parent do
 		refreshLegendaryPet()
-		task.wait(1)
+		task.wait(2)
 	end
 end)
 
