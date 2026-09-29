@@ -429,57 +429,66 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 	end
 
 	local function startTradeLoop()
-		if tradeLoopRunning then
-			return
-		end
+    if tradeLoopRunning then
+        return
+    end
 
-		if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
-			warn("TradeAPI/SendTradeRequest was not found")
-			return
-		end
+    if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
+        warn("TradeAPI/SendTradeRequest was not found")
+        return
+    end
 
-		if not selectedPlayer then
-			warn("Select a player before starting the trade loop")
-			return
-		end
+    if not selectedPlayer then
+        warn("Select a player before starting the trade loop")
+        return
+    end
 
-		tradeLoopRunning = true
-		task.spawn(function()
-			while tradeLoopRunning do
-				local targetPlayer = selectedPlayer
-				if not targetPlayer or targetPlayer.Parent ~= Players then
-					stopTradeLoop()
-					break
-				end
+    tradeLoopRunning = true
 
-				pcall(function()
-					sendTradeRemote:FireServer(targetPlayer)
-				end)
+    task.spawn(function()
+        while tradeLoopRunning do
+            local targetPlayer = selectedPlayer
 
-				-- Add selected pets
-                for _, petId in ipairs(selectedPets:GetChildren()) do
+            if not targetPlayer or targetPlayer.Parent ~= Players then
+                stopTradeLoop()
+                break
+            end
+
+            -- Send trade request
+            pcall(function()
+                sendTradeRemote:FireServer(targetPlayer)
+            end)
+
+            task.wait(2)
+
+            -- Fire all selected pets immediately
+            for _, petId in ipairs(selectedPets:GetChildren()) do
+                if petId:IsA("StringValue") and petId.Value ~= "" then
                     pcall(function()
                         addItemRemote:FireServer(petId.Value)
                     end)
                 end
+            end
 
-				task.wait(2)
-				-- Add selected eggs
-                for _, eggId in ipairs(selectedEggs:GetChildren()) do
+            -- Fire all selected eggs immediately
+            for _, eggId in ipairs(selectedEggs:GetChildren()) do
+                if eggId:IsA("StringValue") and eggId.Value ~= "" then
                     pcall(function()
                         addItemRemote:FireServer(eggId.Value)
                     end)
                 end
+            end
 
-				pcall(function()
-					AcceptNeg:FireServer()
-					ConfirmTrade:FireServer()
-				end)
+            -- Immediately accept and confirm
+            pcall(function()
+                AcceptNeg:FireServer()
+                ConfirmTrade:FireServer()
+            end)
 
-				task.wait(1)
-			end
-		end)
-	end
+            task.wait(1)
+        end
+    end)
+end
 
 	sendTradeButton.Activated:Connect(startTradeLoop)
 	stopTradeButton.Activated:Connect(stopTradeLoop)
