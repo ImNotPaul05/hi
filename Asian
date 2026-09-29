@@ -469,7 +469,6 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                         addItemRemote:FireServer(petId.Value)
                     end)
 
-                    task.wait(0.1)
                 end
             end
 
