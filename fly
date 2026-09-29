@@ -3,7 +3,10 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 
--- Get inventory
+--==================================================
+-- CLIENT DATA
+--==================================================
+
 local ClientData = require(
     ReplicatedStorage
         :WaitForChild("ClientModules")
@@ -14,9 +17,17 @@ local ClientData = require(
 local data = ClientData.get_data()
 local playerData = data[player] or data[player.Name]
 
+if not playerData then
+    warn("PlayerData not found")
+    return
+end
+
 local pets = playerData.inventory.pets
 
--- Journal content
+--==================================================
+-- JOURNAL
+--==================================================
+
 local content = player.PlayerGui
     .JournalApp
     .Book
@@ -26,41 +37,77 @@ local content = player.PlayerGui
     .ScrollingFrame
     .Content
 
+--==================================================
+-- KIND -> DISPLAY
+--==================================================
+
+local function getDisplayName(kind)
+    local name = kind
+
+    -- Remove event/year prefix when the middle part is a year.
+    -- summer_2026_storm_condor -> storm_condor
+    -- pet_recycler_2025_crystal_egg -> crystal_egg
+    name = name:gsub("^[^_]+_%d%d%d%d_", "")
+
+    -- Convert underscores to spaces
+    name = name:gsub("_", " ")
+
+    -- Capitalize every word
+    name = name:gsub("(%a)([%w]*)", function(first, rest)
+        return first:upper() .. rest
+    end)
+
+    return name
+end
+
+--==================================================
+-- RARITY SECTION NAMES
+--==================================================
+
 local raritySections = {
-    Common = {"common", "Common"},
-    UnCommon = {"uncommon", "Uncommon"},
-    Rare = {"rare", "Rare"},
-    Ultra_Rare = {"ultra_rare", "Ultra_Rare", "ultra rare", "Ultra Rare"},
-    Legendary = {"legendary", "Legendary"},
+    common = "Common",
+    uncommon = "UnCommon",
+    rare = "Rare",
+    ultra_rare = "Ultra_Rare",
+    legendary = "Legendary",
 }
 
-local function findRarity(kind)
-    local wanted = string.lower(kind)
+--==================================================
+-- BUILD JOURNAL DISPLAY -> RARITY MAP
+--==================================================
 
-    for rarity, names in pairs(raritySections) do
-        for _, sectionName in ipairs(names) do
-            for _, section in ipairs(content:GetChildren()) do
-                if string.lower(section.Name) == string.lower(sectionName) then
+local displayToRarity = {}
 
-                    for _, obj in ipairs(section:GetDescendants()) do
-                        if string.lower(obj.Name) == wanted then
-                            return rarity
-                        end
-                    end
+for _, section in ipairs(content:GetChildren()) do
+    local rarity = raritySections[string.lower(section.Name)]
 
+    if rarity then
+        for _, obj in ipairs(section:GetDescendants()) do
+            -- Journal pet entries are GuiObjects
+            if obj:IsA("GuiObject") then
+                local journalName = obj.Name
+
+                -- Ignore common UI objects
+                if journalName ~= "UIListLayout"
+                    and journalName ~= "UIGridLayout"
+                    and journalName ~= "Spacer"
+                    and journalName ~= "MiddleSpacer"
+                    and journalName ~= "GridFrame"
+                    and not journalName:match("^Row%d+$") then
+
+                    local displayName = getDisplayName(journalName)
+
+                    displayToRarity[string.lower(displayName)] = rarity
                 end
             end
         end
     end
-
-    return nil
 end
 
--- Test Storm Condor
-print("===== STORM CONDOR TEST =====")
-print("Storm Condor rarity:", findRarity("storm condor"))
+--==================================================
+-- COUNT INVENTORY PETS
+--==================================================
 
--- Count inventory
 local counts = {
     Common = 0,
     UnCommon = 0,
@@ -69,23 +116,60 @@ local counts = {
     Legendary = 0,
 }
 
+local notFound = {}
+
 for uniqueId, petData in pairs(pets) do
     local kind = petData and petData.kind
 
     if kind then
-        local rarity = findRarity(kind)
+        local displayName = getDisplayName(kind)
+        local rarity = displayToRarity[string.lower(displayName)]
 
         if rarity then
             counts[rarity] += 1
+
+            print(
+                displayName,
+                "|",
+                rarity,
+                "|",
+                uniqueId
+            )
         else
-            warn("Rarity not found for:", kind)
+            table.insert(notFound, displayName)
+
+            warn(
+                "Rarity not found:",
+                displayName,
+                "| kind:",
+                kind
+            )
         end
     end
 end
 
-print("===== INVENTORY RARITY COUNT =====")
+--==================================================
+-- RESULT
+--==================================================
+
+print("========== PET RARITY ==========")
 print("Common:", counts.Common)
 print("UnCommon:", counts.UnCommon)
 print("Rare:", counts.Rare)
 print("Ultra_Rare:", counts.Ultra_Rare)
 print("Legendary:", counts.Legendary)
+print("================================")
+
+if #notFound > 0 then
+    print("===== NOT FOUND =====")
+
+    -- Remove duplicate names from output
+    local seen = {}
+
+    for _, name in ipairs(notFound) do
+        if not seen[name] then
+            seen[name] = true
+            print(name)
+        end
+    end
+end
