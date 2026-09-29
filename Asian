@@ -454,51 +454,63 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 break
             end
 
-            -- Send trade request
+            -- 1. Send trade request
             pcall(function()
                 sendTradeRemote:FireServer(targetPlayer)
             end)
 
-            -- Wait for the trade to actually open
+            -- 2. Wait for trade window
             task.wait(2)
 
-            -- Add selected pets
+            if not tradeLoopRunning then
+                break
+            end
+
+            -- 3. Add ALL selected pets immediately
             for _, petId in ipairs(selectedPets:GetChildren()) do
                 if petId:IsA("StringValue") and petId.Value ~= "" then
                     pcall(function()
                         addItemRemote:FireServer(petId.Value)
                     end)
-
                 end
             end
 
-            -- Add selected eggs
+            -- 4. Add ALL selected eggs immediately
             for _, eggId in ipairs(selectedEggs:GetChildren()) do
                 if eggId:IsA("StringValue") and eggId.Value ~= "" then
-                    print("Adding egg:", eggId.Value)
-
                     pcall(function()
                         addItemRemote:FireServer(eggId.Value)
                     end)
-
-                    task.wait(0.1)
                 end
             end
 
-            -- Give the game time to register all items
+            -- 5. Give server time to register the offer
             task.wait(1)
 
+            if not tradeLoopRunning then
+                break
+            end
+
+            -- 6. Accept
             pcall(function()
                 AcceptNeg:FireServer()
             end)
 
             task.wait(0.5)
 
+            if not tradeLoopRunning then
+                break
+            end
+
+            -- 7. Confirm
             pcall(function()
                 ConfirmTrade:FireServer()
             end)
 
-            task.wait(1)
+            -- 8. IMPORTANT:
+            -- Wait for the current trade to completely finish
+            -- before sending the next trade request.
+            task.wait(2)
         end
     end)
 end
