@@ -14,6 +14,7 @@ local ClientData = require(
 local data = ClientData.get_data()
 local playerData = data[player] or data[player.Name]
 
+-- YOUR INVENTORY
 local pets = playerData.inventory.pets
 
 -- Journal
@@ -41,7 +42,7 @@ local function isEgg(itemData)
         or category == "eggs"
 end
 
--- Get rarity from Journal
+-- Find rarity using the inventory pet's kind
 local function getRarity(kind)
     for _, row in ipairs(grid:GetChildren()) do
         if row:IsA("Frame") then
@@ -52,6 +53,7 @@ local function getRarity(kind)
 
                 if button then
                     firesignal(button.Activated)
+
                     task.wait(0.1)
 
                     return journal.Book.Popup.Polaroid.PetRarity.Text
@@ -63,7 +65,6 @@ local function getRarity(kind)
     return nil
 end
 
--- Rarity totals
 local counts = {
     Common = 0,
     Uncommon = 0,
@@ -72,10 +73,13 @@ local counts = {
     Legendary = 0
 }
 
--- Count pets
-for uniqueId, pet in pairs(pets) do
-    if not isEgg(pet) then
-        local kind = pet.kind
+-- ONLY pets that actually exist in YOUR inventory are processed
+for uniqueId, petData in pairs(pets) do
+
+    -- Completely exclude eggs
+    if not isEgg(petData) then
+
+        local kind = petData.kind
 
         if kind then
             local rarity = getRarity(kind)
@@ -84,33 +88,29 @@ for uniqueId, pet in pairs(pets) do
                 counts[rarity] = (counts[rarity] or 0) + 1
 
                 print(
+                    "INVENTORY PET:",
                     uniqueId,
+                    "|",
                     kind,
-                    "→",
+                    "|",
                     rarity
                 )
             else
                 print(
                     "RARITY NOT FOUND:",
                     uniqueId,
+                    "|",
                     kind
                 )
             end
         end
-    else
-        print(
-            "SKIPPED EGG:",
-            uniqueId,
-            pet.kind
-        )
     end
 end
 
--- Results
-print("===== PET RARITY TOTALS =====")
+print("===== YOUR INVENTORY PET TOTALS =====")
 print("Common:", counts.Common)
 print("Uncommon:", counts.Uncommon)
 print("Rare:", counts.Rare)
 print("Ultra-Rare:", counts["Ultra-Rare"])
 print("Legendary:", counts.Legendary)
-print("=============================")
+print("====================================")
