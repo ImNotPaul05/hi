@@ -686,6 +686,13 @@ local function isEgg(itemData)
     end
 
     local kind = tostring(itemData.kind or "")
+    local lowerKind = string.lower(kind)
+
+    -- Exclude basic_egg_2022 pet entries
+    if string.find(lowerKind, "^basic_egg_2022_", 1) then
+        return false
+    end
+
     local kindData = KindDB[kind]
 
     if kindData then
@@ -700,8 +707,8 @@ local function isEgg(itemData)
         end
     end
 
-    -- Fallback for egg IDs that aren't in KindDB
-    return string.find(string.lower(kind), "egg", 1, true) ~= nil
+    -- Fallback for actual egg IDs
+    return string.find(lowerKind, "egg", 1, true) ~= nil
 end
 	
 	local function clearList()
@@ -940,23 +947,6 @@ end
 		return kind == "practice_dog"
 			or string.find(kind, "practice_dog", 1, true) ~= nil
 			or string.find(displayName, "practice dog", 1, true) ~= nil
-	end
-
-		local function isStarterEgg(itemData)
-		local properties = itemData.properties or {}
-		local kind = string.lower(tostring(itemData.kind or ""))
-		local displayName = string.lower(tostring(
-			properties.name
-				or properties.custom_name
-				or properties.display_name
-				or itemData.display_name
-				or itemData.displayName
-				or itemData.name
-				or ""
-		))
-		return kind == "starter_egg"
-			or string.find(kind, "starter_egg", 1, true) ~= nil
-			or string.find(displayName, "Starter Egg", 1, true) ~= nil
 	end
 
 	local function clearList()
