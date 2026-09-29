@@ -1,111 +1,101 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local CoreGui = game:GetService("CoreGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local localPlayer = Players.LocalPlayer
-local camera = workspace.CurrentCamera
+local TARGET_FAST_ID = 1510
 
-local flying = false
-local bodyVel, bodyGyro
+print("================================")
+print("SEARCHING FOR FAST ID:", TARGET_FAST_ID)
+print("================================")
 
--- Safely grab Roblox's native mobile/pc control module
-local controls = nil
-task.spawn(function()
-    pcall(function()
-        local playerScripts = localPlayer:WaitForChild("PlayerScripts")
-        local playerModule = require(playerScripts:WaitForChild("PlayerModule"))
-        controls = playerModule:GetControls()
-    end)
-end)
+local function scanTable(tbl, path, depth, visited)
+    if type(tbl) ~= "table" then
+        return
+    end
 
--- Create Screen GUI and Button
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "UniversalFlyGui"
-screenGui.ResetOnSpawn = false
-pcall(function() screenGui.Parent = CoreGui end)
-if not screenGui.Parent then screenGui.Parent = localPlayer:WaitForChild("PlayerGui") end
+    if depth > 8 then
+        return
+    end
 
-local flyButton = Instance.new("TextButton")
-flyButton.Size = UDim2.new(0, 110, 0, 45)
-flyButton.Position = UDim2.new(0.5, -55, 0.82, 0)
-flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-flyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyButton.TextSize = 14
-flyButton.Font = Enum.Font.SourceSansBold
-flyButton.Text = "Fly: OFF"
-flyButton.Parent = screenGui
+    visited = visited or {}
 
-local function startFlight()
-    local character = localPlayer.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = character.HumanoidRootPart
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    
-    flying = true
-    flyButton.Text = "Fly: ON"
-    flyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-    
-    if humanoid then humanoid.PlatformStand = true end
-    
-    if hrp:FindFirstChild("UnivVel") then hrp.UnivVel:Destroy() end
-    if hrp:FindFirstChild("UnivGyro") then hrp.UnivGyro:Destroy() end
-    
-    bodyVel = Instance.new("BodyVelocity")
-    bodyVel.Name = "UnivVel"
-    bodyVel.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    bodyVel.Velocity = Vector3.new(0, 0.1, 0)
-    bodyVel.Parent = hrp
-    
-    bodyGyro = Instance.new("BodyGyro")
-    bodyGyro.Name = "UnivGyro"
-    bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    bodyGyro.CFrame = hrp.CFrame
-    bodyGyro.Parent = hrp
-end
+    if visited[tbl] then
+        return
+    end
 
-local function stopFlight()
-    flying = false
-    flyButton.Text = "Fly: OFF"
-    flyButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    
-    local character = localPlayer.Character
-    if character then
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-        if humanoid then humanoid.PlatformStand = false end
-        local hrp = character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            if hrp:FindFirstChild("UnivVel") then hrp.UnivVel:Destroy() end
-            if hrp:FindFirstChild("UnivGyro") then hrp.UnivGyro:Destroy() end
+    visited[tbl] = true
+
+    for key, value in pairs(tbl) do
+        if value == TARGET_FAST_ID then
+            print("")
+            print("========== MATCH ==========")
+            print("Path:", path)
+            print("Key:", key)
+            print("Value:", value)
+            print("============================")
+        end
+
+        if type(key) == "number" and key == TARGET_FAST_ID then
+            print("")
+            print("========== KEY MATCH ==========")
+            print("Path:", path)
+            print("Key:", key)
+            print("Value:", value)
+            print("===============================")
+        end
+
+        if type(value) == "table" then
+            scanTable(
+                value,
+                path .. "." .. tostring(key),
+                depth + 1,
+                visited
+            )
         end
     end
 end
 
-flyButton.MouseButton1Click:Connect(function()
-    if flying then stopFlight() else startFlight() end
+-- Search ClientData
+local success, ClientData = pcall(function()
+    return require(
+        ReplicatedStorage
+            :WaitForChild("ClientModules")
+            :WaitForChild("Core")
+            :WaitForChild("ClientData")
+    )
 end)
 
--- Read native mobile inputs dynamically every frame
-RunService.RenderStepped:Connect(function()
-    if not flying or not bodyVel or not bodyGyro then return end
-    
-    local camCF = camera.CFrame
-    local moveVector = Vector3.new(0, 0, 0)
-    
-    if controls then
-        -- Grabs the active movement vector directly from the mobile thumbstick
-        moveVector = controls:GetMoveVector()
-    end
-    
-    local velocity = Vector3.new(0, 0.1, 0) -- Anti-sink hover state
-    
-    if moveVector.Magnitude > 0 then
-        local forward = camCF.LookVector * moveVector.Z
-        local right = camCF.RightVector * moveVector.X
-        velocity = (forward + right).Unit * speed
-    end
-    
-    bodyVel.Velocity = velocity
-    bodyGyro.CFrame = camCF
-end)
+if success and ClientData then
+    print("Searching ClientData...")
+    scanTable(
+        ClientData,
+        "ClientData",
+        0
+    )
+end
 
-print("Universal Thumbstick Fly Loaded!")
+-- Search ModuleScripts under ReplicatedStorage
+local modules = 0
+
+for _, obj in ipairs(
+    ReplicatedStorage:GetDescendants()
+) do
+
+    if obj:IsA("ModuleScript") then
+        modules += 1
+
+        local ok, result = pcall(require, obj)
+
+        if ok and type(result) == "table" then
+            scanTable(
+                result,
+                obj:GetFullName(),
+                0
+            )
+        end
+    end
+end
+
+print("")
+print("================================")
+print("Modules scanned:", modules)
+print("SEARCH FINISHED")
+print("================================")
