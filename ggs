@@ -1,272 +1,365 @@
-local Config = {
-    TargetUsername = "R0gueX5gWarpB200323",
+-- Gui to Lua
+-- Version: 3.2
 
-    PurchaseAmount = 100,
+-- Instances:
 
-    PurchasesPerWindow = 3,
-    WindowSeconds = 120,
+local Main = Instance.new("ScreenGui")
+local Potion = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local TextLabel = Instance.new("TextLabel")
+local TradingButton = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
+local ShopButton = Instance.new("TextButton")
+local UICorner_2 = Instance.new("UICorner")
+local PotionButton = Instance.new("TextButton")
+local UICorner_3 = Instance.new("UICorner")
+local BucksButton = Instance.new("TextButton")
+local UICorner_4 = Instance.new("UICorner")
+local ClosedButton = Instance.new("TextButton")
+local UICorner_5 = Instance.new("UICorner")
+local CosnoleButton = Instance.new("TextButton")
+local UICorner_6 = Instance.new("UICorner")
+local ScrollingFrame = Instance.new("ScrollingFrame")
+local UICorner_7 = Instance.new("UICorner")
+local Legendaryfrm = Instance.new("Frame")
+local UICorner_8 = Instance.new("UICorner")
+local ImageLabel = Instance.new("ImageLabel")
+local AgeButton = Instance.new("TextButton")
+local UICorner_9 = Instance.new("UICorner")
+local status = Instance.new("TextLabel")
+local Legendarytxt = Instance.new("TextLabel")
 
-    DelayBetweenPurchases = 1,
-    DeleteDelay = 0.5,
-}
+--Properties:
 
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+Main.Name = "Main"
+Main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+Potion.Name = "Potion"
+Potion.Parent = Main
+Potion.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Potion.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Potion.BorderSizePixel = 0
+Potion.Position = UDim2.new(0.330901176, 0, 0.0188152455, 0)
+Potion.Size = UDim2.new(0.458353192, 0, 1.00048983, 0)
 
---==================================================
--- LOAD TARGET HOUSE FIRST
---==================================================
+Title.Name = "Title"
+Title.Parent = Potion
+Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1.000
+Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Title.BorderSizePixel = 0
+Title.Size = UDim2.new(0, 45, 0, 24)
+Title.Font = Enum.Font.Unknown
+Title.Text = "vox"
+Title.TextColor3 = Color3.fromRGB(255, 0, 255)
+Title.TextSize = 19.000
 
-local targetPlayer = Players:WaitForChild(Config.TargetUsername)
+TextLabel.Parent = Title
+TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.BackgroundTransparency = 1.000
+TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.BorderSizePixel = 0
+TextLabel.Position = UDim2.new(0.625474036, 0, 0.791666687, 0)
+TextLabel.Size = UDim2.new(0.888032615, 0, 0.894831359, 0)
+TextLabel.Font = Enum.Font.FredokaOne
+TextLabel.Text = "ADM"
+TextLabel.TextColor3 = Color3.fromRGB(255, 0, 255)
+TextLabel.TextSize = 14.000
 
-local houseArgs = {
-    targetPlayer
-}
+TradingButton.Name = "Trading/Button"
+TradingButton.Parent = Potion
+TradingButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TradingButton.BackgroundTransparency = 0.400
+TradingButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TradingButton.BorderSizePixel = 0
+TradingButton.Position = UDim2.new(0.314018846, 0, 0.0883753002, 0)
+TradingButton.Size = UDim2.new(0.166999996, 0, 0.0599999987, 0)
+TradingButton.Font = Enum.Font.SourceSansBold
+TradingButton.Text = "Trading"
+TradingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TradingButton.TextSize = 19.000
 
-ReplicatedStorage:WaitForChild("API")
-    :WaitForChild("HousingAPI/SubscribeToHouse")
-    :FireServer(unpack(houseArgs))
+UICorner.CornerRadius = UDim.new(0, 9)
+UICorner.Parent = TradingButton
 
-print("House subscribed:", Config.TargetUsername)
+ShopButton.Name = "Shop/Button"
+ShopButton.Parent = Potion
+ShopButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ShopButton.BackgroundTransparency = 0.400
+ShopButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ShopButton.BorderSizePixel = 0
+ShopButton.Position = UDim2.new(0.517406344, 0, 0.0883753002, 0)
+ShopButton.Size = UDim2.new(0.166999996, 0, 0.0599999987, 0)
+ShopButton.Font = Enum.Font.SourceSansBold
+ShopButton.Text = "Shop"
+ShopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ShopButton.TextSize = 19.000
 
+UICorner_2.CornerRadius = UDim.new(0, 9)
+UICorner_2.Parent = ShopButton
 
---==================================================
--- AUTO BUY SETUP
---==================================================
+PotionButton.Name = "Potion/Button"
+PotionButton.Parent = Potion
+PotionButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+PotionButton.BackgroundTransparency = 0.400
+PotionButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+PotionButton.BorderSizePixel = 0
+PotionButton.Position = UDim2.new(0.104669452, 0, 0.0883753151, 0)
+PotionButton.Size = UDim2.new(0.167384252, 0, 0.0599145368, 0)
+PotionButton.Font = Enum.Font.SourceSansBold
+PotionButton.Text = "Potion"
+PotionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+PotionButton.TextSize = 19.000
 
-local furniture = Workspace
-    :WaitForChild("HouseInteriors")
-    :WaitForChild("furniture")
+UICorner_3.CornerRadius = UDim.new(0, 9)
+UICorner_3.Parent = PotionButton
 
-local API = ReplicatedStorage:WaitForChild("API")
+BucksButton.Name = "Bucks/Button"
+BucksButton.Parent = Potion
+BucksButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BucksButton.BackgroundTransparency = 0.400
+BucksButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+BucksButton.BorderSizePixel = 0
+BucksButton.Position = UDim2.new(0.715706289, 0, 0.0869139954, 0)
+BucksButton.Size = UDim2.new(0.166999996, 0, 0.0599999987, 0)
+BucksButton.Font = Enum.Font.SourceSansBold
+BucksButton.Text = "Bucks"
+BucksButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+BucksButton.TextSize = 19.000
 
-local buyRemote =
-    API:WaitForChild("AvatarAPI/BuyMannequinOutfit")
+UICorner_4.CornerRadius = UDim.new(0, 9)
+UICorner_4.Parent = BucksButton
 
-local deleteRemote =
-    API:WaitForChild("AvatarAPI/DeleteOutfit")
+ClosedButton.Name = "Closed/Button"
+ClosedButton.Parent = Potion
+ClosedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ClosedButton.BackgroundTransparency = 1.000
+ClosedButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ClosedButton.BorderSizePixel = 0
+ClosedButton.Position = UDim2.new(0.92948246, 0, 0.0175359566, 0)
+ClosedButton.Size = UDim2.new(0.0481034406, 0, 0.0445354134, 0)
+ClosedButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
+ClosedButton.Font = Enum.Font.Unknown
+ClosedButton.Text = "X"
+ClosedButton.TextColor3 = Color3.fromRGB(255, 0, 255)
+ClosedButton.TextSize = 30.000
 
-local UUID_PATTERN =
-    "^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$"
+UICorner_5.CornerRadius = UDim.new(0, 10)
+UICorner_5.Parent = Potion
 
+CosnoleButton.Name = "Cosnole/Button"
+CosnoleButton.Parent = Potion
+CosnoleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+CosnoleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+CosnoleButton.BorderSizePixel = 0
+CosnoleButton.Position = UDim2.new(0.768384039, 0, 0.0175359566, 0)
+CosnoleButton.Size = UDim2.new(0.12687543, 0, 0.0445354134, 0)
+CosnoleButton.Font = Enum.Font.SourceSansBold
+CosnoleButton.Text = "Console"
+CosnoleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CosnoleButton.TextSize = 17.000
 
---==================================================
--- FIND TARGET PLAYER'S MANNEQUIN
---==================================================
+UICorner_6.CornerRadius = UDim.new(0, 9)
+UICorner_6.Parent = CosnoleButton
 
-local function findTargetMannequin()
-    local prefix = Config.TargetUsername .. "/"
+ScrollingFrame.Parent = Potion
+ScrollingFrame.Active = true
+ScrollingFrame.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
+ScrollingFrame.BackgroundTransparency = 0.600
+ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.Position = UDim2.new(0.0173499323, 0, 0.163158834, 0)
+ScrollingFrame.Size = UDim2.new(0.964724481, 0, 0.818428278, 0)
+ScrollingFrame.CanvasPosition = Vector2.new(0, 100)
 
-    for _, obj in ipairs(furniture:GetChildren()) do
+UICorner_7.CornerRadius = UDim.new(0, 9)
+UICorner_7.Parent = ScrollingFrame
 
-        if obj.Name:sub(1, #prefix) == prefix then
+Legendaryfrm.Name = "Legendaryfrm"
+Legendaryfrm.Parent = ScrollingFrame
+Legendaryfrm.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Legendaryfrm.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Legendaryfrm.BorderSizePixel = 0
+Legendaryfrm.Position = UDim2.new(0.0281033255, 0, 0.158866823, 0)
+Legendaryfrm.Size = UDim2.new(0.936573148, 0, 0.0339052156, 0)
 
-            local furnitureId =
-                obj.Name:match("(f%-.+)$")
+UICorner_8.Parent = Legendaryfrm
 
-            local mannequin =
-                obj:FindFirstChild("Mannequin", true)
+ImageLabel.Parent = Legendaryfrm
+ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ImageLabel.BorderSizePixel = 0
+ImageLabel.Position = UDim2.new(0.0194160696, 0, 0.113820642, 0)
+ImageLabel.Size = UDim2.new(0.100610547, 0, 0.758804262, 0)
+ImageLabel.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
 
-            if furnitureId and mannequin then
-                return obj, furnitureId, mannequin
-            end
-        end
-    end
+AgeButton.Name = "Age/Button"
+AgeButton.Parent = Legendaryfrm
+AgeButton.BackgroundColor3 = Color3.fromRGB(173, 0, 173)
+AgeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+AgeButton.BorderSizePixel = 0
+AgeButton.Position = UDim2.new(0.767451882, 0, 0.113820061, 0)
+AgeButton.Size = UDim2.new(0.207815081, 0, 0.758805752, 0)
+AgeButton.Font = Enum.Font.SourceSansBold
+AgeButton.Text = "AGE"
+AgeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+AgeButton.TextSize = 17.000
 
-    return nil
+UICorner_9.CornerRadius = UDim.new(0, 9)
+UICorner_9.Parent = AgeButton
+
+status.Name = "status"
+status.Parent = Legendaryfrm
+status.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+status.BackgroundTransparency = 1.000
+status.BorderColor3 = Color3.fromRGB(0, 0, 0)
+status.BorderSizePixel = 0
+status.Position = UDim2.new(0.134147391, 0, 0.0758804306, 0)
+status.Size = UDim2.new(0.236523032, 0, 0.398372233, 0)
+status.Font = Enum.Font.SourceSansBold
+status.TextColor3 = Color3.fromRGB(255, 255, 255)
+status.TextSize = 14.000
+
+Legendarytxt.Name = "Legendarytxt"
+Legendarytxt.Parent = ScrollingFrame
+Legendarytxt.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Legendarytxt.BackgroundTransparency = 1.000
+Legendarytxt.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Legendarytxt.BorderSizePixel = 0
+Legendarytxt.Position = UDim2.new(0.0281033758, 0, 0.152435005, 0)
+Legendarytxt.Size = UDim2.new(0.162386462, 0, -0.0192405116, 0)
+Legendarytxt.Font = Enum.Font.FredokaOne
+Legendarytxt.Text = "Legendary"
+Legendarytxt.TextColor3 = Color3.fromRGB(255, 0, 255)
+Legendarytxt.TextSize = 22.000
+Legendarytxt.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+Legendarytxt.TextWrapped = true
+
+-- Scripts:
+
+local function UTWKBFA_fake_script() -- TradingButton.LocalScript 
+	local script = Instance.new('LocalScript', TradingButton)
+
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local potion = main:WaitForChild("Potion")
+	local trading = main:WaitForChild("Trading")
+	local stroke = button:WaitForChild("UIStroke")
+	
+	button.BackgroundColor3 = Color3.fromRGB(154, 0, 154)
+	stroke.Color = Color3.fromRGB(255, 0, 255)
+	
+	button.Activated:Connect(function()
+		potion.Visible = false
+		trading.Visible = true
+	end)
 end
+coroutine.wrap(UTWKBFA_fake_script)()
+local function OTOUR_fake_script() -- ShopButton.LocalScript 
+	local script = Instance.new('LocalScript', ShopButton)
 
-
---==================================================
--- FIND UUID
---==================================================
-
-local function findUUID(root)
-
-    for name, value in pairs(root:GetAttributes()) do
-
-        if typeof(value) == "string"
-            and value:match(UUID_PATTERN)
-        then
-            print("UUID found in attribute:", name)
-            return value
-        end
-    end
-
-
-    for _, obj in ipairs(root:GetDescendants()) do
-
-        for name, value in pairs(obj:GetAttributes()) do
-
-            if typeof(value) == "string"
-                and value:match(UUID_PATTERN)
-            then
-                print(
-                    "UUID found:",
-                    value,
-                    "at",
-                    obj:GetFullName(),
-                    "attribute:",
-                    name
-                )
-
-                return value
-            end
-        end
-
-
-        if obj:IsA("StringValue") then
-
-            if obj.Value:match(UUID_PATTERN) then
-
-                print(
-                    "UUID found:",
-                    obj.Value,
-                    "at",
-                    obj:GetFullName()
-                )
-
-                return obj.Value
-            end
-        end
-    end
-
-    return nil
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local potion = main:WaitForChild("Potion")
+	local shop = main:WaitForChild("Shop")
+	local stroke = button:WaitForChild("UIStroke")
+	
+	button.BackgroundColor3 = Color3.fromRGB(154, 0, 154)
+	stroke.Color = Color3.fromRGB(255, 0, 255)
+	
+	button.Activated:Connect(function()
+		potion.Visible = false
+		shop.Visible = false
+	end)
 end
+coroutine.wrap(OTOUR_fake_script)()
+local function NVDOCG_fake_script() -- PotionButton.LocalScript 
+	local script = Instance.new('LocalScript', PotionButton)
 
-
---==================================================
--- MAKE SURE TARGET EXISTS
---==================================================
-
-if not targetPlayer then
-    warn("Target player is not in the server.")
-    return
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local potion = main:WaitForChild("Potion")
+	local trading = main:WaitForChild("Trading")
+	local stroke = button:WaitForChild("UIStroke")
+	
+	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	stroke.Color = Color3.fromRGB(255, 0, 255)
+	
+	button.Activated:Connect(function()
+		potion.Visible = true
+		trading.Visible = false
+		
+		
+	end)
 end
+coroutine.wrap(NVDOCG_fake_script)()
+local function NHED_fake_script() -- BucksButton.LocalScript 
+	local script = Instance.new('LocalScript', BucksButton)
 
-
---==================================================
--- PURCHASE LOOP
---==================================================
-
-while true do
-
-    print("================================")
-    print("Starting purchase window")
-    print("Limit:", Config.PurchasesPerWindow)
-    print("================================")
-
-
-    for purchaseNumber = 1, Config.PurchasesPerWindow do
-
-        local mannequinFolder, furnitureId, mannequin =
-            findTargetMannequin()
-
-
-        if not mannequinFolder then
-            warn("Could not find target mannequin.")
-            task.wait(Config.DelayBetweenPurchases)
-            continue
-        end
-
-
-        local outfitUUID =
-            findUUID(mannequinFolder)
-
-
-        if not outfitUUID then
-            warn("Could not find outfit UUID.")
-            task.wait(Config.DelayBetweenPurchases)
-            continue
-        end
-
-
-        print("")
-        print(
-            "Purchase:",
-            purchaseNumber,
-            "/",
-            Config.PurchasesPerWindow
-        )
-
-        print("Target:", Config.TargetUsername)
-        print("Furniture ID:", furnitureId)
-        print("UUID:", outfitUUID)
-
-
-        -- BUY
-        local buySuccess, buyResult =
-            pcall(function()
-
-                return buyRemote:InvokeServer(
-                    targetPlayer,
-                    furnitureId,
-                    outfitUUID,
-                    Config.PurchaseAmount
-                )
-
-            end)
-
-
-        if buySuccess then
-
-            print("Purchase successful:", buyResult)
-
-            task.wait(Config.DeleteDelay)
-
-
-            -- DELETE
-            local deleteSuccess, deleteResult =
-                pcall(function()
-
-                    return deleteRemote:FireServer(
-                        "player",
-                        "Outfit"
-                    )
-
-                end)
-
-
-            if deleteSuccess then
-                print("Outfit deleted.")
-            else
-                warn(
-                    "Delete failed:",
-                    deleteResult
-                )
-            end
-
-        else
-
-            warn(
-                "Purchase failed:",
-                buyResult
-            )
-
-        end
-
-
-        if purchaseNumber < Config.PurchasesPerWindow then
-            task.wait(Config.DelayBetweenPurchases)
-        end
-    end
-
-
-    --==================================================
-    -- WAIT FOR NEXT 2-MINUTE WINDOW
-    --==================================================
-
-    print("")
-    print("================================")
-    print("3 purchases completed.")
-    print(
-        "Waiting",
-        Config.WindowSeconds,
-        "seconds..."
-    )
-    print("================================")
-
-    task.wait(Config.WindowSeconds)
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local potion = main:WaitForChild("Potion")
+	local bucks = main:WaitForChild("Bucks")
+	local stroke = button:WaitForChild("UIStroke")
+	
+	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	stroke.Color = Color3.fromRGB(255, 0, 255)
+	
+	button.Activated:Connect(function()
+		potion.Visible = false
+		bucks.Visible = true
+	end)
 end
+coroutine.wrap(NHED_fake_script)()
+local function JXSZ_fake_script() -- ClosedButton.ClosedScript 
+	local script = Instance.new('LocalScript', ClosedButton)
+
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local trading = main:WaitForChild("Trading")
+	local icon = main:WaitForChild("Icon2")
+	
+	button.Activated:Connect(function()
+		trading.Visible = false
+		icon.Visible = true
+	end)
+end
+coroutine.wrap(JXSZ_fake_script)()
+local function AUIEZRN_fake_script() -- CosnoleButton.ConsoleScript 
+	local script = Instance.new('LocalScript', CosnoleButton)
+
+	local StarterGui = game:GetService("StarterGui")
+	
+	local button = script.Parent
+	if not button:IsA("TextButton") then
+		return
+	end
+	
+	local function openDeveloperConsole()
+		for _ = 1, 10 do
+			local success, errorMessage = pcall(function()
+				StarterGui:SetCore("DevConsoleVisible", true)
+			end)
+	
+			if success then
+				return
+			end
+	
+			task.wait(0.25)
+			if errorMessage then
+				warn("Could not open Developer Console: " .. errorMessage)
+			end
+		end
+	end
+	
+	button.Activated:Connect(openDeveloperConsole)
+	
+end
+coroutine.wrap(AUIEZRN_fake_script)()
+local function LJFQY_fake_script() -- AgeButton.Age1Script 
+	local script = Instance.new('LocalScript', AgeButton)
+
+	
+end
+coroutine.wrap(LJFQY_fake_script)()
