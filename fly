@@ -1,4 +1,4 @@
--- 5:401m
+-- 6:401m
 -- Version: 3.2
 
 -- Instances:
@@ -837,6 +837,13 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		return cleanedName:gsub("^%s+", ""):gsub("%s+$", "")
 	end
 
+	local KindDB = require(
+		ReplicatedStorage
+			:WaitForChild("ClientDB")
+			:WaitForChild("Inventory")
+			:WaitForChild("KindDB")
+	)
+
 	local function capitalizeWords(displayName)
 		return displayName:gsub("(%S+)", function(word)
 			return word:sub(1, 1):upper() .. word:sub(2):lower()
@@ -846,22 +853,15 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local function getDisplayName(itemData)
 		local kind = tostring(itemData.kind or "")
 		local kindData = KindDB[kind]
-	
-        -- Use the actual pet name from KindDB
-        if kindData and kindData.name and kindData.name ~= "" then
-            return tostring(kindData.name)
-        end
 
-       -- Fallback
-       local properties = itemData.properties or {}
+		-- Use the actual pet name from KindDB
+		if kindData and kindData.name and kindData.name ~= "" then
+			return tostring(kindData.name)
+		end
 
-       local KindDB = require(
-            ReplicatedStorage
-                :WaitForChild("ClientDB")
-                :WaitForChild("Inventory")
-                :WaitForChild("KindDB")
-        )
-       local displayName = properties.name
+		-- Fallback
+		local properties = itemData.properties or {}
+		local displayName = properties.name
 			or properties.custom_name
 			or properties.display_name
 			or itemData.display_name
@@ -869,18 +869,18 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			or itemData.name
 			or kind
 
-        if displayName and displayName ~= "" then
-            local cleanedName = removeEventPrefix(displayName)
+		if displayName and displayName ~= "" then
+			local cleanedName = removeEventPrefix(displayName)
 
-            if cleanedName ~= "" then
-                return capitalizeWords(cleanedName)
-            end
-        end
+			if cleanedName ~= "" then
+				return capitalizeWords(cleanedName)
+			end
+		end
 
-        return capitalizeWords(
-            removeEventPrefix(kind:gsub("[_%-]", " "))
-        )
-    end
+		return capitalizeWords(
+			removeEventPrefix(kind:gsub("[_%-]", " "))
+		)
+	end
 
 	local function getForm(itemData)
 		local properties = itemData.properties or {}
