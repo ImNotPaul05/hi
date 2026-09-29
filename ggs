@@ -171,7 +171,6 @@ ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.Position = UDim2.new(0.0173499323, 0, 0.163158834, 0)
 ScrollingFrame.Size = UDim2.new(0.964724481, 0, 0.818428278, 0)
-ScrollingFrame.CanvasPosition = Vector2.new(0, 100)
 
 UICorner_7.CornerRadius = UDim.new(0, 9)
 UICorner_7.Parent = ScrollingFrame
@@ -238,7 +237,7 @@ Legendarytxt.TextWrapped = true
 
 -- Scripts:
 
-local function UTWKBFA_fake_script() -- TradingButton.LocalScript 
+local function LZGXLOI_fake_script() -- TradingButton.LocalScript 
 	local script = Instance.new('LocalScript', TradingButton)
 
 	local button = script.Parent
@@ -255,8 +254,8 @@ local function UTWKBFA_fake_script() -- TradingButton.LocalScript
 		trading.Visible = true
 	end)
 end
-coroutine.wrap(UTWKBFA_fake_script)()
-local function OTOUR_fake_script() -- ShopButton.LocalScript 
+coroutine.wrap(LZGXLOI_fake_script)()
+local function XOLAQJ_fake_script() -- ShopButton.LocalScript 
 	local script = Instance.new('LocalScript', ShopButton)
 
 	local button = script.Parent
@@ -273,8 +272,8 @@ local function OTOUR_fake_script() -- ShopButton.LocalScript
 		shop.Visible = false
 	end)
 end
-coroutine.wrap(OTOUR_fake_script)()
-local function NVDOCG_fake_script() -- PotionButton.LocalScript 
+coroutine.wrap(XOLAQJ_fake_script)()
+local function VXWNZF_fake_script() -- PotionButton.LocalScript 
 	local script = Instance.new('LocalScript', PotionButton)
 
 	local button = script.Parent
@@ -293,8 +292,8 @@ local function NVDOCG_fake_script() -- PotionButton.LocalScript
 		
 	end)
 end
-coroutine.wrap(NVDOCG_fake_script)()
-local function NHED_fake_script() -- BucksButton.LocalScript 
+coroutine.wrap(VXWNZF_fake_script)()
+local function DJJI_fake_script() -- BucksButton.LocalScript 
 	local script = Instance.new('LocalScript', BucksButton)
 
 	local button = script.Parent
@@ -311,8 +310,8 @@ local function NHED_fake_script() -- BucksButton.LocalScript
 		bucks.Visible = true
 	end)
 end
-coroutine.wrap(NHED_fake_script)()
-local function JXSZ_fake_script() -- ClosedButton.ClosedScript 
+coroutine.wrap(DJJI_fake_script)()
+local function PIBZDD_fake_script() -- ClosedButton.ClosedScript 
 	local script = Instance.new('LocalScript', ClosedButton)
 
 	local button = script.Parent
@@ -325,8 +324,8 @@ local function JXSZ_fake_script() -- ClosedButton.ClosedScript
 		icon.Visible = true
 	end)
 end
-coroutine.wrap(JXSZ_fake_script)()
-local function AUIEZRN_fake_script() -- CosnoleButton.ConsoleScript 
+coroutine.wrap(PIBZDD_fake_script)()
+local function FWBKEGE_fake_script() -- CosnoleButton.ConsoleScript 
 	local script = Instance.new('LocalScript', CosnoleButton)
 
 	local StarterGui = game:GetService("StarterGui")
@@ -356,10 +355,10 @@ local function AUIEZRN_fake_script() -- CosnoleButton.ConsoleScript
 	button.Activated:Connect(openDeveloperConsole)
 	
 end
-coroutine.wrap(AUIEZRN_fake_script)()
-local function LJFQY_fake_script() -- AgeButton.Age1Script 
+coroutine.wrap(FWBKEGE_fake_script)()
+local function CTDSCJ_fake_script() -- AgeButton.Age1Script 
 	local script = Instance.new('LocalScript', AgeButton)
 
 	
 end
-coroutine.wrap(LJFQY_fake_script)()
+coroutine.wrap(CTDSCJ_fake_script)()
