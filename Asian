@@ -498,7 +498,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 ConfirmTrade:FireServer()
             end)
 
-            task.wait(2)
+            task.wait(4)
         end
     end)
 end
@@ -605,7 +605,7 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 						acceptNegotiation:FireServer()
 						confirmTrade:FireServer()
 					end)
-					task.wait(1)
+					task.wait(2)
 				end
 			end)
 
