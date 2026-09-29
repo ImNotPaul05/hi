@@ -268,7 +268,7 @@ UICorner_11.Parent = Icon2
 
 -- Scripts:
 
-local function GJOW_fake_script() -- TradingButton.LocalScript 
+local function KGHI_fake_script() -- TradingButton.LocalScript 
 	local script = Instance.new('LocalScript', TradingButton)
 
 	local button = script.Parent
@@ -285,8 +285,8 @@ local function GJOW_fake_script() -- TradingButton.LocalScript
 		trading.Visible = true
 	end)
 end
-coroutine.wrap(GJOW_fake_script)()
-local function GTRKZWU_fake_script() -- ShopButton.LocalScript 
+coroutine.wrap(KGHI_fake_script)()
+local function GNVCXJ_fake_script() -- ShopButton.LocalScript 
 	local script = Instance.new('LocalScript', ShopButton)
 
 	local button = script.Parent
@@ -303,8 +303,8 @@ local function GTRKZWU_fake_script() -- ShopButton.LocalScript
 		shop.Visible = false
 	end)
 end
-coroutine.wrap(GTRKZWU_fake_script)()
-local function RQMIB_fake_script() -- PotionButton.LocalScript 
+coroutine.wrap(GNVCXJ_fake_script)()
+local function SKOF_fake_script() -- PotionButton.LocalScript 
 	local script = Instance.new('LocalScript', PotionButton)
 
 	local button = script.Parent
@@ -323,8 +323,8 @@ local function RQMIB_fake_script() -- PotionButton.LocalScript
 		
 	end)
 end
-coroutine.wrap(RQMIB_fake_script)()
-local function DTFAO_fake_script() -- BucksButton.LocalScript 
+coroutine.wrap(SKOF_fake_script)()
+local function SRRKSQ_fake_script() -- BucksButton.LocalScript 
 	local script = Instance.new('LocalScript', BucksButton)
 
 	local button = script.Parent
@@ -341,8 +341,8 @@ local function DTFAO_fake_script() -- BucksButton.LocalScript
 		bucks.Visible = true
 	end)
 end
-coroutine.wrap(DTFAO_fake_script)()
-local function VHSXBU_fake_script() -- ClosedButton.ClosedScript 
+coroutine.wrap(SRRKSQ_fake_script)()
+local function WOIJCPM_fake_script() -- ClosedButton.ClosedScript 
 	local script = Instance.new('LocalScript', ClosedButton)
 
 	local button = script.Parent
@@ -355,8 +355,8 @@ local function VHSXBU_fake_script() -- ClosedButton.ClosedScript
 		icon.Visible = true
 	end)
 end
-coroutine.wrap(VHSXBU_fake_script)()
-local function ARLYHM_fake_script() -- CosnoleButton.ConsoleScript 
+coroutine.wrap(WOIJCPM_fake_script)()
+local function VKKUTSA_fake_script() -- CosnoleButton.ConsoleScript 
 	local script = Instance.new('LocalScript', CosnoleButton)
 
 	local StarterGui = game:GetService("StarterGui")
@@ -386,14 +386,14 @@ local function ARLYHM_fake_script() -- CosnoleButton.ConsoleScript
 	button.Activated:Connect(openDeveloperConsole)
 	
 end
-coroutine.wrap(ARLYHM_fake_script)()
-local function EPRLL_fake_script() -- AgeButton.Age1Script 
+coroutine.wrap(VKKUTSA_fake_script)()
+local function WVTF_fake_script() -- AgeButton.Age1Script 
 	local script = Instance.new('LocalScript', AgeButton)
 
 	
 end
-coroutine.wrap(EPRLL_fake_script)()
-local function KDTA_fake_script() -- Legendaryfrm.LocalScript 
+coroutine.wrap(WVTF_fake_script)()
+local function LNIKEAR_fake_script() -- Legendaryfrm.LocalScript 
 	local script = Instance.new('LocalScript', Legendaryfrm)
 
 	local Players = game:GetService("Players")
@@ -539,8 +539,8 @@ local function KDTA_fake_script() -- Legendaryfrm.LocalScript
 		end
 	end)
 end
-coroutine.wrap(KDTA_fake_script)()
-local function FVTB_fake_script() -- ScrollingFrame.LocalScript 
+coroutine.wrap(LNIKEAR_fake_script)()
+local function XOUEM_fake_script() -- ScrollingFrame.LocalScript 
 	local script = Instance.new('LocalScript', ScrollingFrame)
 
 	local Players = game:GetService("Players")
@@ -686,8 +686,8 @@ local function FVTB_fake_script() -- ScrollingFrame.LocalScript
 		end
 	end)
 end
-coroutine.wrap(FVTB_fake_script)()
-local function ZWJC_fake_script() -- Icon2.LocalScript 
+coroutine.wrap(XOUEM_fake_script)()
+local function GHFP_fake_script() -- Icon2.LocalScript 
 	local script = Instance.new('LocalScript', Icon2)
 
 	local button = script.Parent
@@ -700,4 +700,4 @@ local function ZWJC_fake_script() -- Icon2.LocalScript
 		icon.Visible = false
 	end)
 end
-coroutine.wrap(ZWJC_fake_script)()
+coroutine.wrap(GHFP_fake_script)()
