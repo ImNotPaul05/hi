@@ -28,6 +28,8 @@ local AgeButton = Instance.new("TextButton")
 local UICorner_9 = Instance.new("UICorner")
 local status = Instance.new("TextLabel")
 local Legendarytxt = Instance.new("TextLabel")
+local UITextSizeConstraint = Instance.new("UITextSizeConstraint")
+local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
 
 --Properties:
 
@@ -226,18 +228,27 @@ Legendarytxt.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Legendarytxt.BackgroundTransparency = 1.000
 Legendarytxt.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Legendarytxt.BorderSizePixel = 0
-Legendarytxt.Position = UDim2.new(0.0281033758, 0, 0.152435005, 0)
-Legendarytxt.Size = UDim2.new(0.162386462, 0, -0.0192405116, 0)
+Legendarytxt.Position = UDim2.new(0.0281034112, 0, 0.152435035, 0)
+Legendarytxt.Size = UDim2.new(0.162386462, 0, -0.017140165, 0)
 Legendarytxt.Font = Enum.Font.FredokaOne
 Legendarytxt.Text = "Legendary"
 Legendarytxt.TextColor3 = Color3.fromRGB(255, 0, 255)
+Legendarytxt.TextScaled = true
 Legendarytxt.TextSize = 22.000
 Legendarytxt.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
 Legendarytxt.TextWrapped = true
 
+UITextSizeConstraint.Parent = Legendarytxt
+UITextSizeConstraint.MaxTextSize = 22
+
+UIAspectRatioConstraint.Parent = Potion
+UIAspectRatioConstraint.AspectRatio = 0.807
+UIAspectRatioConstraint.AspectType = Enum.AspectType.ScaleWithParentSize
+UIAspectRatioConstraint.DominantAxis = Enum.DominantAxis.Height
+
 -- Scripts:
 
-local function LZGXLOI_fake_script() -- TradingButton.LocalScript 
+local function IWRDDR_fake_script() -- TradingButton.LocalScript 
 	local script = Instance.new('LocalScript', TradingButton)
 
 	local button = script.Parent
@@ -254,8 +265,8 @@ local function LZGXLOI_fake_script() -- TradingButton.LocalScript
 		trading.Visible = true
 	end)
 end
-coroutine.wrap(LZGXLOI_fake_script)()
-local function XOLAQJ_fake_script() -- ShopButton.LocalScript 
+coroutine.wrap(IWRDDR_fake_script)()
+local function EJBXM_fake_script() -- ShopButton.LocalScript 
 	local script = Instance.new('LocalScript', ShopButton)
 
 	local button = script.Parent
@@ -272,8 +283,8 @@ local function XOLAQJ_fake_script() -- ShopButton.LocalScript
 		shop.Visible = false
 	end)
 end
-coroutine.wrap(XOLAQJ_fake_script)()
-local function VXWNZF_fake_script() -- PotionButton.LocalScript 
+coroutine.wrap(EJBXM_fake_script)()
+local function ZRMA_fake_script() -- PotionButton.LocalScript 
 	local script = Instance.new('LocalScript', PotionButton)
 
 	local button = script.Parent
@@ -292,8 +303,8 @@ local function VXWNZF_fake_script() -- PotionButton.LocalScript
 		
 	end)
 end
-coroutine.wrap(VXWNZF_fake_script)()
-local function DJJI_fake_script() -- BucksButton.LocalScript 
+coroutine.wrap(ZRMA_fake_script)()
+local function PXHEFR_fake_script() -- BucksButton.LocalScript 
 	local script = Instance.new('LocalScript', BucksButton)
 
 	local button = script.Parent
@@ -310,8 +321,8 @@ local function DJJI_fake_script() -- BucksButton.LocalScript
 		bucks.Visible = true
 	end)
 end
-coroutine.wrap(DJJI_fake_script)()
-local function PIBZDD_fake_script() -- ClosedButton.ClosedScript 
+coroutine.wrap(PXHEFR_fake_script)()
+local function YFJIXV_fake_script() -- ClosedButton.ClosedScript 
 	local script = Instance.new('LocalScript', ClosedButton)
 
 	local button = script.Parent
@@ -324,8 +335,8 @@ local function PIBZDD_fake_script() -- ClosedButton.ClosedScript
 		icon.Visible = true
 	end)
 end
-coroutine.wrap(PIBZDD_fake_script)()
-local function FWBKEGE_fake_script() -- CosnoleButton.ConsoleScript 
+coroutine.wrap(YFJIXV_fake_script)()
+local function XJVIZPD_fake_script() -- CosnoleButton.ConsoleScript 
 	local script = Instance.new('LocalScript', CosnoleButton)
 
 	local StarterGui = game:GetService("StarterGui")
@@ -355,10 +366,10 @@ local function FWBKEGE_fake_script() -- CosnoleButton.ConsoleScript
 	button.Activated:Connect(openDeveloperConsole)
 	
 end
-coroutine.wrap(FWBKEGE_fake_script)()
-local function CTDSCJ_fake_script() -- AgeButton.Age1Script 
+coroutine.wrap(XJVIZPD_fake_script)()
+local function BLOEQXO_fake_script() -- AgeButton.Age1Script 
 	local script = Instance.new('LocalScript', AgeButton)
 
 	
 end
-coroutine.wrap(CTDSCJ_fake_script)()
+coroutine.wrap(BLOEQXO_fake_script)()
