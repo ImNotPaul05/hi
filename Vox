@@ -942,6 +942,23 @@ end
 			or string.find(displayName, "practice dog", 1, true) ~= nil
 	end
 
+		local function isStarterEgg(itemData)
+		local properties = itemData.properties or {}
+		local kind = string.lower(tostring(itemData.kind or ""))
+		local displayName = string.lower(tostring(
+			properties.name
+				or properties.custom_name
+				or properties.display_name
+				or itemData.display_name
+				or itemData.displayName
+				or itemData.name
+				or ""
+		))
+		return kind == "starter_egg"
+			or string.find(kind, "starter_egg", 1, true) ~= nil
+			or string.find(displayName, "starter egg", 1, true) ~= nil
+	end
+
 	local function clearList()
 		for _, child in ipairs(list:GetChildren()) do
 			if child:IsA("TextButton") then
