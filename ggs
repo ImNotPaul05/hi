@@ -184,8 +184,8 @@ Legendaryfrm.Parent = ScrollingFrame
 Legendaryfrm.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Legendaryfrm.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Legendaryfrm.BorderSizePixel = 0
-Legendaryfrm.Position = UDim2.new(0.0281033255, 0, 0.158866823, 0)
-Legendaryfrm.Size = UDim2.new(0.936573148, 0, 0.0339052156, 0)
+Legendaryfrm.Position = UDim2.new(0.00990978349, 0, 0.10738676, 0)
+Legendaryfrm.Size = UDim2.new(0.936573207, 0, 0.0529764295, 0)
 
 UICorner_8.Parent = Legendaryfrm
 
@@ -193,8 +193,8 @@ ImageLabel.Parent = Legendaryfrm
 ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 ImageLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 ImageLabel.BorderSizePixel = 0
-ImageLabel.Position = UDim2.new(0.0194160696, 0, 0.113820642, 0)
-ImageLabel.Size = UDim2.new(0.100610547, 0, 0.758804262, 0)
+ImageLabel.Position = UDim2.new(0.0194160938, 0, 0.113820322, 0)
+ImageLabel.Size = UDim2.new(0.114731275, 0, 0.758804262, 0)
 ImageLabel.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
 
 AgeButton.Name = "Age/Button"
@@ -230,7 +230,7 @@ Legendarytxt.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Legendarytxt.BackgroundTransparency = 1.000
 Legendarytxt.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Legendarytxt.BorderSizePixel = 0
-Legendarytxt.Position = UDim2.new(0.0281034112, 0, 0.152435035, 0)
+Legendarytxt.Position = UDim2.new(0.0264494587, 0, 0.0996679738, 0)
 Legendarytxt.Size = UDim2.new(0.162386462, 0, -0.017140165, 0)
 Legendarytxt.Font = Enum.Font.FredokaOne
 Legendarytxt.Text = "Legendary"
@@ -267,7 +267,7 @@ UICorner_10.Parent = Icon2
 
 -- Scripts:
 
-local function BSNAN_fake_script() -- TradingButton.LocalScript 
+local function VLPCWMW_fake_script() -- TradingButton.LocalScript 
 	local script = Instance.new('LocalScript', TradingButton)
 
 	local button = script.Parent
@@ -284,8 +284,8 @@ local function BSNAN_fake_script() -- TradingButton.LocalScript
 		trading.Visible = true
 	end)
 end
-coroutine.wrap(BSNAN_fake_script)()
-local function MXCVITW_fake_script() -- ShopButton.LocalScript 
+coroutine.wrap(VLPCWMW_fake_script)()
+local function KIZU_fake_script() -- ShopButton.LocalScript 
 	local script = Instance.new('LocalScript', ShopButton)
 
 	local button = script.Parent
@@ -302,8 +302,8 @@ local function MXCVITW_fake_script() -- ShopButton.LocalScript
 		shop.Visible = false
 	end)
 end
-coroutine.wrap(MXCVITW_fake_script)()
-local function VOPFCY_fake_script() -- PotionButton.LocalScript 
+coroutine.wrap(KIZU_fake_script)()
+local function QVKV_fake_script() -- PotionButton.LocalScript 
 	local script = Instance.new('LocalScript', PotionButton)
 
 	local button = script.Parent
@@ -322,8 +322,8 @@ local function VOPFCY_fake_script() -- PotionButton.LocalScript
 		
 	end)
 end
-coroutine.wrap(VOPFCY_fake_script)()
-local function DTMXPF_fake_script() -- BucksButton.LocalScript 
+coroutine.wrap(QVKV_fake_script)()
+local function VHVO_fake_script() -- BucksButton.LocalScript 
 	local script = Instance.new('LocalScript', BucksButton)
 
 	local button = script.Parent
@@ -340,8 +340,8 @@ local function DTMXPF_fake_script() -- BucksButton.LocalScript
 		bucks.Visible = true
 	end)
 end
-coroutine.wrap(DTMXPF_fake_script)()
-local function UWGJNQJ_fake_script() -- ClosedButton.ClosedScript 
+coroutine.wrap(VHVO_fake_script)()
+local function VWFK_fake_script() -- ClosedButton.ClosedScript 
 	local script = Instance.new('LocalScript', ClosedButton)
 
 	local button = script.Parent
@@ -354,8 +354,8 @@ local function UWGJNQJ_fake_script() -- ClosedButton.ClosedScript
 		icon.Visible = true
 	end)
 end
-coroutine.wrap(UWGJNQJ_fake_script)()
-local function ZVFDWLM_fake_script() -- CosnoleButton.ConsoleScript 
+coroutine.wrap(VWFK_fake_script)()
+local function FOQN_fake_script() -- CosnoleButton.ConsoleScript 
 	local script = Instance.new('LocalScript', CosnoleButton)
 
 	local StarterGui = game:GetService("StarterGui")
@@ -385,14 +385,14 @@ local function ZVFDWLM_fake_script() -- CosnoleButton.ConsoleScript
 	button.Activated:Connect(openDeveloperConsole)
 	
 end
-coroutine.wrap(ZVFDWLM_fake_script)()
-local function KGZQZ_fake_script() -- AgeButton.Age1Script 
+coroutine.wrap(FOQN_fake_script)()
+local function GLHMV_fake_script() -- AgeButton.Age1Script 
 	local script = Instance.new('LocalScript', AgeButton)
 
 	
 end
-coroutine.wrap(KGZQZ_fake_script)()
-local function SHHE_fake_script() -- Icon2.LocalScript 
+coroutine.wrap(GLHMV_fake_script)()
+local function DDWFS_fake_script() -- Icon2.LocalScript 
 	local script = Instance.new('LocalScript', Icon2)
 
 	local button = script.Parent
@@ -405,4 +405,4 @@ local function SHHE_fake_script() -- Icon2.LocalScript
 		icon.Visible = false
 	end)
 end
-coroutine.wrap(SHHE_fake_script)()
+coroutine.wrap(DDWFS_fake_script)()
