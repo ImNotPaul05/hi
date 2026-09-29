@@ -1,637 +1,581 @@
+-- Gui to Lua
+-- Version: 3.2
+
+-- Instances:
+
+local Main = Instance.new("ScreenGui")
+local Potion = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local TextLabel = Instance.new("TextLabel")
+local TradingButton = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
+local ShopButton = Instance.new("TextButton")
+local UICorner_2 = Instance.new("UICorner")
+local PotionButton = Instance.new("TextButton")
+local UICorner_3 = Instance.new("UICorner")
+local BucksButton = Instance.new("TextButton")
+local UICorner_4 = Instance.new("UICorner")
+local ClosedButton = Instance.new("TextButton")
+local UICorner_5 = Instance.new("UICorner")
+local CosnoleButton = Instance.new("TextButton")
+local UICorner_6 = Instance.new("UICorner")
+local ScrollingFrame = Instance.new("ScrollingFrame")
+local UICorner_7 = Instance.new("UICorner")
+local Legendaryfrm = Instance.new("Frame")
+local UICorner_8 = Instance.new("UICorner")
+local ImageLabel = Instance.new("ImageLabel")
+local AgeButton = Instance.new("TextButton")
+local UICorner_9 = Instance.new("UICorner")
+local status = Instance.new("TextLabel")
+local Legendarytxt = Instance.new("TextLabel")
+local Commontxt = Instance.new("TextLabel")
+local Commontxt_2 = Instance.new("TextLabel")
+local Commontxt_3 = Instance.new("TextLabel")
+local Commontxt_4 = Instance.new("TextLabel")
+
+--Properties:
+
+Main.Name = "Main"
+Main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Potion.Name = "Potion"
+Potion.Parent = Main
+Potion.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Potion.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Potion.BorderSizePixel = 0
+Potion.Position = UDim2.new(0.330901176, 0, 0.0188152455, 0)
+Potion.Size = UDim2.new(0.458353192, 0, 1.00048983, 0)
+
+Title.Name = "Title"
+Title.Parent = Potion
+Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1.000
+Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Title.BorderSizePixel = 0
+Title.Size = UDim2.new(0, 45, 0, 24)
+Title.Font = Enum.Font.Unknown
+Title.Text = "vox"
+Title.TextColor3 = Color3.fromRGB(255, 0, 255)
+Title.TextSize = 19.000
+
+TextLabel.Parent = Title
+TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.BackgroundTransparency = 1.000
+TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.BorderSizePixel = 0
+TextLabel.Position = UDim2.new(0.625474036, 0, 0.791666687, 0)
+TextLabel.Size = UDim2.new(0.888032615, 0, 0.894831359, 0)
+TextLabel.Font = Enum.Font.FredokaOne
+TextLabel.Text = "ADM"
+TextLabel.TextColor3 = Color3.fromRGB(255, 0, 255)
+TextLabel.TextSize = 14.000
+
+TradingButton.Name = "Trading/Button"
+TradingButton.Parent = Potion
+TradingButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TradingButton.BackgroundTransparency = 0.400
+TradingButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TradingButton.BorderSizePixel = 0
+TradingButton.Position = UDim2.new(0.314018846, 0, 0.0883753002, 0)
+TradingButton.Size = UDim2.new(0.166999996, 0, 0.0599999987, 0)
+TradingButton.Font = Enum.Font.SourceSansBold
+TradingButton.Text = "Trading"
+TradingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TradingButton.TextSize = 19.000
+
+UICorner.CornerRadius = UDim.new(0, 9)
+UICorner.Parent = TradingButton
+
+ShopButton.Name = "Shop/Button"
+ShopButton.Parent = Potion
+ShopButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ShopButton.BackgroundTransparency = 0.400
+ShopButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ShopButton.BorderSizePixel = 0
+ShopButton.Position = UDim2.new(0.517406344, 0, 0.0883753002, 0)
+ShopButton.Size = UDim2.new(0.166999996, 0, 0.0599999987, 0)
+ShopButton.Font = Enum.Font.SourceSansBold
+ShopButton.Text = "Shop"
+ShopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ShopButton.TextSize = 19.000
+
+UICorner_2.CornerRadius = UDim.new(0, 9)
+UICorner_2.Parent = ShopButton
+
+PotionButton.Name = "Potion/Button"
+PotionButton.Parent = Potion
+PotionButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+PotionButton.BackgroundTransparency = 0.400
+PotionButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+PotionButton.BorderSizePixel = 0
+PotionButton.Position = UDim2.new(0.104669452, 0, 0.0883753151, 0)
+PotionButton.Size = UDim2.new(0.167384252, 0, 0.0599145368, 0)
+PotionButton.Font = Enum.Font.SourceSansBold
+PotionButton.Text = "Potion"
+PotionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+PotionButton.TextSize = 19.000
+
+UICorner_3.CornerRadius = UDim.new(0, 9)
+UICorner_3.Parent = PotionButton
+
+BucksButton.Name = "Bucks/Button"
+BucksButton.Parent = Potion
+BucksButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+BucksButton.BackgroundTransparency = 0.400
+BucksButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+BucksButton.BorderSizePixel = 0
+BucksButton.Position = UDim2.new(0.715706289, 0, 0.0869139954, 0)
+BucksButton.Size = UDim2.new(0.166999996, 0, 0.0599999987, 0)
+BucksButton.Font = Enum.Font.SourceSansBold
+BucksButton.Text = "Bucks"
+BucksButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+BucksButton.TextSize = 19.000
+
+UICorner_4.CornerRadius = UDim.new(0, 9)
+UICorner_4.Parent = BucksButton
+
+ClosedButton.Name = "Closed/Button"
+ClosedButton.Parent = Potion
+ClosedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ClosedButton.BackgroundTransparency = 1.000
+ClosedButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ClosedButton.BorderSizePixel = 0
+ClosedButton.Position = UDim2.new(0.92948246, 0, 0.0175359566, 0)
+ClosedButton.Size = UDim2.new(0.0481034406, 0, 0.0445354134, 0)
+ClosedButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
+ClosedButton.Font = Enum.Font.Unknown
+ClosedButton.Text = "X"
+ClosedButton.TextColor3 = Color3.fromRGB(255, 0, 255)
+ClosedButton.TextSize = 30.000
+
+UICorner_5.CornerRadius = UDim.new(0, 10)
+UICorner_5.Parent = Potion
+
+CosnoleButton.Name = "Cosnole/Button"
+CosnoleButton.Parent = Potion
+CosnoleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+CosnoleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+CosnoleButton.BorderSizePixel = 0
+CosnoleButton.Position = UDim2.new(0.768384039, 0, 0.0175359566, 0)
+CosnoleButton.Size = UDim2.new(0.12687543, 0, 0.0445354134, 0)
+CosnoleButton.Font = Enum.Font.SourceSansBold
+CosnoleButton.Text = "Console"
+CosnoleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CosnoleButton.TextSize = 17.000
+
+UICorner_6.CornerRadius = UDim.new(0, 9)
+UICorner_6.Parent = CosnoleButton
+
+ScrollingFrame.Parent = Potion
+ScrollingFrame.Active = true
+ScrollingFrame.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
+ScrollingFrame.BackgroundTransparency = 0.600
+ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.Position = UDim2.new(0.0173499323, 0, 0.163158834, 0)
+ScrollingFrame.Size = UDim2.new(0.964724481, 0, 0.818428278, 0)
+
+UICorner_7.CornerRadius = UDim.new(0, 9)
+UICorner_7.Parent = ScrollingFrame
+
+Legendaryfrm.Name = "Legendaryfrm"
+Legendaryfrm.Parent = ScrollingFrame
+Legendaryfrm.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Legendaryfrm.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Legendaryfrm.BorderSizePixel = 0
+Legendaryfrm.Position = UDim2.new(0.0281033255, 0, 0.158866823, 0)
+Legendaryfrm.Size = UDim2.new(0.936573148, 0, 0.0339052156, 0)
+
+UICorner_8.Parent = Legendaryfrm
+
+ImageLabel.Parent = Legendaryfrm
+ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ImageLabel.BorderSizePixel = 0
+ImageLabel.Position = UDim2.new(0.0194160696, 0, 0.113820642, 0)
+ImageLabel.Size = UDim2.new(0.100610547, 0, 0.758804262, 0)
+ImageLabel.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+
+AgeButton.Name = "Age/Button"
+AgeButton.Parent = Legendaryfrm
+AgeButton.BackgroundColor3 = Color3.fromRGB(173, 0, 173)
+AgeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+AgeButton.BorderSizePixel = 0
+AgeButton.Position = UDim2.new(0.767451882, 0, 0.113820061, 0)
+AgeButton.Size = UDim2.new(0.207815081, 0, 0.758805752, 0)
+AgeButton.Font = Enum.Font.SourceSansBold
+AgeButton.Text = "AGE"
+AgeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+AgeButton.TextSize = 17.000
+
+UICorner_9.CornerRadius = UDim.new(0, 9)
+UICorner_9.Parent = AgeButton
+
+status.Name = "status"
+status.Parent = Legendaryfrm
+status.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+status.BackgroundTransparency = 1.000
+status.BorderColor3 = Color3.fromRGB(0, 0, 0)
+status.BorderSizePixel = 0
+status.Position = UDim2.new(0.134147391, 0, 0.0758804306, 0)
+status.Size = UDim2.new(0.236523032, 0, 0.398372233, 0)
+status.Font = Enum.Font.SourceSansBold
+status.TextColor3 = Color3.fromRGB(255, 255, 255)
+status.TextSize = 14.000
+
+Legendarytxt.Name = "Legendarytxt"
+Legendarytxt.Parent = ScrollingFrame
+Legendarytxt.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Legendarytxt.BackgroundTransparency = 1.000
+Legendarytxt.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Legendarytxt.BorderSizePixel = 0
+Legendarytxt.Position = UDim2.new(0.0281033758, 0, 0.152435005, 0)
+Legendarytxt.Size = UDim2.new(0.162386462, 0, -0.0192405116, 0)
+Legendarytxt.Font = Enum.Font.FredokaOne
+Legendarytxt.Text = "Legendary"
+Legendarytxt.TextColor3 = Color3.fromRGB(255, 0, 255)
+Legendarytxt.TextSize = 22.000
+Legendarytxt.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+Legendarytxt.TextWrapped = true
+
+Commontxt.Name = "Commontxt"
+Commontxt.Parent = Legendarytxt
+Commontxt.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Commontxt.BackgroundTransparency = 1.000
+Commontxt.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Commontxt.BorderSizePixel = 0
+Commontxt.Position = UDim2.new(4.32059574, 0, 11.4927883, 0)
+Commontxt.Size = UDim2.new(0.927910328, 0, 0.942754865, 0)
+Commontxt.Font = Enum.Font.FredokaOne
+Commontxt.Text = "Common"
+Commontxt.TextColor3 = Color3.fromRGB(255, 0, 255)
+Commontxt.TextSize = 22.000
+Commontxt.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+Commontxt.TextWrapped = true
+
+Commontxt_2.Name = "Commontxt"
+Commontxt_2.Parent = Legendarytxt
+Commontxt_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Commontxt_2.BackgroundTransparency = 1.000
+Commontxt_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Commontxt_2.BorderSizePixel = 0
+Commontxt_2.Position = UDim2.new(4.33912373, 0, 8.47319412, 0)
+Commontxt_2.Size = UDim2.new(0.889015675, 0, 1.55148232, 0)
+Commontxt_2.Font = Enum.Font.FredokaOne
+Commontxt_2.Text = "Common"
+Commontxt_2.TextColor3 = Color3.fromRGB(255, 0, 255)
+Commontxt_2.TextSize = 22.000
+Commontxt_2.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+Commontxt_2.TextWrapped = true
+
+Commontxt_3.Name = "Commontxt"
+Commontxt_3.Parent = Legendarytxt
+Commontxt_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Commontxt_3.BackgroundTransparency = 1.000
+Commontxt_3.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Commontxt_3.BorderSizePixel = 0
+Commontxt_3.Position = UDim2.new(3.99960971, 0, 7.59391546, 0)
+Commontxt_3.Size = UDim2.new(0.838114381, 0, -1.86758769, 0)
+Commontxt_3.Font = Enum.Font.FredokaOne
+Commontxt_3.Text = "Common"
+Commontxt_3.TextColor3 = Color3.fromRGB(255, 0, 255)
+Commontxt_3.TextSize = 22.000
+Commontxt_3.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+Commontxt_3.TextWrapped = true
+
+Commontxt_4.Name = "Commontxt"
+Commontxt_4.Parent = Legendarytxt
+Commontxt_4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Commontxt_4.BackgroundTransparency = 1.000
+Commontxt_4.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Commontxt_4.BorderSizePixel = 0
+Commontxt_4.Position = UDim2.new(0.374563098, 0, 5.76752329, 0)
+Commontxt_4.Size = UDim2.new(0.918333948, 0, 1.19779217, 0)
+Commontxt_4.Font = Enum.Font.FredokaOne
+Commontxt_4.Text = "Common"
+Commontxt_4.TextColor3 = Color3.fromRGB(255, 0, 255)
+Commontxt_4.TextSize = 22.000
+Commontxt_4.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+Commontxt_4.TextWrapped = true
+
+--==================================================
+-- LEGENDARY PET DISPLAY
+-- Uses the same ClientData inventory source as Transfer.luau.
+--==================================================
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 local LocalPlayer = Players.LocalPlayer
 
---==================================================
--- CONFIG
---==================================================
+local function getPlayerData()
+	local success, clientData = pcall(function()
+		return require(
+			ReplicatedStorage
+				:WaitForChild("ClientModules")
+				:WaitForChild("Core")
+				:WaitForChild("ClientData")
+		)
+	end)
 
-local Config = {
-    Pet = "summer_2026_storm_condor",
+	if not success or not clientData then
+		return nil
+	end
 
-    -- "normal" or "neon"
-    PetForm = "normal",
+	local dataStore = clientData.get_data()
+	return dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
+end
 
-    -- Maximum potions sent in one batch
-    MaxPotionBatch = 15,
+local petDefinitions
 
-    FeedDelay = 0.5,
-}
+local function getPetDefinitions()
+	if petDefinitions then
+		return petDefinitions
+	end
 
---==================================================
--- CLIENT DATA
---==================================================
+	-- Different game versions use different names for this module.
+	for _, moduleName in ipairs({ "PetData", "PetDatabase", "PetDefinitions" }) do
+		for _, object in ipairs(ReplicatedStorage:GetDescendants()) do
+			if object:IsA("ModuleScript") and object.Name == moduleName then
+				local success, definitions = pcall(require, object)
+				if success and type(definitions) == "table" then
+					petDefinitions = definitions
+					return petDefinitions
+				end
+			end
+		end
+	end
+end
 
-local successClientData, ClientData = pcall(function()
-    return require(
-        ReplicatedStorage
-            :WaitForChild("ClientModules")
-            :WaitForChild("Core")
-            :WaitForChild("ClientData")
-    )
+local function getPetDefinition(kind)
+	local definitions = getPetDefinitions()
+	if not definitions then
+		return nil
+	end
+
+	return definitions[kind]
+		or (definitions.pets and definitions.pets[kind])
+end
+
+local function toImageAsset(image)
+	if type(image) == "number" then
+		return "rbxassetid://" .. image
+	end
+
+	if type(image) == "string" and image ~= "" then
+		if image:match("^rbxasset") or image:match("^https?://") then
+			return image
+		end
+
+		if tonumber(image) then
+			return "rbxassetid://" .. image
+		end
+	end
+end
+
+local function getPetImage(definition)
+	if type(definition) ~= "table" then
+		return nil
+	end
+
+	for _, key in ipairs({ "image", "icon", "thumbnail", "image_id", "asset_id" }) do
+		local image = toImageAsset(definition[key])
+		if image then
+			return image
+		end
+	end
+end
+
+local function isLegendary(petData, definition)
+	local rarity = petData.rarity
+		or (petData.properties and petData.properties.rarity)
+		or (definition and definition.rarity)
+
+	return type(rarity) == "string" and rarity:lower() == "legendary"
+end
+
+local function refreshLegendaryPet()
+	local playerData = getPlayerData()
+	local pets = playerData and playerData.inventory and playerData.inventory.pets
+
+	if not pets then
+		status.Text = "Inventory unavailable"
+		return
+	end
+
+	for _, petData in pairs(pets) do
+		local definition = petData and getPetDefinition(petData.kind)
+		if petData and isLegendary(petData, definition) then
+			local image = getPetImage(definition)
+			if image then
+				ImageLabel.Image = image
+			end
+
+			status.Text = (definition and (definition.name or definition.display_name)) or petData.kind
+			return
+		end
+	end
+
+	ImageLabel.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+	status.Text = "No Legendary pet"
+end
+
+task.spawn(function()
+	while Main.Parent do
+		refreshLegendaryPet()
+		task.wait(1)
+	end
 end)
 
-if not successClientData or not ClientData then
-    error("Failed to load ClientData")
+-- Scripts:
+
+local function PDOREW_fake_script() -- TradingButton.LocalScript 
+	local script = Instance.new('LocalScript', TradingButton)
+
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local potion = main:WaitForChild("Potion")
+	local trading = main:WaitForChild("Trading")
+	local stroke = button:WaitForChild("UIStroke")
+	
+	button.BackgroundColor3 = Color3.fromRGB(154, 0, 154)
+	stroke.Color = Color3.fromRGB(255, 0, 255)
+	
+	button.Activated:Connect(function()
+		potion.Visible = false
+		trading.Visible = true
+	end)
 end
+coroutine.wrap(PDOREW_fake_script)()
+local function VINP_fake_script() -- ShopButton.LocalScript 
+	local script = Instance.new('LocalScript', ShopButton)
 
---==================================================
--- GET PLAYER DATA
---==================================================
-
-local function GetPlayerData()
-    local dataStore = ClientData.get_data()
-
-    if not dataStore then
-        return nil
-    end
-
-    return dataStore[LocalPlayer]
-        or dataStore[LocalPlayer.Name]
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local potion = main:WaitForChild("Potion")
+	local shop = main:WaitForChild("Shop")
+	local stroke = button:WaitForChild("UIStroke")
+	
+	button.BackgroundColor3 = Color3.fromRGB(154, 0, 154)
+	stroke.Color = Color3.fromRGB(255, 0, 255)
+	
+	button.Activated:Connect(function()
+		potion.Visible = false
+		shop.Visible = false
+	end)
 end
+coroutine.wrap(VINP_fake_script)()
+local function OWSBCT_fake_script() -- PotionButton.LocalScript 
+	local script = Instance.new('LocalScript', PotionButton)
 
---==================================================
--- GET PET AGE FROM CLIENT DATA
---==================================================
-
-local function GetPetAge(petData)
-    if not petData then
-        return nil
-    end
-
-    local properties = petData.properties
-
-    if not properties then
-        return nil
-    end
-
-    return tonumber(properties.age)
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local potion = main:WaitForChild("Potion")
+	local trading = main:WaitForChild("Trading")
+	local stroke = button:WaitForChild("UIStroke")
+	
+	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	stroke.Color = Color3.fromRGB(255, 0, 255)
+	
+	button.Activated:Connect(function()
+		potion.Visible = true
+		trading.Visible = false
+		
+		
+	end)
 end
+coroutine.wrap(OWSBCT_fake_script)()
+local function GUAPLNH_fake_script() -- BucksButton.LocalScript 
+	local script = Instance.new('LocalScript', BucksButton)
 
---==================================================
--- CHECK PET FORM
---==================================================
-
-local function IsCorrectPetForm(petData)
-    if not petData then
-        return false
-    end
-
-    local properties = petData.properties or {}
-
-    local isNeon = properties.neon == true
-    local isMegaNeon = properties.mega_neon == true
-
-    if Config.PetForm == "neon" then
-        return isNeon and not isMegaNeon
-    end
-
-    -- Normal
-    return not isNeon and not isMegaNeon
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local potion = main:WaitForChild("Potion")
+	local bucks = main:WaitForChild("Bucks")
+	local stroke = button:WaitForChild("UIStroke")
+	
+	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	stroke.Color = Color3.fromRGB(255, 0, 255)
+	
+	button.Activated:Connect(function()
+		potion.Visible = false
+		bucks.Visible = true
+	end)
 end
+coroutine.wrap(GUAPLNH_fake_script)()
+local function NBSEN_fake_script() -- ClosedButton.ClosedScript 
+	local script = Instance.new('LocalScript', ClosedButton)
 
---==================================================
--- GET MATCHING PETS
---==================================================
-
-local function GetMatchingPets()
-    local playerData = GetPlayerData()
-
-    if not playerData
-        or not playerData.inventory
-        or not playerData.inventory.pets then
-        return {}
-    end
-
-    local matchingPets = {}
-
-    for uniqueId, petData in pairs(playerData.inventory.pets) do
-
-        if petData
-            and petData.kind == Config.Pet
-            and IsCorrectPetForm(petData) then
-
-            local age = GetPetAge(petData)
-
-            if age then
-
-                -- ONLY PROCESS PETS BELOW AGE 6
-                if age < 6 then
-                    table.insert(matchingPets, {
-                        uniqueId = uniqueId,
-                        age = age
-                    })
-
-                    print(
-                        "[SELECTED]",
-                        uniqueId,
-                        "Age:",
-                        age
-                    )
-
-                else
-                    print(
-                        "[SKIPPED MAX AGE]",
-                        uniqueId,
-                        "Age:",
-                        age
-                    )
-                end
-            else
-                warn(
-                    "[NO AGE DATA]",
-                    uniqueId
-                )
-            end
-        end
-    end
-
-    return matchingPets
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local trading = main:WaitForChild("Trading")
+	local icon = main:WaitForChild("Icon2")
+	
+	button.Activated:Connect(function()
+		trading.Visible = false
+		icon.Visible = true
+	end)
 end
+coroutine.wrap(NBSEN_fake_script)()
+local function DHDF_fake_script() -- CosnoleButton.ConsoleScript 
+	local script = Instance.new('LocalScript', CosnoleButton)
 
---==================================================
--- EQUIP ITEM
---==================================================
-
-local function EquipItem(uniqueId)
-
-    local args = {
-        uniqueId,
-        {
-            use_sound_delay = false,
-            equip_as_last = false
-        }
-    }
-
-    local success, result = pcall(function()
-        return ReplicatedStorage
-            :WaitForChild("API")
-            :WaitForChild("ToolAPI/Equip")
-            :InvokeServer(unpack(args))
-    end)
-
-    if not success then
-        warn(
-            "[EQUIP FAILED]",
-            uniqueId,
-            result
-        )
-
-        return false
-    end
-
-    return true
+	local StarterGui = game:GetService("StarterGui")
+	
+	local button = script.Parent
+	if not button:IsA("TextButton") then
+		return
+	end
+	
+	local function openDeveloperConsole()
+		for _ = 1, 10 do
+			local success, errorMessage = pcall(function()
+				StarterGui:SetCore("DevConsoleVisible", true)
+			end)
+	
+			if success then
+				return
+			end
+	
+			task.wait(0.25)
+			if errorMessage then
+				warn("Could not open Developer Console: " .. errorMessage)
+			end
+		end
+	end
+	
+	button.Activated:Connect(openDeveloperConsole)
+	
 end
+coroutine.wrap(DHDF_fake_script)()
+local function UOGVIL_fake_script() -- AgeButton.Age1Script 
+	local script = Instance.new('LocalScript', AgeButton)
 
---==================================================
--- GET AGE-UP POTIONS
---==================================================
-
-local function GetAgeUpPotions(maxAmount)
-
-    local playerData = GetPlayerData()
-
-    if not playerData
-        or not playerData.inventory
-        or not playerData.inventory.food then
-        return {}
-    end
-
-    local potionIds = {}
-
-    for uniqueId, itemData in pairs(playerData.inventory.food) do
-
-        if itemData
-            and itemData.kind == "pet_age_potion" then
-
-            table.insert(
-                potionIds,
-                uniqueId
-            )
-
-            if #potionIds >= maxAmount then
-                break
-            end
-        end
-    end
-
-    return potionIds
+	local StarterGui = game:GetService("StarterGui")
+	
+	local button = script.Parent
+	if not button:IsA("TextButton") then
+		return
+	end
+	
+	local function openDeveloperConsole()
+		for _ = 1, 10 do
+			local success, errorMessage = pcall(function()
+				StarterGui:SetCore("DevConsoleVisible", true)
+			end)
+	
+			if success then
+				return
+			end
+	
+			task.wait(0.25)
+			if errorMessage then
+				warn("Could not open Developer Console: " .. errorMessage)
+			end
+		end
+	end
+	
+	button.Activated:Connect(openDeveloperConsole)
+	
 end
-
---==================================================
--- USE AGE-UP POTIONS
---==================================================
-
-local function UseAgeUpPotions(petUniqueId)
-
-    local potionIds =
-        GetAgeUpPotions(
-            Config.MaxPotionBatch
-        )
-
-    if #potionIds == 0 then
-        warn(
-            "[NO POTIONS]"
-        )
-
-        return false
-    end
-
-    print("--------------------------------")
-    print(
-        "Using",
-        #potionIds,
-        "Age-Up Potion(s)"
-    )
-
-    local firstPotionId =
-        potionIds[1]
-
-    local additionalPotions = {}
-
-    for i = 2, #potionIds do
-        table.insert(
-            additionalPotions,
-            potionIds[i]
-        )
-    end
-
-    --==================================================
-    -- START AGE-UP POTION
-    --==================================================
-
-    local startSuccess, startResult =
-        pcall(function()
-
-            return ReplicatedStorage
-                :WaitForChild("API")
-                :WaitForChild("ToolAPI/ServerUseTool")
-                :InvokeServer(
-                    firstPotionId,
-                    "START"
-                )
-        end)
-
-    if not startSuccess then
-
-        warn(
-            "[START FAILED]",
-            startResult
-        )
-
-        return false
-    end
-
-    task.wait(0.2)
-
-    --==================================================
-    -- CREATE PET OBJECT
-    --==================================================
-
-    local createSuccess, createResult =
-        pcall(function()
-
-            local args = {
-                "__Enum_PetObjectCreatorType_2",
-
-                {
-                    additional_consume_uniques =
-                        additionalPotions,
-
-                    pet_unique =
-                        petUniqueId,
-
-                    unique_id =
-                        firstPotionId
-                }
-            }
-
-            return ReplicatedStorage
-                :WaitForChild("API")
-                :WaitForChild("PetObjectAPI/CreatePetObject")
-                :InvokeServer(
-                    unpack(args)
-                )
-        end)
-
-    if not createSuccess then
-
-        warn(
-            "[CREATE PET OBJECT FAILED]",
-            createResult
-        )
-
-        return false
-    end
-
-    return true
-end
-
---==================================================
--- GET UPDATED PET AGE
---==================================================
-
-local function GetCurrentPetData(petUniqueId)
-
-    local playerData = GetPlayerData()
-
-    if not playerData
-        or not playerData.inventory
-        or not playerData.inventory.pets then
-        return nil
-    end
-
-    return playerData.inventory.pets[petUniqueId]
-end
-
---==================================================
--- WAIT FOR PET AGE UPDATE
---==================================================
-
-local function WaitForPetAgeUpdate(
-    petUniqueId,
-    oldAge,
-    timeout
-)
-
-    timeout = timeout or 5
-
-    local startTime = tick()
-
-    while tick() - startTime < timeout do
-
-        local petData =
-            GetCurrentPetData(
-                petUniqueId
-            )
-
-        local age =
-            GetPetAge(
-                petData
-            )
-
-        if age
-            and age ~= oldAge then
-
-            return age
-        end
-
-        task.wait(0.15)
-    end
-
-    -- Return current age even if it didn't change
-    local petData =
-        GetCurrentPetData(
-            petUniqueId
-        )
-
-    return GetPetAge(
-        petData
-    )
-end
-
---==================================================
--- AGE ONE PET
---==================================================
-
-local function AgePet(petInfo)
-
-    local petUniqueId =
-        petInfo.uniqueId
-
-    local age =
-        petInfo.age
-
-    print("")
-    print("================================")
-    print(
-        "PROCESSING PET:",
-        petUniqueId
-    )
-    print(
-        "START AGE:",
-        age
-    )
-    print("================================")
-
-    --==================================================
-    -- SAFETY CHECK
-    --==================================================
-
-    if age >= 6 then
-
-        print(
-            "[SKIP] Already age 6:",
-            petUniqueId
-        )
-
-        return true
-    end
-
-    --==================================================
-    -- EQUIP PET
-    --==================================================
-
-    if not EquipItem(
-        petUniqueId
-    ) then
-
-        warn(
-            "Failed to equip:",
-            petUniqueId
-        )
-
-        return false
-    end
-
-    task.wait(0.75)
-
-    --==================================================
-    -- AGE LOOP
-    --==================================================
-
-    while age < 6 do
-
-        print("--------------------------------")
-        print(
-            "Pet:",
-            petUniqueId
-        )
-        print(
-            "Current age:",
-            age
-        )
-        print(
-            "Potion batch:",
-            Config.MaxPotionBatch
-        )
-
-        --==================================================
-        -- USE UP TO 15 POTIONS
-        --==================================================
-
-        local success =
-            UseAgeUpPotions(
-                petUniqueId
-            )
-
-        if not success then
-
-            warn(
-                "Failed to use Age-Up Potions."
-            )
-
-            return false
-        end
-
-        --==================================================
-        -- WAIT FOR SERVER DATA
-        --==================================================
-
-        task.wait(0.75)
-
-        --==================================================
-        -- READ AGE DIRECTLY FROM CLIENT DATA
-        --==================================================
-
-        local newAge =
-            WaitForPetAgeUpdate(
-                petUniqueId,
-                age,
-                5
-            )
-
-        if not newAge then
-
-            warn(
-                "Could not determine new age."
-            )
-
-            return false
-        end
-
-        age = newAge
-
-        print(
-            "[UPDATED AGE]",
-            age
-        )
-
-        --==================================================
-        -- AGE 6 = MAX
-        --==================================================
-
-        if age >= 6 then
-
-            print("--------------------------------")
-            print(
-                "[MAX AGE REACHED]",
-                petUniqueId
-            )
-            print(
-                "Final age:",
-                age
-            )
-            print("--------------------------------")
-
-            break
-        end
-
-        task.wait(
-            Config.FeedDelay
-        )
-    end
-
-    return true
-end
-
---==================================================
--- MAIN
---==================================================
-
-print("")
-print("================================")
-print("AUTO PET AGING")
-print("================================")
-print(
-    "Pet:",
-    Config.Pet
-)
-print(
-    "Form:",
-    Config.PetForm
-)
-print(
-    "Max Potion Batch:",
-    Config.MaxPotionBatch
-)
-print("================================")
-
---==================================================
--- FIND ONLY UNMAXED PETS
---==================================================
-
-local pets =
-    GetMatchingPets()
-
-print("")
-print(
-    "Unmaxed matching pets:",
-    #pets
-)
-
---==================================================
--- NO PETS
---==================================================
-
-if #pets == 0 then
-
-    print(
-        "No unmaxed matching pets found."
-    )
-
-    return
-end
-
---==================================================
--- PROCESS PETS
---==================================================
-
-for index, petInfo in ipairs(pets) do
-
-    print("")
-    print("================================")
-    print(
-        "PET",
-        index,
-        "OF",
-        #pets
-    )
-    print("================================")
-
-    local success =
-        AgePet(
-            petInfo
-        )
-
-    if not success then
-
-        warn(
-            "Stopped because feeding failed."
-        )
-
-        break
-    end
-
-    task.wait(0.5)
-end
-
---==================================================
--- FINISHED
---==================================================
-
-print("")
-print("================================")
-print("AUTO PET AGING FINISHED")
-print("================================")
+coroutine.wrap(UOGVIL_fake_script)()
