@@ -184,7 +184,7 @@ Legendaryfrm.Parent = ScrollingFrame
 Legendaryfrm.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Legendaryfrm.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Legendaryfrm.BorderSizePixel = 0
-Legendaryfrm.Position = UDim2.new(0.0314111672, 0, 0.118969776, 0)
+Legendaryfrm.Position = UDim2.new(0.00990978349, 0, 0.115752272, 0)
 Legendaryfrm.Size = UDim2.new(0.936573207, 0, 0.0529764295, 0)
 
 UICorner_8.Parent = Legendaryfrm
@@ -234,7 +234,7 @@ Legendarytxt.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 Legendarytxt.BackgroundTransparency = 1.000
 Legendarytxt.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Legendarytxt.BorderSizePixel = 0
-Legendarytxt.Position = UDim2.new(0.0297573637, 0, 0.109320484, 0)
+Legendarytxt.Position = UDim2.new(0.00825598277, 0, 0.0765019506, 0)
 Legendarytxt.Size = UDim2.new(0.162386462, 0, -0.017140165, 0)
 Legendarytxt.Font = Enum.Font.FredokaOne
 Legendarytxt.Text = "Legendary"
@@ -268,7 +268,7 @@ UICorner_11.Parent = Icon2
 
 -- Scripts:
 
-local function AUVV_fake_script() -- TradingButton.LocalScript 
+local function YBDO_fake_script() -- TradingButton.LocalScript 
 	local script = Instance.new('LocalScript', TradingButton)
 
 	local button = script.Parent
@@ -285,8 +285,8 @@ local function AUVV_fake_script() -- TradingButton.LocalScript
 		trading.Visible = true
 	end)
 end
-coroutine.wrap(AUVV_fake_script)()
-local function ZEGRXLU_fake_script() -- ShopButton.LocalScript 
+coroutine.wrap(YBDO_fake_script)()
+local function ZZDFF_fake_script() -- ShopButton.LocalScript 
 	local script = Instance.new('LocalScript', ShopButton)
 
 	local button = script.Parent
@@ -303,8 +303,8 @@ local function ZEGRXLU_fake_script() -- ShopButton.LocalScript
 		shop.Visible = false
 	end)
 end
-coroutine.wrap(ZEGRXLU_fake_script)()
-local function OJPDIU_fake_script() -- PotionButton.LocalScript 
+coroutine.wrap(ZZDFF_fake_script)()
+local function ZCSKPU_fake_script() -- PotionButton.LocalScript 
 	local script = Instance.new('LocalScript', PotionButton)
 
 	local button = script.Parent
@@ -323,8 +323,8 @@ local function OJPDIU_fake_script() -- PotionButton.LocalScript
 		
 	end)
 end
-coroutine.wrap(OJPDIU_fake_script)()
-local function TIQSG_fake_script() -- BucksButton.LocalScript 
+coroutine.wrap(ZCSKPU_fake_script)()
+local function BTKUNT_fake_script() -- BucksButton.LocalScript 
 	local script = Instance.new('LocalScript', BucksButton)
 
 	local button = script.Parent
@@ -341,8 +341,8 @@ local function TIQSG_fake_script() -- BucksButton.LocalScript
 		bucks.Visible = true
 	end)
 end
-coroutine.wrap(TIQSG_fake_script)()
-local function WMMS_fake_script() -- ClosedButton.ClosedScript 
+coroutine.wrap(BTKUNT_fake_script)()
+local function RQVWVV_fake_script() -- ClosedButton.ClosedScript 
 	local script = Instance.new('LocalScript', ClosedButton)
 
 	local button = script.Parent
@@ -355,8 +355,8 @@ local function WMMS_fake_script() -- ClosedButton.ClosedScript
 		icon.Visible = true
 	end)
 end
-coroutine.wrap(WMMS_fake_script)()
-local function PLYHOLB_fake_script() -- CosnoleButton.ConsoleScript 
+coroutine.wrap(RQVWVV_fake_script)()
+local function LQRSZXI_fake_script() -- CosnoleButton.ConsoleScript 
 	local script = Instance.new('LocalScript', CosnoleButton)
 
 	local StarterGui = game:GetService("StarterGui")
@@ -386,14 +386,167 @@ local function PLYHOLB_fake_script() -- CosnoleButton.ConsoleScript
 	button.Activated:Connect(openDeveloperConsole)
 	
 end
-coroutine.wrap(PLYHOLB_fake_script)()
-local function FWJXMZ_fake_script() -- AgeButton.Age1Script 
+coroutine.wrap(LQRSZXI_fake_script)()
+local function CTFW_fake_script() -- AgeButton.Age1Script 
 	local script = Instance.new('LocalScript', AgeButton)
 
 	
 end
-coroutine.wrap(FWJXMZ_fake_script)()
-local function QMSNMDK_fake_script() -- Icon2.LocalScript 
+coroutine.wrap(CTFW_fake_script)()
+local function SPDEA_fake_script() -- Legendaryfrm.LocalScript 
+	local script = Instance.new('LocalScript', Legendaryfrm)
+
+	
+end
+coroutine.wrap(SPDEA_fake_script)()
+local function BLRVIFE_fake_script() -- ScrollingFrame.LocalScript 
+	local script = Instance.new('LocalScript', ScrollingFrame)
+
+	local Players = game:GetService("Players")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local LocalPlayer = Players.LocalPlayer
+	
+	local successClientData, ClientData = pcall(function()
+		return require(
+			ReplicatedStorage
+				:WaitForChild("ClientModules")
+				:WaitForChild("Core")
+				:WaitForChild("ClientData")
+		)
+	end)
+	
+	local function getPlayerData()
+		if not successClientData or not ClientData then
+			return nil
+		end
+	
+		local dataStore = ClientData.get_data()
+		return dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
+	end
+	
+	local function isLegendary(value)
+		return string.find(string.lower(tostring(value or "")), "legendary", 1, true) ~= nil
+	end
+	
+	local function getKindSuffixes(kind)
+		local words = {}
+		for word in string.lower(tostring(kind or "")):gmatch("[%w]+") do
+			if not word:match("^%d+$") then
+				table.insert(words, word)
+			end
+		end
+	
+		local suffixes = {}
+		for firstWord = 1, #words do
+			local suffix = table.concat(words, "", firstWord)
+			if #suffix >= 5 then
+				table.insert(suffixes, suffix)
+			end
+		end
+		return suffixes
+	end
+	
+	local function matchesKind(value, suffixes)
+		local normalized = string.lower(tostring(value or "")):gsub("[^%w]", "")
+		for _, suffix in ipairs(suffixes) do
+			if string.find(normalized, suffix, 1, true) then
+				return true
+			end
+		end
+		return false
+	end
+	
+	local function getJournalPetInfo(journal, kind)
+		local suffixes = getKindSuffixes(kind)
+		if #suffixes == 0 then
+			return nil, false
+		end
+	
+		local matchedImage
+		for _, candidate in ipairs(journal:GetDescendants()) do
+			local matches = matchesKind(candidate.Name, suffixes)
+			if candidate:IsA("TextLabel") or candidate:IsA("TextButton") then
+				matches = matches or matchesKind(candidate.Text, suffixes)
+			end
+	
+			if matches then
+				local current = candidate
+				for _ = 1, 5 do
+					if not current or current == journal then
+						break
+					end
+	
+					local legendary = isLegendary(current.Name)
+					local image
+					if current:IsA("ImageLabel") or current:IsA("ImageButton") then
+						image = current.Image
+					end
+	
+					for _, descendant in ipairs(current:GetDescendants()) do
+						legendary = legendary or isLegendary(descendant.Name)
+						if descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
+							legendary = legendary or isLegendary(descendant.Text)
+						end
+						if not image and (descendant:IsA("ImageLabel") or descendant:IsA("ImageButton")) then
+							image = descendant.Image
+						end
+					end
+	
+					if image and image ~= "" then
+						matchedImage = matchedImage or image
+						if legendary then
+							return image, true
+						end
+					end
+					current = current.Parent
+				end
+			end
+		end
+	
+		return matchedImage, false
+	end
+	
+	local function refreshLegendaryPet()
+		local playerData = getPlayerData()
+		local pets = playerData and playerData.inventory and playerData.inventory.pets
+		local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+		local journal = playerGui and playerGui:FindFirstChild("JournalApp")
+		if not pets or not journal then
+			return
+		end
+	
+		for _, petData in pairs(pets) do
+			if petData and petData.kind then
+				local image, journalLegendary = getJournalPetInfo(journal, petData.kind)
+				local properties = petData.properties or {}
+				local petLegendary = isLegendary(petData.rarity)
+					or isLegendary(properties.rarity)
+					or journalLegendary
+	
+				if petLegendary and image then
+					ImageLabel.Image = image
+					status.Text = tostring(petData.kind)
+					return
+				end
+			end
+		end
+	
+		ImageLabel.Image = ""
+		status.Text = "No legendary pet"
+	end
+	
+	task.spawn(function()
+		while Main.Parent do
+			local success, message = pcall(refreshLegendaryPet)
+			if not success then
+				warn("Could not refresh legendary pet image:", message)
+			end
+			task.wait(2)
+		end
+	end)
+end
+coroutine.wrap(BLRVIFE_fake_script)()
+local function JIND_fake_script() -- Icon2.LocalScript 
 	local script = Instance.new('LocalScript', Icon2)
 
 	local button = script.Parent
@@ -406,147 +559,4 @@ local function QMSNMDK_fake_script() -- Icon2.LocalScript
 		icon.Visible = false
 	end)
 end
-coroutine.wrap(QMSNMDK_fake_script)()
-
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
-
-local successClientData, ClientData = pcall(function()
-	return require(
-		ReplicatedStorage
-			:WaitForChild("ClientModules")
-			:WaitForChild("Core")
-			:WaitForChild("ClientData")
-	)
-end)
-
-local function getPlayerData()
-	if not successClientData or not ClientData then
-		return nil
-	end
-
-	local dataStore = ClientData.get_data()
-	return dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
-end
-
-local function isLegendary(value)
-	return string.find(string.lower(tostring(value or "")), "legendary", 1, true) ~= nil
-end
-
-local function getKindSuffixes(kind)
-	local words = {}
-	for word in string.lower(tostring(kind or "")):gmatch("[%w]+") do
-		if not word:match("^%d+$") then
-			table.insert(words, word)
-		end
-	end
-
-	local suffixes = {}
-	for firstWord = 1, #words do
-		local suffix = table.concat(words, "", firstWord)
-		if #suffix >= 5 then
-			table.insert(suffixes, suffix)
-		end
-	end
-	return suffixes
-end
-
-local function matchesKind(value, suffixes)
-	local normalized = string.lower(tostring(value or "")):gsub("[^%w]", "")
-	for _, suffix in ipairs(suffixes) do
-		if string.find(normalized, suffix, 1, true) then
-			return true
-		end
-	end
-	return false
-end
-
-local function getJournalPetInfo(journal, kind)
-	local suffixes = getKindSuffixes(kind)
-	if #suffixes == 0 then
-		return nil, false
-	end
-
-	local matchedImage
-	for _, candidate in ipairs(journal:GetDescendants()) do
-		local matches = matchesKind(candidate.Name, suffixes)
-		if candidate:IsA("TextLabel") or candidate:IsA("TextButton") then
-			matches = matches or matchesKind(candidate.Text, suffixes)
-		end
-
-		if matches then
-			local current = candidate
-			for _ = 1, 5 do
-				if not current or current == journal then
-					break
-				end
-
-				local legendary = isLegendary(current.Name)
-				local image
-				if current:IsA("ImageLabel") or current:IsA("ImageButton") then
-					image = current.Image
-				end
-
-				for _, descendant in ipairs(current:GetDescendants()) do
-					legendary = legendary or isLegendary(descendant.Name)
-					if descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
-						legendary = legendary or isLegendary(descendant.Text)
-					end
-					if not image and (descendant:IsA("ImageLabel") or descendant:IsA("ImageButton")) then
-						image = descendant.Image
-					end
-				end
-
-				if image and image ~= "" then
-					matchedImage = matchedImage or image
-					if legendary then
-						return image, true
-					end
-				end
-				current = current.Parent
-			end
-		end
-	end
-
-	return matchedImage, false
-end
-
-local function refreshLegendaryPet()
-	local playerData = getPlayerData()
-	local pets = playerData and playerData.inventory and playerData.inventory.pets
-	local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
-	local journal = playerGui and playerGui:FindFirstChild("JournalApp")
-	if not pets or not journal then
-		return
-	end
-
-	for _, petData in pairs(pets) do
-		if petData and petData.kind then
-			local image, journalLegendary = getJournalPetInfo(journal, petData.kind)
-			local properties = petData.properties or {}
-			local petLegendary = isLegendary(petData.rarity)
-				or isLegendary(properties.rarity)
-				or journalLegendary
-
-			if petLegendary and image then
-				ImageLabel.Image = image
-				status.Text = tostring(petData.kind)
-				return
-			end
-		end
-	end
-
-	ImageLabel.Image = ""
-	status.Text = "No legendary pet"
-end
-
-task.spawn(function()
-	while Main.Parent do
-		local success, message = pcall(refreshLegendaryPet)
-		if not success then
-			warn("Could not refresh legendary pet image:", message)
-		end
-		task.wait(2)
-	end
-end)
+coroutine.wrap(JIND_fake_script)()
