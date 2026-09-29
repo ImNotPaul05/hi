@@ -53,7 +53,8 @@ end
 for uniqueId, pet in pairs(pets) do
     local kind = pet.kind
 
-    if kind then
+    -- Skip eggs
+    if kind and not kind:lower():find("egg", 1, true) then
         local rarity = getRarity(kind)
 
         if rarity then
