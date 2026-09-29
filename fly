@@ -21,14 +21,27 @@ local journal = player.PlayerGui.JournalApp
 local content = journal.Book.Category.Body.ScrollComplex.ScrollingFrame.Content
 local grid = content.GridFrame
 
-local counts = {
-    Common = 0,
-    Uncommon = 0,
-    Rare = 0,
-    ["Ultra-Rare"] = 0,
-    Legendary = 0
-}
+-- Egg checker
+local function isEgg(itemData)
+    local kind = string.lower(tostring(itemData.kind or ""))
+    local displayName = string.lower(
+        tostring(
+            itemData.display_name
+                or itemData.displayName
+                or itemData.name
+                or ""
+        )
+    )
+    local category = string.lower(tostring(itemData.category or ""))
 
+    return itemData.is_egg == true
+        or string.find(kind, "egg", 1, true) ~= nil
+        or string.find(displayName, "egg", 1, true) ~= nil
+        or category == "egg"
+        or category == "eggs"
+end
+
+-- Get rarity from Journal
 local function getRarity(kind)
     for _, row in ipairs(grid:GetChildren()) do
         if row:IsA("Frame") then
@@ -50,22 +63,50 @@ local function getRarity(kind)
     return nil
 end
 
+-- Rarity totals
+local counts = {
+    Common = 0,
+    Uncommon = 0,
+    Rare = 0,
+    ["Ultra-Rare"] = 0,
+    Legendary = 0
+}
+
+-- Count pets
 for uniqueId, pet in pairs(pets) do
-    local kind = pet.kind
+    if not isEgg(pet) then
+        local kind = pet.kind
 
-    -- Skip eggs
-    if kind and not kind:lower():find("egg", 1, true) then
-        local rarity = getRarity(kind)
+        if kind then
+            local rarity = getRarity(kind)
 
-        if rarity then
-            counts[rarity] = (counts[rarity] or 0) + 1
-            print(uniqueId, kind, "→", rarity)
-        else
-            print("RARITY NOT FOUND:", uniqueId, kind)
+            if rarity then
+                counts[rarity] = (counts[rarity] or 0) + 1
+
+                print(
+                    uniqueId,
+                    kind,
+                    "→",
+                    rarity
+                )
+            else
+                print(
+                    "RARITY NOT FOUND:",
+                    uniqueId,
+                    kind
+                )
+            end
         end
+    else
+        print(
+            "SKIPPED EGG:",
+            uniqueId,
+            pet.kind
+        )
     end
 end
 
+-- Results
 print("===== PET RARITY TOTALS =====")
 print("Common:", counts.Common)
 print("Uncommon:", counts.Uncommon)
