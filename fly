@@ -1,62 +1,116 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local targetKind = "summer_2026_acorn_friend"
-local targetFastId = 1510
+local player = Players.LocalPlayer
+local gui = player.PlayerGui
 
-local function containsTarget(value, visited)
-    if type(value) ~= "table" then
-        return false
-    end
+-- ClientData
+local ClientData = require(
+    ReplicatedStorage
+        :WaitForChild("ClientModules")
+        :WaitForChild("Core")
+        :WaitForChild("ClientData")
+)
 
-    visited = visited or {}
-    if visited[value] then
-        return false
-    end
-    visited[value] = true
+local data = ClientData.get_data()
+local playerData = data[player] or data[player.Name]
 
-    for k, v in pairs(value) do
-        if k == targetKind or v == targetKind then
-            return true
-        end
+local pets = playerData.inventory.pets
+local journal = gui:FindFirstChild("JournalApp")
 
-        if k == targetFastId or v == targetFastId then
-            return true
-        end
-
-        if type(v) == "table" and containsTarget(v, visited) then
-            return true
-        end
-    end
-
-    return false
+if not journal then
+    warn("JournalApp not found")
+    return
 end
 
-for _, module in ipairs(ReplicatedStorage:GetDescendants()) do
-    if module:IsA("ModuleScript") then
-        local name = string.lower(module.Name)
+local rarities = {
+    common = "Common",
+    uncommon = "UnCommon",
+    rare = "Rare",
+    ultra_rare = "Ultra_Rare",
+    legendary = "Legendary",
+}
 
-        -- Only try modules likely to contain pet/catalog data
-        if string.find(name, "pet")
-            or string.find(name, "catalog")
-            or string.find(name, "item")
-            or string.find(name, "database")
-            or string.find(name, "data")
-            or string.find(name, "journal")
-        then
-            local ok, result = pcall(require, module)
+local function getRarityFromPath(obj)
+    local current = obj
 
-            if ok and type(result) == "table" then
-                if containsTarget(result) then
-                    print("================================")
-                    print("TARGET FOUND")
-                    print("Module:", module:GetFullName())
-                    print("================================")
-                end
-            else
-                print("Skipped:", module:GetFullName())
+    while current and current ~= journal do
+        local rarity = rarities[string.lower(current.Name)]
+
+        if rarity then
+            return rarity
+        end
+
+        current = current.Parent
+    end
+
+    return nil
+end
+
+local function findJournalPet(kind)
+    for _, obj in ipairs(journal:GetDescendants()) do
+        -- Pet entry itself may be named with its kind
+        if obj.Name == kind then
+            return obj
+        end
+
+        -- Or it may have the kind as an attribute
+        for _, value in pairs(obj:GetAttributes()) do
+            if value == kind then
+                return obj
             end
         end
+
+        -- Or a StringValue inside it may contain the kind
+        if obj:IsA("StringValue") and obj.Value == kind then
+            return obj
+        end
+    end
+
+    return nil
+end
+
+local counts = {
+    Common = 0,
+    UnCommon = 0,
+    Rare = 0,
+    Ultra_Rare = 0,
+    Legendary = 0,
+}
+
+local checkedKinds = {}
+
+for uniqueId, petData in pairs(pets) do
+    local kind = petData and petData.kind
+
+    if kind and not checkedKinds[kind] then
+        checkedKinds[kind] = true
+
+        local journalPet = findJournalPet(kind)
+
+        if journalPet then
+            local rarity = getRarityFromPath(journalPet)
+
+            print(
+                kind,
+                "=>",
+                rarity or "RARITY NOT FOUND",
+                "|",
+                journalPet:GetFullName()
+            )
+
+            if rarity then
+                counts[rarity] += 1
+            end
+        else
+            print(kind, "=> JOURNAL PET NOT FOUND")
+        end
     end
 end
 
-print("Search finished")
+print("===== RARITY COUNTS =====")
+print("Common:", counts.Common)
+print("UnCommon:", counts.UnCommon)
+print("Rare:", counts.Rare)
+print("Ultra_Rare:", counts.Ultra_Rare)
+print("Legendary:", counts.Legendary)
