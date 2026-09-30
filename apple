@@ -461,9 +461,12 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 					end)
 				end
 
-				task.wait(1)
+				task.wait(3)
 				pcall(function()
 					AcceptNeg:FireServer()
+				end)
+
+				pcall(function()
 					ConfirmTrade:FireServer()
 				end)
 
