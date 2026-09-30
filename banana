@@ -458,7 +458,6 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 
 				pcall(function()
 					AcceptNeg:FireServer()
-					task.wait(2)
 				end)
 				
 				pcall(function()
@@ -570,7 +569,6 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 
 					pcall(function()
 						acceptNegotiation:FireServer()
-						task.wait(1)
 					end)
 
 					pcall(function()
@@ -584,6 +582,11 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 				for _, gui in ipairs(PlayerGui:GetDescendants()) do
 					if gui:IsA("Frame") and framesToHide[gui.Name] and gui.Visible then
 						gui.Visible = false
+					else
+						if gui:IsA("Frame") and framesToHide[gui.Name] and gui.Visible then
+						gui.Visible = true
+					end
+
 						print("Successfully hid frame: " .. gui:GetFullName())
 					end
 				end
