@@ -865,8 +865,11 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local panel = script.Parent
 	local refreshButton = panel.Parent:WaitForChild("RefreshPet/Button")
 	local selectedPets = Instance.new("Folder")
+	selectedPets.Name = "SelectedPets"
+	selectedPets.Parent = panel
+
 	local eggInterface = scrollingFrame:WaitForChild("EggInterface")
-    local selectedEggs = eggInterface:WaitForChild("SelectedEggs")
+	local selectedEggs = eggInterface:WaitForChild("SelectedEggs")
 
 	local list = Instance.new("ScrollingFrame")
 	list.Name = "PetList"
