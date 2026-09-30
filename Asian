@@ -496,7 +496,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 AcceptNeg:FireServer()
             end)
 
-            task.wait(0.5)
+            task.wait(2)
 
             if not tradeLoopRunning then
                 break
