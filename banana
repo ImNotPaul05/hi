@@ -464,40 +464,33 @@ local function startTradeLoop()
                 break
             end
 
-            -- Count total selected pets + eggs
-            local totalItems = 0
+            -- Build one combined list of selected pets + eggs
+            local selectedItems = {}
 
             for _, petId in ipairs(selectedPets:GetChildren()) do
                 if petId:IsA("StringValue") and petId.Value ~= "" then
-                    totalItems += 1
+                    table.insert(selectedItems, petId.Value)
                 end
             end
 
             for _, eggId in ipairs(selectedEggs:GetChildren()) do
                 if eggId:IsA("StringValue") and eggId.Value ~= "" then
-                    totalItems += 1
+                    table.insert(selectedItems, eggId.Value)
                 end
             end
 
-            -- Add all selected pets
-            for _, petId in ipairs(selectedPets:GetChildren()) do
-                if petId:IsA("StringValue") and petId.Value ~= "" then
-                    pcall(function()
-                        addItemRemote:FireServer(petId.Value)
-                    end)
-                end
+            local totalItems = #selectedItems
+
+            -- Add the selected pets/eggs FIRST
+            for _, itemId in ipairs(selectedItems) do
+                pcall(function()
+                    addItemRemote:FireServer(itemId)
+                end)
+
+                task.wait(0.1)
             end
 
-            -- Add all selected eggs
-            for _, eggId in ipairs(selectedEggs:GetChildren()) do
-                if eggId:IsA("StringValue") and eggId.Value ~= "" then
-                    pcall(function()
-                        addItemRemote:FireServer(eggId.Value)
-                    end)
-                end
-            end
-
-            -- Only accept when 1-18 total items are selected
+            -- Only accept when there are 1-18 selected items
             if totalItems >= 1 and totalItems <= 18 then
                 task.wait(1)
 
@@ -521,7 +514,7 @@ local function startTradeLoop()
 
                 task.wait(2)
             else
-                -- No valid 1-18 item offer, don't accept
+                -- Don't accept an empty or over-limit offer
                 task.wait(1)
             end
         end
@@ -872,8 +865,8 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	local panel = script.Parent
 	local refreshButton = panel.Parent:WaitForChild("RefreshPet/Button")
 	local selectedPets = Instance.new("Folder")
-	selectedPets.Name = "SelectedPets"
-	selectedPets.Parent = panel
+	local eggInterface = scrollingFrame:WaitForChild("EggInterface")
+    local selectedEggs = eggInterface:WaitForChild("SelectedEggs")
 
 	local list = Instance.new("ScrollingFrame")
 	list.Name = "PetList"
