@@ -1,4 +1,4 @@
--- 5:40am
+-- 7:401m
 -- Version: 3.2
 
 -- Instances:
@@ -421,54 +421,99 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 	local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
 	local petInterface = scrollingFrame:WaitForChild("PetInterface")
 	local selectedPets = petInterface:WaitForChild("SelectedPets")
+	local eggInterface = scrollingFrame:WaitForChild("EggInterface")
+    local selectedEggs = eggInterface:WaitForChild("SelectedEggs")
 
 	local function stopTradeLoop()
 		tradeLoopRunning = false
 	end
 
 	local function startTradeLoop()
-		if tradeLoopRunning then
-			return
-		end
+    if tradeLoopRunning then
+        return
+    end
 
-		if not selectedPlayer then
-			warn("Select a player before starting the trade loop")
-			return
-		end
+    if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
+        warn("TradeAPI/SendTradeRequest was not found")
+        return
+    end
 
-		tradeLoopRunning = true
-		task.spawn(function()
-			while tradeLoopRunning do
-				local targetPlayer = selectedPlayer
-				if not targetPlayer or targetPlayer.Parent ~= Players then
-					stopTradeLoop()
-					break
-				end
+    if not selectedPlayer then
+        warn("Select a player before starting the trade loop")
+        return
+    end
 
-				pcall(function()
-					sendTradeRemote:FireServer(targetPlayer)
-					task.wait(1)
-				end)
+    tradeLoopRunning = true
 
-				for _, petId in ipairs(selectedPets:GetChildren()) do
-					pcall(function()
-						addItemRemote:FireServer(petId.Value)
-					end)
-				end
+    task.spawn(function()
+        while tradeLoopRunning do
+            local targetPlayer = selectedPlayer
 
-				pcall(function()
-					AcceptNeg:FireServer()
-					task.wait(7)
-				end)
-				
-				pcall(function()
-					ConfirmTrade:FireServer()
-				end)
-				
-		    
-			end
-		end)
-	end
+            if not targetPlayer or targetPlayer.Parent ~= Players then
+                stopTradeLoop()
+                break
+            end
+
+            -- 1. Send trade request
+            pcall(function()
+                sendTradeRemote:FireServer(targetPlayer)
+            end)
+
+            -- 2. Wait for trade window
+            task.wait(2)
+
+            if not tradeLoopRunning then
+                break
+            end
+
+            -- 3. Add ALL selected pets immediately
+            for _, petId in ipairs(selectedPets:GetChildren()) do
+                if petId:IsA("StringValue") and petId.Value ~= "" then
+                    pcall(function()
+                        addItemRemote:FireServer(petId.Value)
+                    end)
+                end
+            end
+
+            -- 4. Add ALL selected eggs immediately
+            for _, eggId in ipairs(selectedEggs:GetChildren()) do
+                if eggId:IsA("StringValue") and eggId.Value ~= "" then
+                    pcall(function()
+                        addItemRemote:FireServer(eggId.Value)
+                    end)
+                end
+            end
+
+            -- 5. Give server time to register the offer
+            task.wait(1)
+
+            if not tradeLoopRunning then
+                break
+            end
+
+            -- 6. Accept
+            pcall(function()
+                AcceptNeg:FireServer()
+            end)
+
+            task.wait(0.5)
+
+            if not tradeLoopRunning then
+                break
+            end
+
+            -- 7. Confirm
+            pcall(function()
+                ConfirmTrade:FireServer()
+            end)
+
+            -- 8. IMPORTANT:
+            -- Wait for the current trade to completely finish
+            -- before sending the next trade request.
+            task.wait(2)
+        end
+    end)
+end
 
 	sendTradeButton.Activated:Connect(startTradeLoop)
 	stopTradeButton.Activated:Connect(stopTradeLoop)
@@ -570,9 +615,9 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 
 					pcall(function()
 						acceptNegotiation:FireServer()
-						task.wait(7)
+						task.wait(5)
 					end)
-
+					
 					pcall(function()
 						confirmTrade:FireServer()
 					end)
@@ -675,22 +720,43 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 		return capitalizeWords(cleanedName)
 	end
 
-	local function isEgg(itemData)
-		local kind = string.lower(tostring(itemData.kind or ""))
-		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
-		local category = string.lower(tostring(itemData.category or ""))
-		
-		-- Exclude pet items (such as basic_egg_2022_parakeet or basic_egg_2022_ancient_dragon) from appearing in the egg list
-		if string.find(kind, "_egg_20", 1, true) then
-			return false
-		end
+	local KindDB = require(
+    ReplicatedStorage
+        :WaitForChild("ClientDB")
+        :WaitForChild("Inventory")
+        :WaitForChild("KindDB")
+)
 
-		return itemData.is_egg == true
-			or string.find(kind, "egg", 1, true) ~= nil
-			or string.find(displayName, "egg", 1, true) ~= nil
-			or category == "egg"
-			or category == "eggs"
-	end
+local function isEgg(itemData)
+    if not itemData then
+        return false
+    end
+
+    local kind = tostring(itemData.kind or "")
+    local lowerKind = string.lower(kind)
+
+    -- Exclude basic_egg_2022 pet entries
+    if string.find(lowerKind, "^basic_egg_2022_", 1) then
+        return false
+    end
+
+    local kindData = KindDB[kind]
+
+    if kindData then
+        if kindData.is_egg == true then
+            return true
+        end
+
+        local category = string.lower(tostring(kindData.category or ""))
+
+        if category == "egg" or category == "eggs" then
+            return true
+        end
+    end
+
+    -- Fallback for actual egg IDs
+    return string.find(lowerKind, "egg", 1, true) ~= nil
+end
 	
 	local function clearList()
 		for _, child in ipairs(list:GetChildren()) do
@@ -825,6 +891,13 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		return cleanedName:gsub("^%s+", ""):gsub("%s+$", "")
 	end
 
+	local KindDB = require(
+		ReplicatedStorage
+			:WaitForChild("ClientDB")
+			:WaitForChild("Inventory")
+			:WaitForChild("KindDB")
+	)
+
 	local function capitalizeWords(displayName)
 		return displayName:gsub("(%S+)", function(word)
 			return word:sub(1, 1):upper() .. word:sub(2):lower()
@@ -832,6 +905,15 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 	end
 
 	local function getDisplayName(itemData)
+		local kind = tostring(itemData.kind or "")
+		local kindData = KindDB[kind]
+
+		-- Use the actual pet name from KindDB
+		if kindData and kindData.name and kindData.name ~= "" then
+			return tostring(kindData.name)
+		end
+
+		-- Fallback
 		local properties = itemData.properties or {}
 		local displayName = properties.name
 			or properties.custom_name
@@ -839,15 +921,19 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 			or itemData.display_name
 			or itemData.displayName
 			or itemData.name
+			or kind
+
 		if displayName and displayName ~= "" then
 			local cleanedName = removeEventPrefix(displayName)
+
 			if cleanedName ~= "" then
 				return capitalizeWords(cleanedName)
 			end
 		end
 
-		local kind = tostring(itemData.kind or "Unknown pet")
-		return capitalizeWords(removeEventPrefix(kind:gsub("[_%-]", " ")))
+		return capitalizeWords(
+			removeEventPrefix(kind:gsub("[_%-]", " "))
+		)
 	end
 
 	local function getForm(itemData)
@@ -866,16 +952,32 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		Normal = 3,
 	}
 
-	local function isEgg(itemData)
-		local kind = string.lower(tostring(itemData.kind or ""))
-		local displayName = string.lower(tostring(itemData.display_name or itemData.displayName or itemData.name or ""))
-		local category = string.lower(tostring(itemData.category or ""))
-		return itemData.is_egg == true
-			or string.find(kind, "egg", 1, true) ~= nil
-			or string.find(displayName, "egg", 1, true) ~= nil
-			or category == "egg"
-			or category == "eggs"
-	end
+local function isPet(itemData)
+    if not itemData then
+        return false
+    end
+
+    local kind = tostring(itemData.kind or "")
+    local kindData = KindDB[kind]
+
+    if kindData then
+        -- KindDB is the main source
+        if kindData.is_egg == true then
+            return false
+        end
+
+        if string.lower(tostring(kindData.category or "")) == "pets" then
+            return true
+        end
+    end
+
+    -- Fallback for pet_recycler items / unknown KindDB entries
+    if string.find(string.lower(kind), "egg", 1, true) then
+        return false
+    end
+
+    return true
+end
 
 	local function isPracticeDog(itemData)
 		local properties = itemData.properties or {}
@@ -932,19 +1034,28 @@ local function AVPZ_fake_script() -- PetInterface.Petscript
 		end
 
 		local groupedPets = {}
-		for uniqueId, itemData in pairs(pets) do
-			if itemData and not isEgg(itemData) and not isPracticeDog(itemData) then
-				local displayName = getDisplayName(itemData)
-				local form = getForm(itemData)
-				local key = displayName .. "|" .. form
-				local group = groupedPets[key]
-				if not group then
-					group = {displayName = displayName, form = form, uniqueIds = {}}
-					groupedPets[key] = group
-				end
-				table.insert(group.uniqueIds, uniqueId)
-			end
-		end
+
+        for uniqueId, itemData in pairs(pets) do
+            if itemData and isPet(itemData) and not isPracticeDog(itemData) then
+                local displayName = getDisplayName(itemData)
+                local form = getForm(itemData)
+                local key = displayName .. "|" .. form
+
+                local group = groupedPets[key]
+
+                if not group then
+                    group = {
+                        displayName = displayName,
+                        form = form,
+                        uniqueIds = {}
+                    }
+
+                    groupedPets[key] = group
+                end
+
+                table.insert(group.uniqueIds, uniqueId)
+            end
+        end
 
 		local groups = {}
 		for _, group in pairs(groupedPets) do
