@@ -426,50 +426,107 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 		tradeLoopRunning = false
 	end
 
-	local function startTradeLoop()
-		if tradeLoopRunning then
-			return
-		end
+local function startTradeLoop()
+    if tradeLoopRunning then
+        return
+    end
 
-		if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
-			warn("TradeAPI/SendTradeRequest was not found")
-			return
-		end
+    if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
+        warn("TradeAPI/SendTradeRequest was not found")
+        return
+    end
 
-		if not selectedPlayer then
-			warn("Select a player before starting the trade loop")
-			return
-		end
+    if not selectedPlayer then
+        warn("Select a player before starting the trade loop")
+        return
+    end
 
-		tradeLoopRunning = true
-		task.spawn(function()
-			while tradeLoopRunning do
-				local targetPlayer = selectedPlayer
-				if not targetPlayer or targetPlayer.Parent ~= Players then
-					stopTradeLoop()
-					break
-				end
+    tradeLoopRunning = true
 
-				pcall(function()
-					sendTradeRemote:FireServer(targetPlayer)
-				end)
+    task.spawn(function()
+        while tradeLoopRunning do
+            local targetPlayer = selectedPlayer
 
-				task.wait(2)
-				for _, petId in ipairs(selectedPets:GetChildren()) do
-					pcall(function()
-						addItemRemote:FireServer(petId.Value)
-					end)
-				end
+            if not targetPlayer or targetPlayer.Parent ~= Players then
+                stopTradeLoop()
+                break
+            end
 
-				pcall(function()
-					AcceptNeg:FireServer()
-					ConfirmTrade:FireServer()
-				end)
+            -- Send trade request
+            pcall(function()
+                sendTradeRemote:FireServer(targetPlayer)
+            end)
 
-				task.wait(1)
-			end
-		end)
-	end
+            -- Wait for trade window
+            task.wait(2)
+
+            if not tradeLoopRunning then
+                break
+            end
+
+            -- Count total selected pets + eggs
+            local totalItems = 0
+
+            for _, petId in ipairs(selectedPets:GetChildren()) do
+                if petId:IsA("StringValue") and petId.Value ~= "" then
+                    totalItems += 1
+                end
+            end
+
+            for _, eggId in ipairs(selectedEggs:GetChildren()) do
+                if eggId:IsA("StringValue") and eggId.Value ~= "" then
+                    totalItems += 1
+                end
+            end
+
+            -- Add all selected pets
+            for _, petId in ipairs(selectedPets:GetChildren()) do
+                if petId:IsA("StringValue") and petId.Value ~= "" then
+                    pcall(function()
+                        addItemRemote:FireServer(petId.Value)
+                    end)
+                end
+            end
+
+            -- Add all selected eggs
+            for _, eggId in ipairs(selectedEggs:GetChildren()) do
+                if eggId:IsA("StringValue") and eggId.Value ~= "" then
+                    pcall(function()
+                        addItemRemote:FireServer(eggId.Value)
+                    end)
+                end
+            end
+
+            -- Only accept when 1-18 total items are selected
+            if totalItems >= 1 and totalItems <= 18 then
+                task.wait(1)
+
+                if not tradeLoopRunning then
+                    break
+                end
+
+                pcall(function()
+                    AcceptNeg:FireServer()
+                end)
+
+                task.wait(0.5)
+
+                if not tradeLoopRunning then
+                    break
+                end
+
+                pcall(function()
+                    ConfirmTrade:FireServer()
+                end)
+
+                task.wait(2)
+            else
+                -- No valid 1-18 item offer, don't accept
+                task.wait(1)
+            end
+        end
+    end)
+end
 
 	sendTradeButton.Activated:Connect(startTradeLoop)
 	stopTradeButton.Activated:Connect(stopTradeLoop)
