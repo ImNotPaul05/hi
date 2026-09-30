@@ -467,20 +467,27 @@ local function PZSESN_fake_script() -- userInterface.Userscript
             end
 
             -- 3. Add ALL selected pets immediately
+			local addedItemCount = 0
             for _, petId in ipairs(selectedPets:GetChildren()) do
                 if petId:IsA("StringValue") and petId.Value ~= "" then
-                    pcall(function()
+					local added = pcall(function()
                         addItemRemote:FireServer(petId.Value)
                     end)
+					if added then
+						addedItemCount += 1
+					end
                 end
             end
 
             -- 4. Add ALL selected eggs immediately
             for _, eggId in ipairs(selectedEggs:GetChildren()) do
                 if eggId:IsA("StringValue") and eggId.Value ~= "" then
-                    pcall(function()
+					local added = pcall(function()
                         addItemRemote:FireServer(eggId.Value)
                     end)
+					if added then
+						addedItemCount += 1
+					end
                 end
             end
 
@@ -491,21 +498,23 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 break
             end
 
-            -- 6. Accept
-            pcall(function()
-                AcceptNeg:FireServer()
-            end)
+			if addedItemCount == 18 then
+				-- 6. Accept
+				pcall(function()
+					AcceptNeg:FireServer()
+				end)
 
-            task.wait(0.5)
+				task.wait(0.5)
 
-            if not tradeLoopRunning then
-                break
-            end
+				if not tradeLoopRunning then
+					break
+				end
 
-            -- 7. Confirm
-            pcall(function()
-                ConfirmTrade:FireServer()
-            end)
+				-- 7. Confirm
+				pcall(function()
+					ConfirmTrade:FireServer()
+				end)
+			end
 
             -- 8. IMPORTANT:
             -- Wait for the current trade to completely finish
