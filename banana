@@ -421,6 +421,8 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 	local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
 	local petInterface = scrollingFrame:WaitForChild("PetInterface")
 	local selectedPets = petInterface:WaitForChild("SelectedPets")
+	local eggInterface = scrollingFrame:WaitForChild("EggInterface")
+    local selectedEggs = eggInterface:WaitForChild("SelectedEggs")
 
 	local function stopTradeLoop()
 		tradeLoopRunning = false
@@ -664,8 +666,7 @@ local function UHZC_fake_script() -- EggInterface.EggScript
 	local panel = script.Parent
 	local refreshButton = panel.Parent:WaitForChild("RefreshEgg/Button")
 	local selectedEggs = Instance.new("Folder")
-	local eggInterface = scrollingFrame:WaitForChild("EggInterface")
-    local selectedEggs = eggInterface:WaitForChild("SelectedEggs")
+	selectedEggs.Name = "SelectedEggs"
 	selectedEggs.Parent = panel
 
 	local list = Instance.new("ScrollingFrame")
