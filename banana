@@ -614,7 +614,7 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 					end
 
 					pcall(function()
-						acceptNegotiation:FireServer()
+						AcceptNeg:FireServer()
 						confirmTrade:FireServer()
 					end)
 					task.wait(2)
@@ -1315,4 +1315,4 @@ local function XOOWGMJ_fake_script() -- Icon2.LocalScript
 		icon.Visible = false
 	end)
 end
-coroutine.wrap(XOOWGMJ_fake_script)()
+coroutine.wrap(XOOWGMJ_fake_script)()acceptNegotiation
