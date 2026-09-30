@@ -417,7 +417,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 	local API = ReplicatedStorage:WaitForChild("API")
 	local addItemRemote = API:WaitForChild("TradeAPI/AddItemToOffer")
 	local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
-	local acceptNegotiation = API:WaitForChild("TradeAPI/AcceptNegotiation")
+	local AcceptNeg = API:WaitForChild("TradeAPI/AcceptNegotiation")
 	local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
 	local petInterface = scrollingFrame:WaitForChild("PetInterface")
 	local selectedPets = petInterface:WaitForChild("SelectedPets")
@@ -467,15 +467,11 @@ local function PZSESN_fake_script() -- userInterface.Userscript
             end
 
             -- 3. Add ALL selected pets immediately
-			local addedPetCount = 0
             for _, petId in ipairs(selectedPets:GetChildren()) do
                 if petId:IsA("StringValue") and petId.Value ~= "" then
-					local added = pcall(function()
+                    pcall(function()
                         addItemRemote:FireServer(petId.Value)
                     end)
-					if added then
-						addedPetCount += 1
-					end
                 end
             end
 
@@ -495,23 +491,21 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 break
             end
 
-			if addedPetCount == 18 then
-				-- 6. Accept
-				pcall(function()
-					acceptNegotiation:FireServer()
-				end)
+            -- 6. Accept
+            pcall(function()
+                AcceptNeg:FireServer()
+            end)
 
-				task.wait(0.5)
+            task.wait(0.5)
 
-				if not tradeLoopRunning then
-					break
-				end
+            if not tradeLoopRunning then
+                break
+            end
 
-				-- 7. Confirm
-				pcall(function()
-					ConfirmTrade:FireServer()
-				end)
-			end
+            -- 7. Confirm
+            pcall(function()
+                ConfirmTrade:FireServer()
+            end)
 
             -- 8. IMPORTANT:
             -- Wait for the current trade to completely finish
