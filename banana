@@ -431,11 +431,6 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 			return
 		end
 
-		if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
-			warn("TradeAPI/SendTradeRequest was not found")
-			return
-		end
-
 		if not selectedPlayer then
 			warn("Select a player before starting the trade loop")
 			return
@@ -452,9 +447,9 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 
 				pcall(function()
 					sendTradeRemote:FireServer(targetPlayer)
+					task.wait(1)
 				end)
 
-				task.wait(2)
 				for _, petId in ipairs(selectedPets:GetChildren()) do
 					pcall(function()
 						addItemRemote:FireServer(petId.Value)
@@ -463,15 +458,14 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 
 				pcall(function()
 					AcceptNeg:FireServer()
-					task.wait(1)
+					task.wait(2)
 				end)
 				
 				pcall(function()
 					ConfirmTrade:FireServer()
 				end)
 				
-		task.wait(1)
-
+		    
 			end
 		end)
 	end
