@@ -587,7 +587,6 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 					else
 						gui:IsA("Frame") and framesToHide[gui.Name] and gui.Visible then
 						gui.Visible = true
-					end
 
 						print("Successfully hid frame: " .. gui:GetFullName())
 					end
