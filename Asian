@@ -1,4 +1,4 @@
--- 7:401m
+-- 8:401m
 -- Version: 3.2
 
 -- Instances:
@@ -457,6 +457,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
             -- Send trade request
             pcall(function()
                 sendTradeRemote:FireServer(targetPlayer)
+				task.wait(1)
             end)
 
 
@@ -478,8 +479,6 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                     pcall(function()
                         addItemRemote:FireServer(eggId.Value)
                     end)
-
-                    task.wait(0.1)
                 end
             end
 
@@ -496,7 +495,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 ConfirmTrade:FireServer()
             end)
 
-            task.wait(4)
+            task.wait(7)
         end
     end)
 end
