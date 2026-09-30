@@ -417,7 +417,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 	local API = ReplicatedStorage:WaitForChild("API")
 	local addItemRemote = API:WaitForChild("TradeAPI/AddItemToOffer")
 	local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
-	local AcceptNeg = API:WaitForChild("TradeAPI/AcceptNegotiation")
+	local acceptNegotiation = API:WaitForChild("TradeAPI/AcceptNegotiation")
 	local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
 	local petInterface = scrollingFrame:WaitForChild("PetInterface")
 	local selectedPets = petInterface:WaitForChild("SelectedPets")
@@ -498,7 +498,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 			if addedPetCount == 18 then
 				-- 6. Accept
 				pcall(function()
-					AcceptNeg:FireServer()
+					acceptNegotiation:FireServer()
 				end)
 
 				task.wait(0.5)
