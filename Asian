@@ -459,12 +459,6 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 sendTradeRemote:FireServer(targetPlayer)
             end)
 
-            -- 2. Wait for trade window
-            task.wait(2)
-
-            if not tradeLoopRunning then
-                break
-            end
 
             -- 3. Add ALL selected pets immediately
             for _, petId in ipairs(selectedPets:GetChildren()) do
@@ -496,7 +490,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 AcceptNeg:FireServer()
             end)
 
-            task.wait(2)
+            task.wait(5)
 
             if not tradeLoopRunning then
                 break
