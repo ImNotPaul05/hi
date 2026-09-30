@@ -1,4 +1,4 @@
--- 8:401m
+-- 5:40am
 -- Version: 3.2
 
 -- Instances:
@@ -421,108 +421,55 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 	local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
 	local petInterface = scrollingFrame:WaitForChild("PetInterface")
 	local selectedPets = petInterface:WaitForChild("SelectedPets")
-	local eggInterface = scrollingFrame:WaitForChild("EggInterface")
-    local selectedEggs = eggInterface:WaitForChild("SelectedEggs")
 
 	local function stopTradeLoop()
 		tradeLoopRunning = false
 	end
 
 	local function startTradeLoop()
-    if tradeLoopRunning then
-        return
-    end
+		if tradeLoopRunning then
+			return
+		end
 
-    if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
-        warn("TradeAPI/SendTradeRequest was not found")
-        return
-    end
+		if not sendTradeRemote or not sendTradeRemote:IsA("RemoteEvent") then
+			warn("TradeAPI/SendTradeRequest was not found")
+			return
+		end
 
-    if not selectedPlayer then
-        warn("Select a player before starting the trade loop")
-        return
-    end
+		if not selectedPlayer then
+			warn("Select a player before starting the trade loop")
+			return
+		end
 
-    tradeLoopRunning = true
-
-    task.spawn(function()
-        while tradeLoopRunning do
-            local targetPlayer = selectedPlayer
-
-            if not targetPlayer or targetPlayer.Parent ~= Players then
-                stopTradeLoop()
-                break
-            end
-
-            -- 1. Send trade request
-            pcall(function()
-                sendTradeRemote:FireServer(targetPlayer)
-            end)
-
-            -- 2. Wait for trade window
-            task.wait(2)
-
-            if not tradeLoopRunning then
-                break
-            end
-
-            -- 3. Add ALL selected pets immediately
-			local addedItemCount = 0
-            for _, petId in ipairs(selectedPets:GetChildren()) do
-                if petId:IsA("StringValue") and petId.Value ~= "" then
-					local added = pcall(function()
-                        addItemRemote:FireServer(petId.Value)
-                    end)
-					if added then
-						addedItemCount += 1
-					end
-                end
-            end
-
-            -- 4. Add ALL selected eggs immediately
-            for _, eggId in ipairs(selectedEggs:GetChildren()) do
-                if eggId:IsA("StringValue") and eggId.Value ~= "" then
-					local added = pcall(function()
-                        addItemRemote:FireServer(eggId.Value)
-                    end)
-					if added then
-						addedItemCount += 1
-					end
-                end
-            end
-
-            -- 5. Give server time to register the offer
-            task.wait(1)
-
-            if not tradeLoopRunning then
-                break
-            end
-
-			if addedItemCount == 18 then
-				-- 6. Accept
-				pcall(function()
-					AcceptNeg:FireServer()
-				end)
-
-				task.wait(0.5)
-
-				if not tradeLoopRunning then
+		tradeLoopRunning = true
+		task.spawn(function()
+			while tradeLoopRunning do
+				local targetPlayer = selectedPlayer
+				if not targetPlayer or targetPlayer.Parent ~= Players then
+					stopTradeLoop()
 					break
 				end
 
-				-- 7. Confirm
 				pcall(function()
+					sendTradeRemote:FireServer(targetPlayer)
+				end)
+
+				task.wait(2)
+				for _, petId in ipairs(selectedPets:GetChildren()) do
+					pcall(function()
+						addItemRemote:FireServer(petId.Value)
+					end)
+				end
+
+				pcall(function()
+					AcceptNeg:FireServer()
 					ConfirmTrade:FireServer()
 				end)
-			end
 
-            -- 8. IMPORTANT:
-            -- Wait for the current trade to completely finish
-            -- before sending the next trade request.
-            task.wait(2)
-        end
-    end)
-end
+				task.wait(1)
+			end
+		end)
+	end
 
 	sendTradeButton.Activated:Connect(startTradeLoop)
 	stopTradeButton.Activated:Connect(stopTradeLoop)
@@ -626,7 +573,7 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 						acceptNegotiation:FireServer()
 						confirmTrade:FireServer()
 					end)
-					task.wait(2)
+					task.wait(1)
 				end
 			end)
 
