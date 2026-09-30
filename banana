@@ -458,7 +458,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 
 				pcall(function()
 					AcceptNeg:FireServer()
-					task.wait(6)
+					task.wait(7)
 				end)
 				
 				pcall(function()
@@ -570,7 +570,7 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 
 					pcall(function()
 						acceptNegotiation:FireServer()
-						task.wait(6)
+						task.wait(7)
 					end)
 
 					pcall(function()
