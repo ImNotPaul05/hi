@@ -454,63 +454,47 @@ local function PZSESN_fake_script() -- userInterface.Userscript
                 break
             end
 
-            -- 1. Send trade request
+            -- Send trade request
             pcall(function()
                 sendTradeRemote:FireServer(targetPlayer)
-            end)
+            end) 
 
-            -- 2. Wait for trade window
-            task.wait(2)
+           local totalItems = 0
 
-            if not tradeLoopRunning then
-                break
-            end
+           for _, petId in ipairs(selectedPets:GetChildren()) do
+               if petId:IsA("StringValue") and petId.Value ~= "" then
+                   totalItems += 1
+			   end
+		   end
 
-            -- 3. Add ALL selected pets immediately
-            for _, petId in ipairs(selectedPets:GetChildren()) do
-                if petId:IsA("StringValue") and petId.Value ~= "" then
-                    pcall(function()
-                        addItemRemote:FireServer(petId.Value)
-                    end)
-                end
-            end
+		   for _, eggId in ipairs(selectedEggs:GetChildren()) do
+			   if eggId:IsA("StringValue") and eggId.Value ~= "" then
+				   totalItems += 1
+			   end
+		   end
 
-            -- 4. Add ALL selected eggs immediately
-            for _, eggId in ipairs(selectedEggs:GetChildren()) do
-                if eggId:IsA("StringValue") and eggId.Value ~= "" then
-                    pcall(function()
-                        addItemRemote:FireServer(eggId.Value)
-                    end)
-                end
-            end
+			-- Add all selected pets immediately
+			for _, petId in ipairs(selectedPets:GetChildren()) do
+				if petId:IsA("StringValue") and petId.Value ~= "" then
+					addItemRemote:FireServer(petId.Value)
+				end
+			end
 
-            -- 5. Give server time to register the offer
-            task.wait(1)
+			-- Add all selected eggs immediately
+			for _, eggId in ipairs(selectedEggs:GetChildren()) do
+				if eggId:IsA("StringValue") and eggId.Value ~= "" then
+					addItemRemote:FireServer(eggId.Value)
+				end
+			end
 
-            if not tradeLoopRunning then
-                break
-            end
+			-- ONLY accept after all 18 slots were fired
+			if totalItems == 18 then
+				AcceptNeg:FireServer()
+			end
 
-            -- 6. Accept
-            pcall(function()
-                AcceptNeg:FireServer()
-            end)
-
-            task.wait(0.5)
-
-            if not tradeLoopRunning then
-                break
-            end
-
-            -- 7. Confirm
             pcall(function()
                 ConfirmTrade:FireServer()
             end)
-
-            -- 8. IMPORTANT:
-            -- Wait for the current trade to completely finish
-            -- before sending the next trade request.
-            task.wait(2)
         end
     end)
 end
@@ -615,12 +599,9 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 
 					pcall(function()
 						acceptNegotiation:FireServer()
-						task.wait(5)
-					end)
-					
-					pcall(function()
 						confirmTrade:FireServer()
 					end)
+					task.wait(2)
 				end
 			end)
 
