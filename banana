@@ -458,6 +458,7 @@ local function PZSESN_fake_script() -- userInterface.Userscript
 
 				pcall(function()
 					AcceptNeg:FireServer()
+					task.wait(6)
 				end)
 				
 				pcall(function()
@@ -569,6 +570,7 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 
 					pcall(function()
 						acceptNegotiation:FireServer()
+						task.wait(6)
 					end)
 
 					pcall(function()
@@ -583,7 +585,7 @@ local function ZEQSNX_fake_script() -- SwitchButton.SwitchScript
 					if gui:IsA("Frame") and framesToHide[gui.Name] and gui.Visible then
 						gui.Visible = false
 					else
-						if gui:IsA("Frame") and framesToHide[gui.Name] and gui.Visible then
+						gui:IsA("Frame") and framesToHide[gui.Name] and gui.Visible then
 						gui.Visible = true
 					end
 
