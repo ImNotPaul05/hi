@@ -24,6 +24,46 @@ local playerData = data[player] or data[player.Name]
 
 local pets = playerData.inventory.pets
 
+local function isEgg(petData)
+    local kind = string.lower(tostring(petData.kind or ""))
+
+    local kindData = KindDB[petData.kind]
+
+    -- Inventory data
+    if petData.is_egg == true then
+        return true
+    end
+
+    if string.find(kind, "egg", 1, true) then
+        return true
+    end
+
+    if string.lower(tostring(petData.category or "")) == "egg"
+        or string.lower(tostring(petData.category or "")) == "eggs" then
+        return true
+    end
+
+    -- KindDB data
+    if kindData then
+        if kindData.is_egg == true then
+            return true
+        end
+
+        local dbCategory = string.lower(tostring(kindData.category or ""))
+        local dbName = string.lower(tostring(kindData.name or ""))
+
+        if dbCategory == "egg" or dbCategory == "eggs" then
+            return true
+        end
+
+        if string.find(dbName, "egg", 1, true) then
+            return true
+        end
+    end
+
+    return false
+end
+
 local function isEgg(itemData)
     local kind = string.lower(tostring(itemData.kind or ""))
 
