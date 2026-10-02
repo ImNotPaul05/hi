@@ -2,11 +2,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- ================= CONFIGURATION =================
-MainAccUsername = {"Her0eXBuildera31"} 
-TARGET_ITEM_NAME = "Retired Egg"
-TARGET_ITEM_FORM = "NORMAL" -- NORMAL, NEON, or MEGA_NEON
-ForceReceiver = false 
 
 local targetFrameNames = {"Dialog"}
 -- =================================================
