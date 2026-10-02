@@ -8,7 +8,7 @@ local LocalPlayer = Players.LocalPlayer
 --==================================================
 
 local Config = {
-    Pet = "summer_2026_storm_condor",
+    Pet = "Storm Condor",
 
     -- "normal" or "neon"
     PetForm = "normal",
@@ -18,6 +18,14 @@ local Config = {
 
     FeedDelay = 0.5,
 }
+-- kindb
+
+local KindDB = require(
+    ReplicatedStorage
+        :WaitForChild("ClientDB")
+        :WaitForChild("Inventory")
+        :WaitForChild("KindDB")
+)
 
 --==================================================
 -- CLIENT DATA
@@ -105,44 +113,59 @@ local function GetMatchingPets()
     end
 
     local matchingPets = {}
+    local targetName = string.lower(Config.Pet)
 
     for uniqueId, petData in pairs(playerData.inventory.pets) do
 
-        if petData
-            and petData.kind == Config.Pet
-            and IsCorrectPetForm(petData) then
+        if petData and petData.kind then
 
-            local age = GetPetAge(petData)
+            local kindData = KindDB[petData.kind]
 
-            if age then
+            if kindData then
 
-                -- ONLY PROCESS PETS BELOW AGE 6
-                if age < 6 then
-                    table.insert(matchingPets, {
-                        uniqueId = uniqueId,
-                        age = age
-                    })
+                local displayName = tostring(kindData.name or "")
 
-                    print(
-                        "[SELECTED]",
-                        uniqueId,
-                        "Age:",
-                        age
-                    )
+                if string.lower(displayName) == targetName
+                    and IsCorrectPetForm(petData) then
 
-                else
-                    print(
-                        "[SKIPPED MAX AGE]",
-                        uniqueId,
-                        "Age:",
-                        age
-                    )
+                    local age = GetPetAge(petData)
+
+                    if age then
+
+                        if age < 6 then
+                            table.insert(matchingPets, {
+                                uniqueId = uniqueId,
+                                age = age
+                            })
+
+                            print(
+                                "[SELECTED]",
+                                displayName,
+                                "| ID:",
+                                uniqueId,
+                                "| Age:",
+                                age
+                            )
+                        else
+                            print(
+                                "[SKIPPED MAX AGE]",
+                                displayName,
+                                "| ID:",
+                                uniqueId,
+                                "| Age:",
+                                age
+                            )
+                        end
+
+                    else
+                        warn(
+                            "[NO AGE DATA]",
+                            displayName,
+                            "| ID:",
+                            uniqueId
+                        )
+                    end
                 end
-            else
-                warn(
-                    "[NO AGE DATA]",
-                    uniqueId
-                )
             end
         end
     end
