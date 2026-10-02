@@ -4,7 +4,10 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- Configuration
-
+local MainAccUsername = {"Her0eXBuildera31"}
+local TARGET_ITEM_NAME = "Retired Egg"
+local TARGET_ITEM_FORM = "NORMAL"
+local ForceReceiver = false
 local targetFrameNames = {"Dialog"}
 
 -- Remotes / modules
@@ -228,62 +231,151 @@ task.spawn(function()
     end
 
     --------------------------------------------------
-    -- ADD ITEMS
+    -- TRADE CYCLE
     --------------------------------------------------
 
-    task.spawn(function()
-        local hasAddedItems = false
+    local AcceptNeg =
+        API:WaitForChild("TradeAPI/AcceptNegotiation")
 
-        while true do
-            local mainAccountFound = false
+    local ConfirmTrade =
+        API:WaitForChild("TradeAPI/ConfirmTrade")
 
-            if MainAccUsername
-                and #MainAccUsername > 0
-                and MainAccUsername[1] ~= "" then
+    local function addSelectedItems()
+        local uniqueIds =
+            getMultipleUniqueIdsByName(
+                TARGET_ITEM_NAME,
+                TARGET_ITEM_FORM,
+                18
+            )
 
-                for _, playerName in ipairs(MainAccUsername) do
-                    if Players:FindFirstChild(playerName) then
-
-                        mainAccountFound = true
-
-                        if not hasAddedItems then
-                            local uniqueIds =
-                                getMultipleUniqueIdsByName(
-                                    TARGET_ITEM_NAME,
-                                    TARGET_ITEM_FORM,
-                                    18
-                                )
-
-                            if #uniqueIds > 0 then
-                                for _, uniqueId in ipairs(uniqueIds) do
-
-                                    pcall(function()
-                                        addItemRemote:FireServer(uniqueId)
-                                    end)
-
-                                    task.wait(0.1)
-                                end
-
-                                hasAddedItems = true
-                            end
-                        end
-
-                        break
-                    end
-                end
-            end
-
-            if not mainAccountFound then
-                hasAddedItems = false
-            end
-
-            task.wait(1)
+        if #uniqueIds == 0 then
+            warn(
+                "[TRADE] No matching items found:",
+                TARGET_ITEM_NAME,
+                TARGET_ITEM_FORM
+            )
+            return false
         end
-    end)
 
-    --------------------------------------------------
-    -- TRADE REQUEST
-    --------------------------------------------------
+        local addedCount = 0
+
+        for _, uniqueId in ipairs(uniqueIds) do
+            local success, err = pcall(function()
+                addItemRemote:FireServer(uniqueId)
+            end)
+
+            if success then
+                addedCount += 1
+            else
+                warn(
+                    "[TRADE] AddItemToOffer failed:",
+                    uniqueId,
+                    err
+                )
+            end
+
+            task.wait(0.1)
+        end
+
+        -- Give all AddItemToOffer calls time to register.
+        task.wait(1)
+
+        return addedCount > 0
+    end
+
+    local function runTradeCycle(playerName)
+        local targetPlayer =
+            Players:FindFirstChild(playerName)
+
+        if not targetPlayer then
+            return false
+        end
+
+        --------------------------------------------------
+        -- 1. Refresh before sending the next trade
+        --------------------------------------------------
+
+        refreshPetEgg()
+        task.wait(0.5)
+
+        if not waitForInventoryReady() then
+            warn("[TRADE] Inventory was not ready.")
+            return false
+        end
+
+        --------------------------------------------------
+        -- 2. Send trade request
+        --------------------------------------------------
+
+        if not sendTradeRemote
+            or not sendTradeRemote:IsA("RemoteEvent") then
+
+            warn("[TRADE] SendTradeRequest remote not found.")
+            return false
+        end
+
+        local requestSuccess = pcall(function()
+            sendTradeRemote:FireServer(targetPlayer)
+        end)
+
+        if not requestSuccess then
+            warn("[TRADE] Failed to send trade request.")
+            return false
+        end
+
+        --------------------------------------------------
+        -- 3. Wait for trade window
+        --------------------------------------------------
+
+        task.wait(2)
+
+        --------------------------------------------------
+        -- 4. Refresh again after the trade opens
+        --------------------------------------------------
+
+        refreshPetEgg()
+        task.wait(0.5)
+
+        if not waitForInventoryReady() then
+            warn("[TRADE] Inventory was not ready after trade opened.")
+            return false
+        end
+
+        --------------------------------------------------
+        -- 5. Add pets / eggs
+        --------------------------------------------------
+
+        if not addSelectedItems() then
+            warn("[TRADE] Nothing was added to the trade.")
+            return false
+        end
+
+        --------------------------------------------------
+        -- 6. Script2-style negotiation timer
+        --------------------------------------------------
+
+        -- 1 second after AddItemToOffer finishes.
+        task.wait(1)
+
+        pcall(function()
+            AcceptNeg:FireServer()
+        end)
+
+        -- Script2 timing.
+        task.wait(0.5)
+
+        pcall(function()
+            ConfirmTrade:FireServer()
+        end)
+
+        --------------------------------------------------
+        -- 7. Wait for trade completion
+        --------------------------------------------------
+
+        task.wait(4)
+
+        return true
+    end
 
     task.spawn(function()
         local currentTargetIndex = 1
@@ -302,7 +394,10 @@ task.spawn(function()
                 if playerName and playerName ~= "" then
                     if Players:FindFirstChild(playerName) then
 
-                        if sendTradeRequest(playerName) then
+                        local completed =
+                            runTradeCycle(playerName)
+
+                        if completed then
                             currentTargetIndex += 1
                         end
                     else
@@ -317,35 +412,8 @@ task.spawn(function()
                 acceptTradeForAll()
             end
 
-            task.wait(1)
-        end
-    end)
-
-    --------------------------------------------------
-    -- NEGOTIATION / CONFIRMATION
-    --------------------------------------------------
-
-    local AcceptNeg =
-        API:WaitForChild("TradeAPI/AcceptNegotiation")
-
-    local ConfirmTrade =
-        API:WaitForChild("TradeAPI/ConfirmTrade")
-
-    task.spawn(function()
-        while true do
-            task.wait(1)
-
-            pcall(function()
-                AcceptNeg:FireServer()
-            end)
-
+            -- Small gap before starting the next cycle.
             task.wait(0.5)
-
-            pcall(function()
-                ConfirmTrade:FireServer()
-            end)
-
-            task.wait(4)
         end
     end)
 
