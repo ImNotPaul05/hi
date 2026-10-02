@@ -1,0 +1,272 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- ================= CONFIGURATION =================
+MainAccUsername = {"Her0eXBuildera31"} 
+TARGET_ITEM_NAME = "Retired Egg"
+TARGET_ITEM_FORM = "NORMAL" -- NORMAL, NEON, or MEGA_NEON
+ForceReceiver = false 
+
+local targetFrameNames = {"Dialog"}
+-- =================================================
+
+local addItemRemote = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AddItemToOffer")
+local sendTradeRemote = ReplicatedStorage:FindFirstChild("TradeAPI/SendTradeRequest", true)
+local tradeFunction = ReplicatedStorage:WaitForChild("API"):WaitForChild("TradeAPI/AcceptOrDeclineTradeRequest")
+local API = ReplicatedStorage:WaitForChild("API")
+
+local successClientData, ClientData = pcall(function()
+	return require(ReplicatedStorage:WaitForChild("ClientModules"):WaitForChild("Core"):WaitForChild("ClientData"))
+end)
+
+-- KindDB
+local KindDB = require(
+    ReplicatedStorage
+        :WaitForChild("ClientDB")
+        :WaitForChild("Inventory")
+        :WaitForChild("KindDB")
+)
+
+local function getKindDisplayName(kind)
+    local kindData = kind and KindDB[kind]
+    return kindData and tostring(kindData.name or "") or ""
+end
+
+local function refreshPetEgg()
+    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if not playerGui then
+        return false
+    end
+
+    local fired = false
+
+    for _, descendant in ipairs(playerGui:GetDescendants()) do
+        if descendant:IsA("BindableEvent") and descendant.Name == "RefreshSelected" then
+            pcall(function()
+                descendant:Fire()
+            end)
+            fired = true
+        end
+    end
+
+    return fired
+end
+
+local function waitForInventoryReady()
+    if not successClientData or not ClientData then
+        return false
+    end
+
+    for _ = 1, 20 do
+        local dataStore = ClientData.get_data()
+        local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
+
+        if playerData
+            and playerData.inventory
+            and playerData.inventory.pets then
+            return true
+        end
+
+        task.wait(0.1)
+    end
+
+    return false
+end
+
+local function getMultipleUniqueIdsByName(itemName, itemForm, limit)
+	if not successClientData or not ClientData then
+		return {}
+	end
+
+	local dataStore = ClientData.get_data()
+	local playerData = dataStore and (dataStore[LocalPlayer] or dataStore[LocalPlayer.Name])
+	
+	if not playerData or not playerData.inventory or not playerData.inventory.pets then
+		return {}
+	end
+
+local uniqueIds = {}
+    -- Normalize itemForm to lowercase to handle any casing
+    local formLower = itemForm and string.lower(itemForm) or ""
+
+    for uniqueId, itemData in pairs(playerData.inventory.pets) do
+        if itemData and itemData.kind then
+            local displayName = getKindDisplayName(itemData.kind)
+            local targetNameLower = string.lower(tostring(itemName or ""))
+            local kindLower = string.lower(tostring(itemData.kind))
+            local displayLower = string.lower(displayName)
+
+            local nameMatches =
+                displayLower == targetNameLower
+                or kindLower == targetNameLower
+
+            if nameMatches then
+            local properties = itemData.properties or {}
+            local isNeon = properties.neon == true
+            local isMegaNeon = properties.mega_neon == true
+            
+            local matchesForm = (formLower == "neon" and isNeon and not isMegaNeon)
+                or (formLower == "mega" and isMegaNeon)
+                or (formLower == "normal" and not isNeon and not isMegaNeon)
+
+                if matchesForm then
+                    table.insert(uniqueIds, uniqueId)
+                    if #uniqueIds >= limit then
+                        break
+                    end
+                end
+            end
+        end
+    end
+    return uniqueIds
+end
+
+local function sendTradeRequest(playerName)
+    local targetPlayer = Players:FindFirstChild(playerName)
+    if not targetPlayer then
+        return false
+    end
+
+    -- Refresh Pet/Egg quantities immediately before the next trade request.
+    -- RefreshSelected only refreshes the inventory display; it does not clear selections.
+    refreshPetEgg()
+    task.wait(0.5)
+    waitForInventoryReady()
+
+    if sendTradeRemote and sendTradeRemote:IsA("RemoteEvent") then
+        local success = pcall(function()
+            sendTradeRemote:FireServer(targetPlayer)
+        end)
+
+        if success then
+            task.wait(5)
+            return true
+        end
+    end
+
+    return false
+end
+
+local function acceptTradeForAll()
+	for _, targetPlayer in ipairs(Players:GetPlayers()) do
+		if targetPlayer ~= Players.LocalPlayer then
+			local args = {
+				targetPlayer,
+				true
+			}
+
+			local success, err = pcall(function()
+				return tradeFunction:InvokeServer(unpack(args))
+			end)
+		end
+	end
+end
+
+task.spawn(function()
+    local hasAddedItems = false
+
+    while true do
+        local mainAccountFound = false
+
+        if MainAccUsername and #MainAccUsername > 0 and MainAccUsername[1] ~= "" then
+            for _, playerName in ipairs(MainAccUsername) do
+                if Players:FindFirstChild(playerName) then
+                    mainAccountFound = true
+                    
+                    -- Only run if we haven't already added items for this trade session
+                    if not hasAddedItems then
+                        local uniqueIds = getMultipleUniqueIdsByName(TARGET_ITEM_NAME, TARGET_ITEM_FORM, 18)
+
+                        if #uniqueIds > 0 then
+                            for _, uniqueId in ipairs(uniqueIds) do
+                                pcall(function()
+                                    addItemRemote:FireServer(uniqueId)
+                                    task.wait(0.1) -- Small delay between fires to prevent rate-limiting
+                                end)
+                            end
+                            hasAddedItems = true -- Lock it so it doesn't spam every second
+                        end
+                    end
+                    break
+                end
+            end
+        end
+
+        -- If the main account leaves or the trade ends, reset the trigger
+        if not mainAccountFound then
+            hasAddedItems = false
+        end
+
+        task.wait(1)
+    end
+end)
+
+task.spawn(function()
+	local currentTargetIndex = 1
+
+	while true do
+		if MainAccUsername and #MainAccUsername > 0 then
+			if currentTargetIndex > #MainAccUsername then
+				currentTargetIndex = 1
+			end
+
+			local playerName = MainAccUsername[currentTargetIndex]
+			if playerName and playerName ~= "" then
+				if Players:FindFirstChild(playerName) then
+					if sendTradeRequest(playerName) then
+						currentTargetIndex += 1
+					end
+				else
+					currentTargetIndex += 1
+				end
+			else
+				currentTargetIndex += 1
+			end
+		end
+
+		if ForceReceiver then
+			acceptTradeForAll()
+		end
+
+		task.wait(1)
+	end
+end)
+
+
+-- Cache the remotes once
+local AcceptNeg = API:WaitForChild("TradeAPI/AcceptNegotiation")
+local ConfirmTrade = API:WaitForChild("TradeAPI/ConfirmTrade")
+
+local function RunTradeAutomation()
+    while true do
+		AcceptNeg:FireServer()
+		ConfirmTrade:FireServer()
+        task.wait(1)
+    end
+end
+
+task.spawn(RunTradeAutomation)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+local framesToHide = {}
+for _, name in ipairs(targetFrameNames) do
+	framesToHide[name] = true
+end
+
+-- Main loop
+while true do
+	for _, gui in ipairs(PlayerGui:GetDescendants()) do
+		if gui:IsA("Frame") and framesToHide[gui.Name] then
+			if gui.Visible then
+				gui.Visible = false
+				print("Successfully hid frame: " .. gui:GetFullName())
+			end
+		end
+	end
+	
+	task.wait(3)
+end
