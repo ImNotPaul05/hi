@@ -1,10 +1,8 @@
-```lua
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 
--- ClientData
 local ClientData = require(
     ReplicatedStorage
         :WaitForChild("ClientModules")
@@ -12,7 +10,6 @@ local ClientData = require(
         :WaitForChild("ClientData")
 )
 
--- KindDB
 local KindDB = require(
     ReplicatedStorage
         :WaitForChild("ClientDB")
@@ -20,13 +17,21 @@ local KindDB = require(
         :WaitForChild("KindDB")
 )
 
-local data = ClientData.get_data()
-local playerData = data[player] or data[player.Name]
+local function getPlayerData()
+    local data = ClientData.get_data()
 
-local inventory = playerData.inventory
-local pets = inventory.pets
+    if not data then
+        return nil
+    end
+
+    return data[player] or data[player.Name]
+end
 
 local function isEgg(itemData)
+    if type(itemData) ~= "table" then
+        return false
+    end
+
     local kind = string.lower(tostring(itemData.kind or ""))
 
     local displayName = string.lower(
@@ -57,110 +62,141 @@ local rarityNames = {
     legendary = "Legendary"
 }
 
-local counts = {
-    Common = 0,
-    Uncommon = 0,
-    Rare = 0,
-    ["Ultra-Rare"] = 0,
-    Legendary = 0
-}
+local function scanInventory()
 
-local eggCount = 0
+    local playerData = getPlayerData()
 
-print("====================================")
-print("===== YOUR INVENTORY =====")
-print("====================================")
+    if not playerData then
+        warn("PlayerData is not available yet.")
+        return false
+    end
 
-for uniqueId, itemData in pairs(pets) do
+    if not playerData.inventory then
+        warn("Inventory is not available yet.")
+        return false
+    end
 
-    -- =========================
-    -- EGG
-    -- =========================
-    if isEgg(itemData) then
+    local pets = playerData.inventory.pets
 
-        eggCount += 1
+    if type(pets) ~= "table" then
+        warn("inventory.pets is not available or is not a table.")
+        return false
+    end
 
-        local kind = itemData.kind or "UNKNOWN"
-        local kindData = KindDB[kind]
+    local counts = {
+        Common = 0,
+        Uncommon = 0,
+        Rare = 0,
+        ["Ultra-Rare"] = 0,
+        Legendary = 0
+    }
 
-        local eggName =
-            (kindData and kindData.name)
-            or itemData.display_name
-            or itemData.displayName
-            or itemData.name
-            or kind
+    local eggCount = 0
+    local petCount = 0
 
-        print(
-            "EGG:",
-            uniqueId,
-            "|",
-            eggName,
-            "| Kind:",
-            kind
-        )
+    print("")
+    print("====================================")
+    print("===== INVENTORY SCAN =====")
+    print("====================================")
 
-    -- =========================
-    -- PET
-    -- =========================
-    else
+    for uniqueId, itemData in pairs(pets) do
 
-        local kind = itemData.kind
-        local kindData = kind and KindDB[kind]
+        if type(itemData) == "table" then
 
-        if kindData then
+            local kind = itemData.kind or "UNKNOWN"
+            local kindData = KindDB[kind]
 
-            local rarity = kindData.rarity
-            local rarityName =
-                rarity
-                and rarityNames[string.lower(rarity)]
+            if isEgg(itemData) then
 
-            if rarityName then
+                eggCount += 1
 
-                counts[rarityName] += 1
+                local eggName =
+                    (kindData and kindData.name)
+                    or itemData.display_name
+                    or itemData.displayName
+                    or itemData.name
+                    or kind
 
                 print(
-                    "PET:",
+                    "EGG:",
                     uniqueId,
                     "|",
-                    kindData.name or kind,
-                    "|",
-                    rarityName
+                    eggName,
+                    "| Kind:",
+                    kind
                 )
 
             else
 
-                print(
-                    "RARITY NOT FOUND:",
-                    uniqueId,
-                    "|",
-                    kind
-                )
+                petCount += 1
 
+                if kindData then
+
+                    local rarity = kindData.rarity
+
+                    local rarityName =
+                        rarity
+                        and rarityNames[string.lower(tostring(rarity))]
+
+                    if rarityName then
+                        counts[rarityName] += 1
+
+                        print(
+                            "PET:",
+                            uniqueId,
+                            "|",
+                            kindData.name or kind,
+                            "|",
+                            rarityName
+                        )
+                    else
+                        print(
+                            "RARITY NOT FOUND:",
+                            uniqueId,
+                            "|",
+                            kind
+                        )
+                    end
+
+                else
+
+                    print(
+                        "KIND NOT FOUND:",
+                        uniqueId,
+                        "|",
+                        kind
+                    )
+
+                end
             end
-
-        else
-
-            print(
-                "KIND NOT FOUND:",
-                uniqueId,
-                "|",
-                kind
-            )
-
         end
     end
+
+    print("")
+    print("===== INVENTORY TOTALS =====")
+    print("Eggs:", eggCount)
+    print("Pets:", petCount)
+    print("Common:", counts.Common)
+    print("Uncommon:", counts.Uncommon)
+    print("Rare:", counts.Rare)
+    print("Ultra-Rare:", counts["Ultra-Rare"])
+    print("Legendary:", counts.Legendary)
+    print("====================================")
+
+    return true
 end
 
-print("")
-print("===== INVENTORY TOTALS =====")
+-- Wait for ClientData to become available.
+task.spawn(function()
 
-print("Eggs:", eggCount)
+    for attempt = 1, 30 do
 
-print("Pets - Common:", counts.Common)
-print("Pets - Uncommon:", counts.Uncommon)
-print("Pets - Rare:", counts.Rare)
-print("Pets - Ultra-Rare:", counts["Ultra-Rare"])
-print("Pets - Legendary:", counts.Legendary)
+        if scanInventory() then
+            break
+        end
 
-print("====================================")
-```
+        task.wait(1)
+
+    end
+
+end)
