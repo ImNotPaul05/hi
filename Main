@@ -4,10 +4,6 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- Configuration
-local MainAccUsername = {"Her0eXBuildera31"}
-local TARGET_ITEM_NAME = "Retired Egg"
-local TARGET_ITEM_FORM = "NORMAL"
-local ForceReceiver = false
 local targetFrameNames = {"Dialog"}
 
 -- Remotes / modules
