@@ -32,10 +32,16 @@ local RefreshEggButton = Instance.new("TextButton")
 local UICorner_12 = Instance.new("UICorner")
 local RefreshPlrButton = Instance.new("TextButton")
 local UICorner_13 = Instance.new("UICorner")
-local TextLabel_2 = Instance.new("TextLabel")
-local TextLabel_3 = Instance.new("TextLabel")
+local Mannequin = Instance.new("TextLabel")
 local UITextSizeConstraint = Instance.new("UITextSizeConstraint")
+local Target1 = Instance.new("TextLabel")
 local UITextSizeConstraint_2 = Instance.new("UITextSizeConstraint")
+local TextLabel_2 = Instance.new("TextLabel")
+local UITextSizeConstraint_3 = Instance.new("UITextSizeConstraint")
+local TextLabel_3 = Instance.new("TextLabel")
+local TextLabel_4 = Instance.new("TextLabel")
+local UITextSizeConstraint_4 = Instance.new("UITextSizeConstraint")
+local UITextSizeConstraint_5 = Instance.new("UITextSizeConstraint")
 local TradingButton = Instance.new("TextButton")
 local UICorner_14 = Instance.new("UICorner")
 local ShopButton = Instance.new("TextButton")
@@ -77,7 +83,7 @@ Trading.Parent = Main
 Trading.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Trading.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Trading.BorderSizePixel = 0
-Trading.Position = UDim2.new(0.303940862, 0, -0.000489773753, 0)
+Trading.Position = UDim2.new(0.27031514, 0, -0.000489773753, 0)
 Trading.Size = UDim2.new(0.458353192, 0, 1.00048983, 0)
 
 ScrollingFrame.Parent = Trading
@@ -257,38 +263,92 @@ RefreshPlrButton.TextSize = 17.000
 UICorner_13.CornerRadius = UDim.new(0, 9)
 UICorner_13.Parent = RefreshPlrButton
 
-TextLabel_2.Parent = Trading
+Mannequin.Name = "Mannequin"
+Mannequin.Parent = ScrollingFrame
+Mannequin.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Mannequin.BackgroundTransparency = 1.000
+Mannequin.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Mannequin.BorderSizePixel = 0
+Mannequin.Position = UDim2.new(0, 11, 0, 10)
+Mannequin.Size = UDim2.new(0, 148, 0, 24)
+Mannequin.Font = Enum.Font.FredokaOne
+Mannequin.Text = "Select player to trade"
+Mannequin.TextColor3 = Color3.fromRGB(255, 0, 255)
+Mannequin.TextScaled = true
+Mannequin.TextSize = 16.000
+Mannequin.TextWrapped = true
+
+UITextSizeConstraint.Parent = Mannequin
+UITextSizeConstraint.MaxTextSize = 16
+
+Target1.Name = "Target1"
+Target1.Parent = ScrollingFrame
+Target1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Target1.BackgroundTransparency = 1.000
+Target1.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Target1.BorderSizePixel = 0
+Target1.Position = UDim2.new(0.121940367, 0, 0.0222332906, 0)
+Target1.Size = UDim2.new(0, 127, 0, 24)
+Target1.Font = Enum.Font.FredokaOne
+Target1.Text = "none"
+Target1.TextColor3 = Color3.fromRGB(255, 255, 255)
+Target1.TextScaled = true
+Target1.TextSize = 13.000
+Target1.TextWrapped = true
+Target1.TextXAlignment = Enum.TextXAlignment.Left
+
+UITextSizeConstraint_2.Parent = Target1
+UITextSizeConstraint_2.MaxTextSize = 13
+
+TextLabel_2.Parent = ScrollingFrame
 TextLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_2.BackgroundTransparency = 1.000
 TextLabel_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_2.BorderSizePixel = 0
-TextLabel_2.Size = UDim2.new(0.0717672259, 0, 0.0308729075, 0)
-TextLabel_2.Font = Enum.Font.Unknown
-TextLabel_2.Text = "vox"
-TextLabel_2.TextColor3 = Color3.fromRGB(255, 0, 255)
+TextLabel_2.Position = UDim2.new(0.0183468666, 0, 0.0221975371, 0)
+TextLabel_2.Size = UDim2.new(0.0846263617, 0, 0.0178367291, 0)
+TextLabel_2.Font = Enum.Font.FredokaOne
+TextLabel_2.Text = "Target -"
+TextLabel_2.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_2.TextScaled = true
-TextLabel_2.TextSize = 19.000
+TextLabel_2.TextSize = 14.000
 TextLabel_2.TextWrapped = true
 
-TextLabel_3.Parent = TextLabel_2
+UITextSizeConstraint_3.Parent = TextLabel_2
+UITextSizeConstraint_3.MaxTextSize = 14
+
+TextLabel_3.Parent = Trading
 TextLabel_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 TextLabel_3.BackgroundTransparency = 1.000
 TextLabel_3.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextLabel_3.BorderSizePixel = 0
-TextLabel_3.Position = UDim2.new(0.625474036, 0, 0.791666687, 0)
-TextLabel_3.Size = UDim2.new(0.888032615, 0, 0.894831359, 0)
-TextLabel_3.Font = Enum.Font.FredokaOne
-TextLabel_3.Text = "ADM"
+TextLabel_3.Size = UDim2.new(0.0717672259, 0, 0.0308729075, 0)
+TextLabel_3.Font = Enum.Font.Unknown
+TextLabel_3.Text = "vox"
 TextLabel_3.TextColor3 = Color3.fromRGB(255, 0, 255)
 TextLabel_3.TextScaled = true
-TextLabel_3.TextSize = 14.000
+TextLabel_3.TextSize = 19.000
 TextLabel_3.TextWrapped = true
 
-UITextSizeConstraint.Parent = TextLabel_3
-UITextSizeConstraint.MaxTextSize = 14
+TextLabel_4.Parent = TextLabel_3
+TextLabel_4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel_4.BackgroundTransparency = 1.000
+TextLabel_4.BorderColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel_4.BorderSizePixel = 0
+TextLabel_4.Position = UDim2.new(0.625474036, 0, 0.791666687, 0)
+TextLabel_4.Size = UDim2.new(0.888032615, 0, 0.894831359, 0)
+TextLabel_4.Font = Enum.Font.FredokaOne
+TextLabel_4.Text = "ADM"
+TextLabel_4.TextColor3 = Color3.fromRGB(255, 0, 255)
+TextLabel_4.TextScaled = true
+TextLabel_4.TextSize = 14.000
+TextLabel_4.TextWrapped = true
 
-UITextSizeConstraint_2.Parent = TextLabel_2
-UITextSizeConstraint_2.MaxTextSize = 19
+UITextSizeConstraint_4.Parent = TextLabel_4
+UITextSizeConstraint_4.MaxTextSize = 14
+
+UITextSizeConstraint_5.Parent = TextLabel_3
+UITextSizeConstraint_5.MaxTextSize = 19
 
 TradingButton.Name = "Trading/Button"
 TradingButton.Parent = Trading
@@ -388,27 +448,14 @@ UICorner_19.Parent = CosnoleButton
 
 -- Scripts:
 
-local function ZMYBMF_fake_script() -- Main.Main 
+local function JGSAR_fake_script() -- Main.Main 
 	local script = Instance.new('LocalScript', Main)
 
 	
 end
-coroutine.wrap(ZMYBMF_fake_script)()
-local function TZWSSIH_fake_script() -- Icon.LocalScript 
-	local script = Instance.new('LocalScript', Icon)
+coroutine.wrap(JGSAR_fake_script)()
 
-	local button = script.Parent
-	local main = button:FindFirstAncestor("Main")
-	local trading = main:WaitForChild("Trading")
-	local icon = main:WaitForChild("Icon")
-	
-	button.Activated:Connect(function()
-		trading.Visible = true
-		icon.Visible = false
-	end)
-end
-coroutine.wrap(TZWSSIH_fake_script)()
-local function QPHPDI_fake_script() -- userInterface.Userscript 
+local function AZLI_fake_script() -- userInterface.Userscript 
 	local script = Instance.new('LocalScript', userInterface)
 
 	local Players = game:GetService("Players")
@@ -582,8 +629,8 @@ local function QPHPDI_fake_script() -- userInterface.Userscript
 	end)
 	end
 end
-coroutine.wrap(QPHPDI_fake_script)()
-local function XVSZLVG_fake_script() -- SwitchButton.SwitchScript 
+coroutine.wrap(AZLI_fake_script)()
+local function DJRIE_fake_script() -- SwitchButton.SwitchScript 
 	local script = Instance.new('LocalScript', SwitchButton)
 
 	local button = script.Parent
@@ -654,8 +701,8 @@ local function XVSZLVG_fake_script() -- SwitchButton.SwitchScript
 	end)
 	end
 end
-coroutine.wrap(XVSZLVG_fake_script)()
-local function XDHY_fake_script() -- EggInterface.EggScript 
+coroutine.wrap(DJRIE_fake_script)()
+local function NRMI_fake_script() -- EggInterface.EggScript 
 	local script = Instance.new('LocalScript', EggInterface)
 
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -913,8 +960,8 @@ local function XDHY_fake_script() -- EggInterface.EggScript
 	panel:SetAttribute("RefreshSelectedVersion", panel:GetAttribute("RefreshSelectedVersion") or 0)
 	end
 end
-coroutine.wrap(XDHY_fake_script)()
-local function UMNHZII_fake_script() -- PetInterface.Petscript 
+coroutine.wrap(NRMI_fake_script)()
+local function KEMYK_fake_script() -- PetInterface.Petscript 
 	local script = Instance.new('LocalScript', PetInterface)
 
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -1214,14 +1261,14 @@ local function UMNHZII_fake_script() -- PetInterface.Petscript
 	panel:SetAttribute("RefreshSelectedVersion", panel:GetAttribute("RefreshSelectedVersion") or 0)
 	end
 end
-coroutine.wrap(UMNHZII_fake_script)()
-local function HSDRVED_fake_script() -- StopTradeButton.StopTradeScript 
+coroutine.wrap(KEMYK_fake_script)()
+local function VVUFO_fake_script() -- StopTradeButton.StopTradeScript 
 	local script = Instance.new('LocalScript', StopTradeButton)
 
 	
 end
-coroutine.wrap(HSDRVED_fake_script)()
-local function RHWC_fake_script() -- SendTradeButton.SendTradeScript 
+coroutine.wrap(VVUFO_fake_script)()
+local function IFGWSGJ_fake_script() -- SendTradeButton.SendTradeScript 
 	local script = Instance.new('LocalScript', SendTradeButton)
 
 	local TweenService = game:GetService("TweenService")
@@ -1284,26 +1331,26 @@ local function RHWC_fake_script() -- SendTradeButton.SendTradeScript
 	button.Activated:Connect(playClickFill)
 	end
 end
-coroutine.wrap(RHWC_fake_script)()
-local function EQVQ_fake_script() -- RefreshPetButton.RefreshpetScript 
+coroutine.wrap(IFGWSGJ_fake_script)()
+local function RSKXX_fake_script() -- RefreshPetButton.RefreshpetScript 
 	local script = Instance.new('LocalScript', RefreshPetButton)
 
 	
 end
-coroutine.wrap(EQVQ_fake_script)()
-local function RNKRJOY_fake_script() -- RefreshEggButton.RefresheggScript 
+coroutine.wrap(RSKXX_fake_script)()
+local function BWHTO_fake_script() -- RefreshEggButton.RefresheggScript 
 	local script = Instance.new('LocalScript', RefreshEggButton)
 
 	
 end
-coroutine.wrap(RNKRJOY_fake_script)()
-local function JQOH_fake_script() -- RefreshPlrButton.RefreshplrScript 
+coroutine.wrap(BWHTO_fake_script)()
+local function UBOC_fake_script() -- RefreshPlrButton.RefreshplrScript 
 	local script = Instance.new('LocalScript', RefreshPlrButton)
 
 	
 end
-coroutine.wrap(JQOH_fake_script)()
-local function DESWN_fake_script() -- TradingButton.LocalScript 
+coroutine.wrap(UBOC_fake_script)()
+local function TEOUQUR_fake_script() -- TradingButton.LocalScript 
 	local script = Instance.new('LocalScript', TradingButton)
 
 	local button = script.Parent
@@ -1320,26 +1367,26 @@ local function DESWN_fake_script() -- TradingButton.LocalScript
 		trading.Visible = true
 	end)
 end
-coroutine.wrap(DESWN_fake_script)()
-local function DZXRKPD_fake_script() -- ShopButton.LocalScript 
+coroutine.wrap(TEOUQUR_fake_script)()
+local function TCQCTAF_fake_script() -- ShopButton.LocalScript 
 	local script = Instance.new('LocalScript', ShopButton)
 
 	
 end
-coroutine.wrap(DZXRKPD_fake_script)()
-local function AMMK_fake_script() -- PotionButton.LocalScript 
+coroutine.wrap(TCQCTAF_fake_script)()
+local function GYPOSYI_fake_script() -- PotionButton.LocalScript 
 	local script = Instance.new('LocalScript', PotionButton)
 
 	
 end
-coroutine.wrap(AMMK_fake_script)()
-local function OXJPXLN_fake_script() -- BucksButton.LocalScript 
+coroutine.wrap(GYPOSYI_fake_script)()
+local function CSPCB_fake_script() -- BucksButton.LocalScript 
 	local script = Instance.new('LocalScript', BucksButton)
 
 	
 end
-coroutine.wrap(OXJPXLN_fake_script)()
-local function VGVNDG_fake_script() -- ClosedButton.ClosedScript 
+coroutine.wrap(CSPCB_fake_script)()
+local function VHRSSL_fake_script() -- ClosedButton.ClosedScript 
 	local script = Instance.new('LocalScript', ClosedButton)
 
 	local button = script.Parent
@@ -1352,8 +1399,8 @@ local function VGVNDG_fake_script() -- ClosedButton.ClosedScript
 		icon.Visible = true
 	end)
 end
-coroutine.wrap(VGVNDG_fake_script)()
-local function MXYEWX_fake_script() -- CosnoleButton.ConsoleScript 
+coroutine.wrap(VHRSSL_fake_script)()
+local function YRZPIAV_fake_script() -- CosnoleButton.ConsoleScript 
 	local script = Instance.new('LocalScript', CosnoleButton)
 
 	local StarterGui = game:GetService("StarterGui")
@@ -1383,4 +1430,19 @@ local function MXYEWX_fake_script() -- CosnoleButton.ConsoleScript
 	button.Activated:Connect(openDeveloperConsole)
 	
 end
-coroutine.wrap(MXYEWX_fake_script)()
+coroutine.wrap(YRZPIAV_fake_script)()
+
+local function YQVPY_fake_script() -- Icon.LocalScript 
+	local script = Instance.new('LocalScript', Icon)
+
+	local button = script.Parent
+	local main = button:FindFirstAncestor("Main")
+	local trading = main:WaitForChild("Trading")
+	local icon = main:WaitForChild("Icon")
+	
+	button.Activated:Connect(function()
+		trading.Visible = true
+		icon.Visible = false
+	end)
+end
+coroutine.wrap(YQVPY_fake_script)()
