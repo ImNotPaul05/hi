@@ -1,3 +1,4 @@
+```lua
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -22,47 +23,8 @@ local KindDB = require(
 local data = ClientData.get_data()
 local playerData = data[player] or data[player.Name]
 
-local pets = playerData.inventory.pets
-
-local function isEgg(petData)
-    local kind = string.lower(tostring(petData.kind or ""))
-
-    local kindData = KindDB[petData.kind]
-
-    -- Inventory data
-    if petData.is_egg == true then
-        return true
-    end
-
-    if string.find(kind, "egg", 1, true) then
-        return true
-    end
-
-    if string.lower(tostring(petData.category or "")) == "egg"
-        or string.lower(tostring(petData.category or "")) == "eggs" then
-        return true
-    end
-
-    -- KindDB data
-    if kindData then
-        if kindData.is_egg == true then
-            return true
-        end
-
-        local dbCategory = string.lower(tostring(kindData.category or ""))
-        local dbName = string.lower(tostring(kindData.name or ""))
-
-        if dbCategory == "egg" or dbCategory == "eggs" then
-            return true
-        end
-
-        if string.find(dbName, "egg", 1, true) then
-            return true
-        end
-    end
-
-    return false
-end
+local inventory = playerData.inventory
+local pets = inventory.pets
 
 local function isEgg(itemData)
     local kind = string.lower(tostring(itemData.kind or ""))
@@ -103,19 +65,57 @@ local counts = {
     Legendary = 0
 }
 
-for uniqueId, petData in pairs(pets) do
+local eggCount = 0
 
-    -- Completely exclude eggs
-    if not isEgg(petData) then
+print("====================================")
+print("===== YOUR INVENTORY =====")
+print("====================================")
 
-        local kind = petData.kind
+for uniqueId, itemData in pairs(pets) do
+
+    -- =========================
+    -- EGG
+    -- =========================
+    if isEgg(itemData) then
+
+        eggCount += 1
+
+        local kind = itemData.kind or "UNKNOWN"
+        local kindData = KindDB[kind]
+
+        local eggName =
+            (kindData and kindData.name)
+            or itemData.display_name
+            or itemData.displayName
+            or itemData.name
+            or kind
+
+        print(
+            "EGG:",
+            uniqueId,
+            "|",
+            eggName,
+            "| Kind:",
+            kind
+        )
+
+    -- =========================
+    -- PET
+    -- =========================
+    else
+
+        local kind = itemData.kind
         local kindData = kind and KindDB[kind]
 
         if kindData then
+
             local rarity = kindData.rarity
-            local rarityName = rarity and rarityNames[string.lower(rarity)]
+            local rarityName =
+                rarity
+                and rarityNames[string.lower(rarity)]
 
             if rarityName then
+
                 counts[rarityName] += 1
 
                 print(
@@ -126,31 +126,41 @@ for uniqueId, petData in pairs(pets) do
                     "|",
                     rarityName
                 )
+
             else
+
                 print(
                     "RARITY NOT FOUND:",
                     uniqueId,
                     "|",
                     kind
                 )
+
             end
+
         else
+
             print(
                 "KIND NOT FOUND:",
                 uniqueId,
                 "|",
                 kind
             )
-        end
 
+        end
     end
 end
 
 print("")
-print("===== YOUR INVENTORY PET TOTALS =====")
-print("Common:", counts.Common)
-print("Uncommon:", counts.Uncommon)
-print("Rare:", counts.Rare)
-print("Ultra-Rare:", counts["Ultra-Rare"])
-print("Legendary:", counts.Legendary)
+print("===== INVENTORY TOTALS =====")
+
+print("Eggs:", eggCount)
+
+print("Pets - Common:", counts.Common)
+print("Pets - Uncommon:", counts.Uncommon)
+print("Pets - Rare:", counts.Rare)
+print("Pets - Ultra-Rare:", counts["Ultra-Rare"])
+print("Pets - Legendary:", counts.Legendary)
+
 print("====================================")
+```
