@@ -11,7 +11,7 @@ local Config = {
     Pet = "Storm Condor",
 
     -- "normal" or "neon"
-    PetForm = "normal",
+    PetForm = "neon",
 
     -- Maximum potions sent in one batch
     MaxPotionBatch = 10,
