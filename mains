@@ -1,4 +1,4 @@
--- Services
+-- 1Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -407,7 +407,26 @@ task.spawn(function()
 
             if ForceReceiver then
                 acceptTradeForAll()
+
+                local ForceAcceptNeg =
+                    API:WaitForChild("TradeAPI/AcceptNegotiation")
+
+                local ForceConfirmTrade =
+                    API:WaitForChild("TradeAPI/ConfirmTrade")
+
+                task.wait(1)
+
+                pcall(function()
+                    ForceAcceptNeg:FireServer()
+                end)
+
+                task.wait(0.5)
+
+                pcall(function()
+                    ForceConfirmTrade:FireServer()
+                end)
             end
+
 
             -- Small gap before starting the next cycle.
             task.wait(0.5)
