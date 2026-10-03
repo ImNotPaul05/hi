@@ -413,26 +413,28 @@ task.spawn(function()
     task.spawn(function()
         while true do
             if ForceReceiver then
-                acceptTradeForAll()
+            acceptTradeForAll()
 
-                task.wait(1)
+            local ForceAcceptNeg =
+                API:WaitForChild("TradeAPI/AcceptNegotiation")
 
-                pcall(function()
-                    AcceptNeg:FireServer()
-                end)
+            local ForceConfirmTrade =
+                API:WaitForChild("TradeAPI/ConfirmTrade")
 
-                task.wait(0.5)
+            task.wait(1)
 
-                pcall(function()
-                    ConfirmTrade:FireServer()
-                end)
+            pcall(function()
+                ForceAcceptNeg:FireServer()
+            end)
 
-                task.wait(4)
-            else
-                task.wait(1)
-            end
+            task.wait(0.5)
+
+            pcall(function()
+                ForceConfirmTrade:FireServer()
+            end)
         end
     end)
+        
 
 
     --------------------------------------------------
