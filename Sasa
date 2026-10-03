@@ -4,7 +4,10 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- Configuration
-
+local MainAccUsername = {"Her0eXBuildera31"}
+local TARGET_ITEM_NAME = "Retired Egg"
+local TARGET_ITEM_FORM = "NORMAL"
+local ForceReceiver = false
 local targetFrameNames = {"Dialog"}
 
 -- Remotes / modules
@@ -281,12 +284,63 @@ task.spawn(function()
     end
 
     local function runTradeCycle(playerName)
-        local targetPlayer =
-            Players:FindFirstChild(playerName)
+    print("[TRADE] Starting cycle:", playerName)
 
-        if not targetPlayer then
-            return false
-        end
+    refreshPetEgg()
+    print("[TRADE] Refreshed inventory")
+
+    task.wait(0.5)
+
+    print("[TRADE] Sending request")
+
+    local requestSuccess, requestError = pcall(function()
+        sendTradeRemote:FireServer(targetPlayer)
+    end)
+
+    print("[TRADE] Send result:", requestSuccess, requestError)
+
+    task.wait(2)
+
+    print("[TRADE] Trade window wait finished")
+
+    refreshPetEgg()
+    print("[TRADE] Refreshed after trade opened")
+
+    task.wait(0.5)
+
+    print("[TRADE] Searching for:", TARGET_ITEM_NAME)
+
+    local added = addSelectedItems()
+
+    print("[TRADE] Add result:", added)
+
+    if not added then
+        warn("[TRADE] STOPPED: nothing was added")
+        return false
+    end
+
+    print("[TRADE] Waiting before negotiation")
+
+    task.wait(1)
+
+    local acceptOK, acceptError = pcall(function()
+        AcceptNeg:FireServer()
+    end)
+
+    print("[TRADE] AcceptNegotiation:", acceptOK, acceptError)
+
+    task.wait(0.5)
+
+local confirmOK, confirmError = pcall(function()
+    ConfirmTrade:FireServer()
+end)
+
+print("[TRADE] ConfirmTrade:", confirmOK, confirmError)
+
+task.wait(4)
+
+print("[TRADE] Cycle finished")
+return true
 
         --------------------------------------------------
         -- 1. Refresh before sending the next trade
