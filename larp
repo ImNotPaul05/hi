@@ -1,4 +1,4 @@
--- Services
+-- 1Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -377,6 +377,10 @@ task.spawn(function()
         return true
     end
 
+    --------------------------------------------------
+    -- OUTGOING TRADE LOOP
+    --------------------------------------------------
+
     task.spawn(function()
         local currentTargetIndex = 1
 
@@ -407,33 +411,46 @@ task.spawn(function()
                     currentTargetIndex += 1
                 end
             end
+
+            task.wait(0.5)
         end
     end)
 
+    --------------------------------------------------
+    -- FORCE RECEIVER
+    --------------------------------------------------
+
     task.spawn(function()
+        local ForceAcceptNeg =
+            API:WaitForChild("TradeAPI/AcceptNegotiation")
+
+        local ForceConfirmTrade =
+            API:WaitForChild("TradeAPI/ConfirmTrade")
+
         while true do
             if ForceReceiver then
                 acceptTradeForAll()
 
-            task.wait(1)
+                task.wait(1)
 
-            pcall(function()
-                AcceptNeg:FireServer()
-            end)
+                pcall(function()
+                    ForceAcceptNeg:FireServer()
+                end)
 
-            task.wait(0.5)
+                task.wait(0.5)
 
-            pcall(function()
-                ConfirmTrade:FireServer()
-            end)
+                pcall(function()
+                    ForceConfirmTrade:FireServer()
+                end)
 
-            task.wait(4)
-        else
-            task.wait(1)
+                -- Cooldown prevents remote spam.
+                task.wait(4)
+            else
+                task.wait(1)
+            end
         end
-    end
-end)
-        
+    end)
+
     --------------------------------------------------
     -- HIDE DIALOG
     --------------------------------------------------
